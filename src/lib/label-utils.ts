@@ -13,9 +13,8 @@ import {
  */
 export const getSoundSystemLabel = (value: string): string => {
   return (
-    SOUND_SYSTEM_TYPES[
-      value as keyof typeof SOUND_SYSTEM_TYPES
-    ] ?? value.replace(/_/g, " ")
+    SOUND_SYSTEM_TYPES[value as keyof typeof SOUND_SYSTEM_TYPES] ??
+    value.replace(/_/g, " ")
   );
 };
 

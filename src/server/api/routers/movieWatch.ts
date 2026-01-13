@@ -731,8 +731,7 @@ export const movieWatchRouter = createTRPCRouter({
       .map((group) => {
         const aspectRatio = group.aspectRatio!;
         return {
-          label:
-            ASPECT_RATIOS[aspectRatio] ?? aspectRatio.replace(/_/g, " "),
+          label: ASPECT_RATIOS[aspectRatio] ?? aspectRatio.replace(/_/g, " "),
           count: group._count.aspectRatio,
         };
       });

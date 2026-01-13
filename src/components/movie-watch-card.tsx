@@ -346,14 +346,13 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="NONE">None</SelectItem>
-                          {Object.entries(STREAMING_SERVICES).map(([value, label]) => (
-                            <SelectItem
-                              key={value}
-                              value={value}
-                            >
-                              {label}
-                            </SelectItem>
-                          ))}
+                          {Object.entries(STREAMING_SERVICES).map(
+                            ([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -401,11 +400,13 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(SOUND_SYSTEM_TYPES).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(SOUND_SYSTEM_TYPES).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -429,11 +430,13 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(PROJECTION_TYPES).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(PROJECTION_TYPES).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -457,11 +460,13 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(LANGUAGE_TYPES).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(LANGUAGE_TYPES).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -485,11 +490,13 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.entries(ASPECT_RATIOS).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(ASPECT_RATIOS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -187,11 +187,13 @@ export function MovieWatchForm({ movieId, onSuccess }: MovieWatchFormProps) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="NONE">None</SelectItem>
-                    {Object.entries(STREAMING_SERVICES).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
+                    {Object.entries(STREAMING_SERVICES).map(
+                      ([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
