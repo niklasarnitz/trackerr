@@ -6,6 +6,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { OptimizedCoverImage } from "~/components/optimized-cover-image";
+import { getPosterUrl } from "~/lib/utils";
 import type { RouterOutputs } from "~/trpc/react";
 
 type Movie = RouterOutputs["movie"]["getById"];
@@ -15,10 +16,6 @@ interface MovieDetailHeaderProps {
 }
 
 export function MovieDetailHeader({ movie }: MovieDetailHeaderProps) {
-  const getPosterUrl = (posterPath: string | null) => {
-    return posterPath ? `${posterPath}` : "/placeholder-movie.jpg";
-  };
-
   return (
     <>
       {/* Header */}
