@@ -49,7 +49,9 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
     },
     onSuccess: async (_data, _vars, ctx) => {
       toast.success(
-        ctx?.wasInWatchlist ? "Removed from watchlist" : "Added to watchlist",
+        ctx?.wasInWatchlist
+          ? "Removed from watchlist"
+          : "Added to your watchlist",
       );
 
       await Promise.all([
@@ -58,6 +60,11 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
       ]);
       onMovieUpdated?.();
       router.refresh();
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Unable to update watchlist. Please try again.",
+      );
     },
   });
 
@@ -67,7 +74,7 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
     },
     onSuccess: async (_data, _vars, ctx) => {
       toast.success(
-        ctx?.wasFavorite ? "Removed from favorites" : "Added to favorites",
+        ctx?.wasFavorite ? "Removed from favorites" : "Added to your favorites",
       );
 
       await Promise.all([
@@ -76,6 +83,11 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
       ]);
       onMovieUpdated?.();
       router.refresh();
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Unable to update favorites. Please try again.",
+      );
     },
   });
 

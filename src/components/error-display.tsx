@@ -12,8 +12,15 @@ export function ErrorDisplay({
 }: ErrorDisplayProps) {
   return (
     <Card className="border-destructive">
-      <CardContent className="py-8 text-center">
-        <AlertCircle className="text-destructive mx-auto mb-2 h-8 w-8" />
+      <CardContent
+        className="py-8 text-center"
+        role="alert"
+        aria-live="assertive"
+      >
+        <AlertCircle
+          className="text-destructive mx-auto mb-2 h-8 w-8"
+          aria-hidden="true"
+        />
         <p className="text-destructive font-medium">{title}</p>
         <p className="text-muted-foreground mt-1 text-sm">{message}</p>
       </CardContent>

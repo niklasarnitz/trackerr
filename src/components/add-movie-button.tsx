@@ -25,7 +25,12 @@ export function AddMovieButton({
 }: AddMovieButtonProps) {
   return (
     <MovieSearchDialog>
-      <Button variant={variant} size={size} className={className}>
+      <Button
+        variant={variant}
+        size={size}
+        className={className}
+        aria-label="Add new movie to collection"
+      >
         {children ?? (
           <>
             <Plus className="mr-2 h-4 w-4" />

@@ -64,7 +64,10 @@ export function MovieDetailTabs({
       router.refresh();
     },
     onError: (error) => {
-      toast.error(error.message);
+      toast.error(
+        error.message ||
+          "Unable to remove movie. Please check your connection and try again.",
+      );
     },
   });
 

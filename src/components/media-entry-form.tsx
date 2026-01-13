@@ -27,6 +27,7 @@ import {
   MEDIA_TYPES,
   type MediaEntryFormData,
 } from "~/lib/form-schemas";
+import { toast } from "sonner";
 
 interface MediaEntryFormProps {
   movieId: string;
@@ -59,6 +60,11 @@ export function MediaEntryForm({ movieId, onSuccess }: MediaEntryFormProps) {
       form.reset();
       onSuccess?.();
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unable to add media entry. Please try again.";
+      toast.error(errorMessage);
       console.error("Failed to create media entry:", error);
     }
   };

@@ -53,13 +53,13 @@ export function BookCard({ book, onBookUpdated }: BookCardProps) {
 
   const deleteBook = api.book.delete.useMutation({
     onSuccess: async () => {
-      toast.success("Book deleted");
+      toast.success("Book successfully removed from your library");
       await utils.book.getAll.invalidate();
       onBookUpdated?.();
       router.refresh();
     },
-    onError: () => {
-      toast.error("Failed to delete book");
+    onError: (error) => {
+      toast.error(error.message || "Unable to delete book. Please try again.");
     },
   });
 

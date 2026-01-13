@@ -11,6 +11,7 @@ import { AdvancedStatistics } from "~/components/advanced-statistics";
 import { CollectionStatistics } from "~/components/collection-statistics";
 import { Suspense } from "react";
 import { DashboardYearSelector } from "~/components/dashboard-year-selector";
+import { LoadingSkeleton } from "~/components/loading-skeleton";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -51,7 +52,22 @@ export default async function Home({ searchParams }: HomeProps) {
           {/* Overview Stats Cards */}
           <div className="space-y-4">
             <h2 className="heading-sm">Overview</h2>
-            <Suspense fallback={<div>Loading stats...</div>}>
+            <Suspense
+              fallback={
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-card animate-pulse rounded-lg border p-6"
+                    >
+                      <div className="bg-muted mb-2 h-4 w-24 rounded" />
+                      <div className="bg-muted mb-1 h-8 w-16 rounded" />
+                      <div className="bg-muted h-3 w-20 rounded" />
+                    </div>
+                  ))}
+                </div>
+              }
+            >
               <DashboardStats year={year} />
             </Suspense>
           </div>
@@ -59,7 +75,14 @@ export default async function Home({ searchParams }: HomeProps) {
           {/* Watch Analytics */}
           <div className="space-y-4">
             <h2 className="heading-sm">Watch Analytics</h2>
-            <Suspense fallback={<div>Loading charts...</div>}>
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
               <DashboardChartsWrapper year={year} />
             </Suspense>
           </div>
@@ -76,7 +99,14 @@ export default async function Home({ searchParams }: HomeProps) {
 
           {/* Cinema Statistics */}
           <div className="space-y-4">
-            <Suspense fallback={<div>Loading cinema analytics...</div>}>
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
               <CinemaDashboardCharts />
             </Suspense>
           </div>
@@ -92,7 +122,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 Show all →
               </Link>
             </div>
-            <Suspense fallback={<div>Loading recent watches...</div>}>
+            <Suspense fallback={<LoadingSkeleton cards={5} />}>
               <DashboardRecentWatches />
             </Suspense>
           </div>

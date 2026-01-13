@@ -56,7 +56,8 @@ export function LoansContent() {
       await utils.loan.getAll.invalidate();
       await utils.loan.getActive.invalidate();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) =>
+      toast.error(e.message || "Unable to create loan. Please try again."),
   });
 
   const updateLoan = api.loan.update.useMutation({
@@ -65,7 +66,8 @@ export function LoansContent() {
       await utils.loan.getAll.invalidate();
       await utils.loan.getActive.invalidate();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) =>
+      toast.error(e.message || "Unable to update loan. Please try again."),
   });
 
   const deleteLoan = api.loan.delete.useMutation({
@@ -74,7 +76,8 @@ export function LoansContent() {
       await utils.loan.getAll.invalidate();
       await utils.loan.getActive.invalidate();
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) =>
+      toast.error(e.message || "Unable to delete loan. Please try again."),
   });
 
   const mediaEntryOptions = useMemo(() => {

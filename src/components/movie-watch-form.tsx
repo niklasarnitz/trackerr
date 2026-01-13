@@ -39,6 +39,7 @@ import {
   type MovieWatchFormData,
 } from "~/lib/form-schemas";
 import { normalizeWatchDate, toCalendarDate } from "~/lib/watch-date";
+import { toast } from "sonner";
 
 interface MovieWatchFormProps {
   readonly movieId: string;
@@ -69,6 +70,11 @@ export function MovieWatchForm({ movieId, onSuccess }: MovieWatchFormProps) {
       form.reset();
       onSuccess();
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unable to log watch. Please check your connection and try again.";
+      toast.error(errorMessage);
       console.error("Failed to create watch entry:", error);
     }
   };

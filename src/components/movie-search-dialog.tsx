@@ -94,6 +94,7 @@ export function MovieSearchDialog({ children }: MovieSearchDialogProps) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
+                  aria-label="Search movies in TMDB database"
                 />
               </div>
               <Button type="submit" disabled={searchResults.isLoading}>

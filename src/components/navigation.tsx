@@ -54,16 +54,6 @@ const navigationItems = [
     icon: BookOpen,
   },
   {
-    href: "/movies/watchlist",
-    name: "Watchlist",
-    icon: Bookmark,
-  },
-  {
-    href: "/movies/favorites",
-    name: "Favorites",
-    icon: Heart,
-  },
-  {
     href: "/watches",
     name: "History",
     icon: Eye,
@@ -82,11 +72,6 @@ const navigationItems = [
     href: "/loans",
     name: "Loans",
     icon: Handshake,
-  },
-  {
-    href: "/reminders",
-    name: "Reminders",
-    icon: Bell,
   },
   {
     href: "/recommendations",
@@ -144,16 +129,17 @@ export function Navigation() {
       item.href === "/" || item.href === "/movies" || item.href === "/books",
   );
   const libraryItems = navigationItems.filter((item) =>
-    [
-      "/movies/watchlist",
-      "/movies/favorites",
-      "/watches",
-      "/collection",
-    ].includes(item.href),
+    ["/watches", "/collection"].includes(item.href),
   );
   const featureItems = navigationItems.filter((item) =>
     ["/lists", "/loans", "/recommendations"].includes(item.href),
   );
+
+  // Separate "My Lists" items for dropdown
+  const myListsItems = [
+    { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
+    { href: "/movies/favorites", name: "Favorites", icon: Heart },
+  ];
 
   const isGroupActive = (items: typeof navigationItems) =>
     items.some((item) => isNavigationItemActive(item.href));
@@ -194,12 +180,51 @@ export function Navigation() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  variant={
+                    pathname.startsWith("/movies/watchlist") ||
+                    pathname.startsWith("/movies/favorites")
+                      ? "secondary"
+                      : "ghost"
+                  }
+                  size="sm"
+                  className={cn(
+                    "flex items-center space-x-2",
+                    (pathname.startsWith("/movies/watchlist") ||
+                      pathname.startsWith("/movies/favorites")) &&
+                      "bg-secondary",
+                  )}
+                  aria-label="My Lists menu"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span className="hidden sm:inline">My Lists</span>
+                  <ChevronDown className="h-4 w-4 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {myListsItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <DropdownMenuItem key={item.href} asChild>
+                      <Link href={item.href}>
+                        <Icon className="mr-2 h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
                   variant={isGroupActive(libraryItems) ? "secondary" : "ghost"}
                   size="sm"
                   className={cn(
                     "flex items-center space-x-2",
                     isGroupActive(libraryItems) && "bg-secondary",
                   )}
+                  aria-label="Library menu"
                 >
                   <Archive className="h-4 w-4" />
                   <span className="hidden sm:inline">Library</span>
@@ -230,9 +255,10 @@ export function Navigation() {
                     "flex items-center space-x-2",
                     isGroupActive(featureItems) && "bg-secondary",
                   )}
+                  aria-label="More features menu"
                 >
                   <Sparkles className="h-4 w-4" />
-                  <span className="hidden sm:inline">Features</span>
+                  <span className="hidden sm:inline">More</span>
                   <ChevronDown className="h-4 w-4 opacity-70" />
                 </Button>
               </DropdownMenuTrigger>
@@ -365,6 +391,50 @@ export function Navigation() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant={
+                      pathname.startsWith("/movies/watchlist") ||
+                      pathname.startsWith("/movies/favorites")
+                        ? "secondary"
+                        : "ghost"
+                    }
+                    size="sm"
+                    className={cn(
+                      "flex w-full items-center justify-start space-x-2",
+                      (pathname.startsWith("/movies/watchlist") ||
+                        pathname.startsWith("/movies/favorites")) &&
+                        "bg-secondary",
+                    )}
+                    aria-label="My Lists menu"
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span>My Lists</span>
+                    <ChevronDown className="ml-auto h-4 w-4 opacity-70" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[calc(100vw-2rem)]"
+                >
+                  {myListsItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Icon className="mr-2 h-4 w-4" />
+                          <span>{item.name}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={
                       isGroupActive(libraryItems) ? "secondary" : "ghost"
                     }
                     size="sm"
@@ -372,6 +442,7 @@ export function Navigation() {
                       "flex w-full items-center justify-start space-x-2",
                       isGroupActive(libraryItems) && "bg-secondary",
                     )}
+                    aria-label="Library menu"
                   >
                     <Archive className="h-4 w-4" />
                     <span>Library</span>
@@ -410,9 +481,10 @@ export function Navigation() {
                       "flex w-full items-center justify-start space-x-2",
                       isGroupActive(featureItems) && "bg-secondary",
                     )}
+                    aria-label="More features menu"
                   >
                     <Sparkles className="h-4 w-4" />
-                    <span>Features</span>
+                    <span>More</span>
                     <ChevronDown className="ml-auto h-4 w-4 opacity-70" />
                   </Button>
                 </DropdownMenuTrigger>

@@ -32,6 +32,17 @@ import {
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { toast } from "sonner";
 import { mediaTypeLabels } from "../helpers/mediaTypeLabels";
@@ -55,6 +66,7 @@ type EditMediaEntryFormData = z.infer<typeof editMediaEntrySchema>;
 
 export function MediaEntryCard({ mediaEntry, onUpdate }: MediaEntryCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const form = useForm<EditMediaEntryFormData>({
     resolver: zodResolver(editMediaEntrySchema),
@@ -129,9 +141,8 @@ export function MediaEntryCard({ mediaEntry, onUpdate }: MediaEntryCardProps) {
   };
 
   const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this media entry?")) {
-      deleteMediaEntry.mutate({ id: mediaEntry.id });
-    }
+    deleteMediaEntry.mutate({ id: mediaEntry.id });
+    setShowDeleteDialog(false);
   };
 
   if (isEditing) {
@@ -294,17 +305,46 @@ export function MediaEntryCard({ mediaEntry, onUpdate }: MediaEntryCardProps) {
               size="sm"
               variant="ghost"
               onClick={() => setIsEditing(true)}
+              aria-label="Edit media entry"
             >
               <Edit2 className="h-4 w-4" />
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleDelete}
-              disabled={deleteMediaEntry.isPending}
+            <AlertDialog
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={deleteMediaEntry.isPending}
+                  aria-label="Delete media entry"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete media entry?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove this media entry from your
+                    collection. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleteMediaEntry.isPending}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive hover:bg-destructive/90 text-white"
+                    onClick={handleDelete}
+                    disabled={deleteMediaEntry.isPending}
+                  >
+                    {deleteMediaEntry.isPending ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         {mediaEntry.version && (

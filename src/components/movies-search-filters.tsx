@@ -18,7 +18,9 @@ interface MoviesSearchFiltersProps {
   readonly baseUrl?: string;
 }
 
-export function MoviesSearchFilters({ baseUrl = "/movies" }: MoviesSearchFiltersProps) {
+export function MoviesSearchFilters({
+  baseUrl = "/movies",
+}: MoviesSearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { sortBy, setSortBy } = useMovieSortPreference();
@@ -53,6 +55,7 @@ export function MoviesSearchFilters({ baseUrl = "/movies" }: MoviesSearchFilters
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="pl-10"
+          aria-label="Search movies by title"
         />
       </div>
 
