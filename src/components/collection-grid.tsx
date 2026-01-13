@@ -6,6 +6,7 @@ import { Badge } from "~/components/ui/badge";
 import { ErrorDisplay } from "~/components/error-display";
 import { Pagination } from "~/components/pagination";
 import { RippedStatusToggle } from "~/components/ripped-status-toggle";
+import { getPosterUrl } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import { AddMovieLink } from "~/components/add-movie-button";
 import type { MediaType } from "@prisma/client";
@@ -42,10 +43,6 @@ const getMediaIcon = (type: string, isVirtual: boolean) => {
     );
   }
   return <Disc className="h-4 w-4" />;
-};
-
-const getPosterUrl = (posterPath: string | null) => {
-  return posterPath ? `${posterPath}` : "/placeholder-movie.jpg";
 };
 
 export async function CollectionGrid({
