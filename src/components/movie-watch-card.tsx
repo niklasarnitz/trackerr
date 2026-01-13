@@ -45,52 +45,26 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { cn } from "~/lib/utils";
+import { cn, getPosterUrl } from "~/lib/utils";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { toast } from "sonner";
 import { CinemaSearch } from "~/components/cinema-search";
 import { ExternalActionMetadataDisplay } from "~/components/external-action-metadata-display";
+import { StarRatingDisplay } from "~/components/star-rating-display";
 import {
   movieWatchUpdateSchema,
   type MovieWatchUpdateInput,
 } from "~/lib/api-schemas";
 import {
-  SOUND_SYSTEM_TYPES,
-  PROJECTION_TYPES,
-  LANGUAGE_TYPES,
-  ASPECT_RATIOS,
   STREAMING_SERVICES,
 } from "~/lib/form-schemas";
+import {
+  getSoundSystemLabel,
+  getProjectionTypeLabel,
+  getLanguageTypeLabel,
+  getAspectRatioLabel,
+} from "~/lib/label-utils";
 import { normalizeWatchDate, toCalendarDate } from "~/lib/watch-date";
-
-// Helper functions to get display labels
-const getSoundSystemLabel = (value: string) => {
-  return (
-    SOUND_SYSTEM_TYPES.find((type) => type.value === value)?.label ??
-    value.replace(/_/g, " ")
-  );
-};
-
-const getProjectionTypeLabel = (value: string) => {
-  return (
-    PROJECTION_TYPES.find((type) => type.value === value)?.label ??
-    value.replace(/_/g, " ")
-  );
-};
-
-const getLanguageTypeLabel = (value: string) => {
-  return (
-    LANGUAGE_TYPES.find((type) => type.value === value)?.label ??
-    value.replace(/_/g, " ")
-  );
-};
-
-const getAspectRatioLabel = (value: string) => {
-  return (
-    ASPECT_RATIOS.find((ratio) => ratio.value === value)?.label ??
-    value.replace(/_/g, " ")
-  );
-};
 
 type MovieWatch = RouterOutputs["movieWatch"]["getByMovieId"][0];
 
@@ -167,26 +141,6 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
     if (confirm("Are you sure you want to delete this watch entry?")) {
       await deleteMutation.mutateAsync({ id: watch.id });
     }
-  };
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      const filled = rating >= i;
-      const halfFilled = rating >= i - 0.5 && rating < i;
-
-      let className = "h-4 w-4 ";
-      if (filled) {
-        className += "fill-yellow-400 text-yellow-400";
-      } else if (halfFilled) {
-        className += "fill-yellow-400/50 text-yellow-400";
-      } else {
-        className += "text-gray-300";
-      }
-
-      stars.push(<Star key={i} className={cn(className)} />);
-    }
-    return stars;
   };
 
   if (isEditing) {
@@ -636,7 +590,7 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
         {/* Rating */}
         {watch.rating !== null && (
           <div className="mb-3 flex items-center gap-2">
-            <div className="flex gap-1">{renderStars(watch.rating)}</div>
+            <StarRatingDisplay rating={watch.rating} />
             <Badge variant="secondary">{watch.rating}/5</Badge>
           </div>
         )}
