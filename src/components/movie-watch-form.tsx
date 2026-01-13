@@ -68,8 +68,8 @@ export function MovieWatchForm({ movieId, onSuccess }: MovieWatchFormProps) {
 
       form.reset();
       onSuccess();
-    } catch {
-      // Error handling is done in the mutation
+    } catch (error) {
+      console.error("Failed to create watch entry:", error);
     }
   };
 

@@ -1,6 +1,11 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/**
+ * Combines multiple CSS class values using clsx and Tailwind merge
+ * @param inputs - CSS class values to combine
+ * @returns Combined and optimized CSS class string
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

@@ -58,8 +58,8 @@ export function MediaEntryForm({ movieId, onSuccess }: MediaEntryFormProps) {
 
       form.reset();
       onSuccess?.();
-    } catch {
-      // Error handling is done in the mutation
+    } catch (error) {
+      console.error("Failed to create media entry:", error);
     }
   };
 
