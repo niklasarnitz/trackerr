@@ -8,7 +8,6 @@ import { enUS } from "date-fns/locale";
 import { toCalendarDate } from "~/lib/watch-date";
 import {
   Calendar as CalendarIcon,
-  Star,
   Play,
   Disc,
   Eye,
@@ -25,6 +24,8 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { OptimizedCoverImage } from "~/components/optimized-cover-image";
+import { getPosterUrl } from "~/lib/utils";
+import { StarRatingDisplay } from "~/components/star-rating-display";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import type { RouterOutputs } from "~/trpc/react";
@@ -77,10 +78,6 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
       router.refresh();
     },
   });
-
-  const getPosterUrl = (posterPath: string | null) => {
-    return posterPath ? `${posterPath}` : "/placeholder-movie.jpg";
-  };
 
   const getLastWatchDate = (watches: Movie["watches"]) => {
     if (!watches || watches.length === 0) return null;
@@ -136,8 +133,8 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
                 </Badge>
               )}
               {averageRating && (
-                <Badge variant="outline" className="text-xs">
-                  <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                  <StarRatingDisplay rating={averageRating} />
                   {averageRating.toFixed(1)}
                 </Badge>
               )}
