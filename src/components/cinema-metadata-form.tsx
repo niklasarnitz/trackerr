@@ -65,9 +65,9 @@ export function CinemaMetadataForm({ control }: CinemaMetadataFormProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {SOUND_SYSTEM_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                {Object.entries(SOUND_SYSTEM_TYPES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -90,9 +90,9 @@ export function CinemaMetadataForm({ control }: CinemaMetadataFormProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {PROJECTION_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                {Object.entries(PROJECTION_TYPES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -115,9 +115,9 @@ export function CinemaMetadataForm({ control }: CinemaMetadataFormProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {LANGUAGE_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                {Object.entries(LANGUAGE_TYPES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -140,9 +140,9 @@ export function CinemaMetadataForm({ control }: CinemaMetadataFormProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {ASPECT_RATIOS.map((ratio) => (
-                  <SelectItem key={ratio.value} value={ratio.value}>
-                    {ratio.label}
+                {Object.entries(ASPECT_RATIOS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>

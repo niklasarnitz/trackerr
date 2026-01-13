@@ -151,9 +151,9 @@ export function MovieWatchForm({ movieId, onSuccess }: MovieWatchFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {WATCH_LOCATIONS.map((location) => (
-                    <SelectItem key={location.value} value={location.value}>
-                      {location.label}
+                  {Object.entries(WATCH_LOCATIONS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -187,9 +187,9 @@ export function MovieWatchForm({ movieId, onSuccess }: MovieWatchFormProps) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="NONE">None</SelectItem>
-                    {STREAMING_SERVICES.map((service) => (
-                      <SelectItem key={service.value} value={service.value}>
-                        {service.label}
+                    {Object.entries(STREAMING_SERVICES).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
                       </SelectItem>
                     ))}
                   </SelectContent>

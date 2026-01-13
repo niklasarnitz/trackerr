@@ -10,8 +10,7 @@ import { ErrorDisplay } from "~/components/error-display";
 import { Pagination } from "~/components/pagination";
 import { StarRatingDisplay } from "~/components/star-rating-display";
 import { getPosterUrl } from "~/lib/utils";
-import { getLabelFromEnum } from "~/lib/label-utils";
-import { WATCH_LOCATIONS } from "~/lib/form-schemas";
+import { getWatchLocationLabel } from "~/lib/label-utils";
 import { api } from "~/trpc/server";
 import { AddMovieLink } from "~/components/add-movie-button";
 
@@ -22,7 +21,7 @@ interface WatchesGridProps {
 }
 
 const getWatchLocationBadge = (location: string) => {
-  return getLabelFromEnum(location, WATCH_LOCATIONS);
+  return getWatchLocationLabel(location);
 };
 
 export async function WatchesGrid({

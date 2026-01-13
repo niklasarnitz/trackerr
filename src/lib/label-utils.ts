@@ -5,6 +5,7 @@ import {
   ASPECT_RATIOS,
   WATCH_LOCATIONS,
   MEDIA_TYPES,
+  STREAMING_SERVICES,
 } from "~/lib/form-schemas";
 
 /**
@@ -12,8 +13,9 @@ import {
  */
 export const getSoundSystemLabel = (value: string): string => {
   return (
-    SOUND_SYSTEM_TYPES.find((type) => type.value === value)?.label ??
-    value.replace(/_/g, " ")
+    SOUND_SYSTEM_TYPES[
+      value as keyof typeof SOUND_SYSTEM_TYPES
+    ] ?? value.replace(/_/g, " ")
   );
 };
 
@@ -22,7 +24,7 @@ export const getSoundSystemLabel = (value: string): string => {
  */
 export const getProjectionTypeLabel = (value: string): string => {
   return (
-    PROJECTION_TYPES.find((type) => type.value === value)?.label ??
+    PROJECTION_TYPES[value as keyof typeof PROJECTION_TYPES] ??
     value.replace(/_/g, " ")
   );
 };
@@ -32,7 +34,7 @@ export const getProjectionTypeLabel = (value: string): string => {
  */
 export const getLanguageTypeLabel = (value: string): string => {
   return (
-    LANGUAGE_TYPES.find((type) => type.value === value)?.label ??
+    LANGUAGE_TYPES[value as keyof typeof LANGUAGE_TYPES] ??
     value.replace(/_/g, " ")
   );
 };
@@ -42,7 +44,7 @@ export const getLanguageTypeLabel = (value: string): string => {
  */
 export const getAspectRatioLabel = (value: string): string => {
   return (
-    ASPECT_RATIOS.find((ratio) => ratio.value === value)?.label ??
+    ASPECT_RATIOS[value as keyof typeof ASPECT_RATIOS] ??
     value.replace(/_/g, " ")
   );
 };
@@ -52,7 +54,7 @@ export const getAspectRatioLabel = (value: string): string => {
  */
 export const getWatchLocationLabel = (value: string): string => {
   return (
-    WATCH_LOCATIONS.find((location) => location.value === value)?.label ??
+    WATCH_LOCATIONS[value as keyof typeof WATCH_LOCATIONS] ??
     value.replace(/_/g, " ")
   );
 };
@@ -62,20 +64,16 @@ export const getWatchLocationLabel = (value: string): string => {
  */
 export const getMediaTypeLabel = (value: string): string => {
   return (
-    MEDIA_TYPES.find((type) => type.value === value)?.label ??
-    value.replace(/_/g, " ")
+    MEDIA_TYPES[value as keyof typeof MEDIA_TYPES] ?? value.replace(/_/g, " ")
   );
 };
 
 /**
- * Generic function to get display label from any enum-like array
+ * Get display label for streaming service
  */
-export const getEnumLabel = <T extends { value: string; label: string }>(
-  enumArray: readonly T[],
-  value: string,
-): string => {
+export const getStreamingServiceLabel = (value: string): string => {
   return (
-    enumArray.find((item) => item.value === value)?.label ??
+    STREAMING_SERVICES[value as keyof typeof STREAMING_SERVICES] ??
     value.replace(/_/g, " ")
   );
 };

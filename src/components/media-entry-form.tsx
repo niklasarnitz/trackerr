@@ -79,9 +79,9 @@ export function MediaEntryForm({ movieId, onSuccess }: MediaEntryFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {MEDIA_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
+                  {Object.entries(MEDIA_TYPES).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
                     </SelectItem>
                   ))}
                 </SelectContent>

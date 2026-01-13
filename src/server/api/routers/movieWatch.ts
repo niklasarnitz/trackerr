@@ -629,11 +629,10 @@ export const movieWatchRouter = createTRPCRouter({
       .filter((group) => group.soundSystemType)
       .map((group) => {
         const soundSystemType = group.soundSystemType!;
-        const labelEntry = SOUND_SYSTEM_TYPES.find(
-          (type) => type.value === soundSystemType,
-        );
         return {
-          label: labelEntry?.label ?? soundSystemType.replace(/_/g, " "),
+          label:
+            SOUND_SYSTEM_TYPES[soundSystemType] ??
+            soundSystemType.replace(/_/g, " "),
           count: group._count.soundSystemType,
         };
       });
@@ -664,11 +663,10 @@ export const movieWatchRouter = createTRPCRouter({
       .filter((group) => group.projectionType)
       .map((group) => {
         const projectionType = group.projectionType!;
-        const labelEntry = PROJECTION_TYPES.find(
-          (type) => type.value === projectionType,
-        );
         return {
-          label: labelEntry?.label ?? projectionType.replace(/_/g, " "),
+          label:
+            PROJECTION_TYPES[projectionType] ??
+            projectionType.replace(/_/g, " "),
           count: group._count.projectionType,
         };
       });
@@ -699,11 +697,9 @@ export const movieWatchRouter = createTRPCRouter({
       .filter((group) => group.languageType)
       .map((group) => {
         const languageType = group.languageType!;
-        const labelEntry = LANGUAGE_TYPES.find(
-          (type) => type.value === languageType,
-        );
         return {
-          label: labelEntry?.label ?? languageType.replace(/_/g, " "),
+          label:
+            LANGUAGE_TYPES[languageType] ?? languageType.replace(/_/g, " "),
           count: group._count.languageType,
         };
       });
@@ -734,11 +730,9 @@ export const movieWatchRouter = createTRPCRouter({
       .filter((group) => group.aspectRatio)
       .map((group) => {
         const aspectRatio = group.aspectRatio!;
-        const labelEntry = ASPECT_RATIOS.find(
-          (ratio) => ratio.value === aspectRatio,
-        );
         return {
-          label: labelEntry?.label ?? aspectRatio.replace(/_/g, " "),
+          label:
+            ASPECT_RATIOS[aspectRatio] ?? aspectRatio.replace(/_/g, " "),
           count: group._count.aspectRatio,
         };
       });
@@ -850,13 +844,10 @@ export const movieWatchRouter = createTRPCRouter({
         .filter((stat) => stat.streamingService)
         .map((stat) => {
           const service = stat.streamingService!;
-          const labelEntry = STREAMING_SERVICES.find(
-            (s) => s.value === service,
-          );
           return {
             service,
             count: stat._count.streamingService,
-            label: labelEntry?.label ?? service.replace(/_/g, " "),
+            label: STREAMING_SERVICES[service] ?? service.replace(/_/g, " "),
           };
         });
     }),
@@ -1173,11 +1164,10 @@ export const movieWatchRouter = createTRPCRouter({
         });
 
         const service = group.streamingService!;
-        const labelEntry = STREAMING_SERVICES.find((s) => s.value === service);
 
         return {
           service,
-          label: labelEntry?.label ?? service.replace(/_/g, " "),
+          label: STREAMING_SERVICES[service] ?? service.replace(/_/g, " "),
           averageRating: avg._avg.rating ?? 0,
           count: avg._count.rating ?? 0,
         };

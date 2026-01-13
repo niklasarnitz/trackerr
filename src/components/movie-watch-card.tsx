@@ -57,6 +57,10 @@ import {
 } from "~/lib/api-schemas";
 import {
   STREAMING_SERVICES,
+  SOUND_SYSTEM_TYPES,
+  PROJECTION_TYPES,
+  LANGUAGE_TYPES,
+  ASPECT_RATIOS,
 } from "~/lib/form-schemas";
 import {
   getSoundSystemLabel,
@@ -342,12 +346,12 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="NONE">None</SelectItem>
-                          {STREAMING_SERVICES.map((service) => (
+                          {Object.entries(STREAMING_SERVICES).map(([value, label]) => (
                             <SelectItem
-                              key={service.value}
-                              value={service.value}
+                              key={value}
+                              value={value}
                             >
-                              {service.label}
+                              {label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -397,9 +401,9 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {SOUND_SYSTEM_TYPES.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
+                            {Object.entries(SOUND_SYSTEM_TYPES).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -425,9 +429,9 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PROJECTION_TYPES.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
+                            {Object.entries(PROJECTION_TYPES).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -453,9 +457,9 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {LANGUAGE_TYPES.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
+                            {Object.entries(LANGUAGE_TYPES).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -481,9 +485,9 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ASPECT_RATIOS.map((ratio) => (
-                              <SelectItem key={ratio.value} value={ratio.value}>
-                                {ratio.label}
+                            {Object.entries(ASPECT_RATIOS).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -606,9 +610,8 @@ export function MovieWatchCard({ watch, onUpdate }: MovieWatchCardProps) {
           </Badge>
           {watch.watchLocation === "ON_DEMAND" && watch.streamingService && (
             <Badge variant="secondary">
-              {STREAMING_SERVICES.find(
-                (s) => s.value === watch.streamingService,
-              )?.label ?? watch.streamingService.replace(/_/g, " ")}
+              {STREAMING_SERVICES[watch.streamingService] ??
+                watch.streamingService.replace(/_/g, " ")}
             </Badge>
           )}
         </div>

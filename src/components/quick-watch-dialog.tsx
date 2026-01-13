@@ -213,9 +213,9 @@ export function QuickWatchDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {WATCH_LOCATIONS.map((location) => (
-                        <SelectItem key={location.value} value={location.value}>
-                          {location.label}
+                      {Object.entries(WATCH_LOCATIONS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -18,19 +18,6 @@ import type { RouterOutputs } from "~/trpc/react";
 interface RecentWatchesListProps {
   watches: RouterOutputs["movieWatch"]["getRecent"];
 }
-            className={`h-4 w-4 ${
-              isFilled
-                ? "fill-yellow-400 text-yellow-400"
-                : isHalfFilled
-                  ? "fill-yellow-400/50 text-yellow-400"
-                  : "text-gray-300"
-            }`}
-          />
-        );
-      })}
-    </div>
-  );
-}
 
 export function RecentWatchesList({ watches }: RecentWatchesListProps) {
   const safeRecentWatches = watches ?? [];
