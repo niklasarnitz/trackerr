@@ -133,7 +133,10 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
                 </Badge>
               )}
               {averageRating && (
-                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-1 text-xs"
+                >
                   <StarRatingDisplay rating={averageRating} />
                   {averageRating.toFixed(1)}
                 </Badge>

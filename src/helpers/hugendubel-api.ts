@@ -3,6 +3,8 @@ import { z } from "zod";
 const HUGENDUBEL_BASE_URL = "https://www.hugendubel.de/rest/v1";
 const HUGENDUBEL_CLIENT = "Hudu-Mobile-Shop-Vollsortiment";
 const JWT_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const FORM_ENCODED_CONTENT_TYPE =
+  "application/x-www-form-urlencoded; charset=UTF-8";
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
@@ -68,7 +70,7 @@ async function getHugendubeLAuthToken(): Promise<string> {
     const response = await fetch(authUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Content-Type": FORM_ENCODED_CONTENT_TYPE,
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
@@ -224,7 +226,7 @@ export async function searchHugendubeLByTitle(
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "Content-Type": FORM_ENCODED_CONTENT_TYPE,
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
           Authorization: `Bearer ${token}`,
