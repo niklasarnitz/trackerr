@@ -1,0 +1,14 @@
+model JellyfinWebhookConfig {
+    id                String          @id @default(cuid())
+    userPreferencesId String          @unique
+    userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id], onDelete: Cascade)
+
+    webhookApiKey  String  @unique
+    isEnabled      Boolean @default(false)
+    usernameFilter String? // Optional: filter watches by Jellyfin username
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userPreferencesId])
+}

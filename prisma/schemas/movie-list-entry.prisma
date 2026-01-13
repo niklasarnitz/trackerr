@@ -1,0 +1,13 @@
+model MovieListEntry {
+    id        String    @id @default(cuid())
+    listId    String
+    movieList MovieList @relation(fields: [listId], references: [id], onDelete: Cascade)
+    movieId   String
+    movie     Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+    order     Int       @default(0) // For custom ordering within list
+    createdAt DateTime  @default(now())
+
+    @@unique([listId, movieId])
+    @@index([listId])
+    @@index([movieId])
+}

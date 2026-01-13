@@ -1,0 +1,12 @@
+model MovieTag {
+    id        String   @id @default(cuid())
+    movieId   String
+    movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+    tagId     String
+    tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([movieId, tagId])
+    @@index([movieId])
+    @@index([tagId])
+}

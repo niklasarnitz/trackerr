@@ -1,0 +1,15 @@
+enum CinemaSoundSystemType {
+    MONO
+    STEREO
+    DOLBY_SURROUND
+    DOLBY_DIGITAL
+    DOLBY_5_1
+    DOLBY_7_1
+    DOLBY_ATMOS
+    DTS
+    DTS_X
+    DTS_70MM
+    SDDS
+    IMAX
+    OTHER
+}

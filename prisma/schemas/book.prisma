@@ -1,0 +1,32 @@
+model Book {
+    id              String            @id @default(cuid())
+    userId          String
+    user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+    isbn            String?
+    title           String
+    subtitle        String?
+    publisher       String?
+    publishedYear   Int?
+    pages           Int? // Total pages in the book
+    coverUrl        String?
+    blurDataUrl     String? // Base64 blur placeholder for cover
+    description     String?
+    abstract        String? // Book abstract/summary
+    seriesName      String? // Series name if part of a series
+    seriesNumber    Float? // Position in series (can be decimal like 1.5)
+    isEbook         Boolean           @default(false)
+    categoryId      String?
+    category        BookCategory?     @relation(fields: [categoryId], references: [id])
+    status          BookStatus        @default(UNREAD)
+    notes           String? // Personal notes about the book
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    readingProgress ReadingProgress[]
+    bookTags        BookTag[]
+    bookAuthors     BookAuthor[]
+
+    @@index([userId, title])
+    @@index([userId, status])
+    @@index([userId, seriesName])
+    @@index([userId, categoryId])
+}

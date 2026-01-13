@@ -1,0 +1,6 @@
+enum WatchLocation {
+    ON_DEMAND
+    CINEMA
+    TV
+    OTHER
+}

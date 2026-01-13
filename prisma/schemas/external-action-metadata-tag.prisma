@@ -1,0 +1,11 @@
+model ExternalActionMetadataTag {
+  id                String                        @id @default(cuid())
+  movieWatchId      String
+  movieWatch        MovieWatch                    @relation(fields: [movieWatchId], references: [id], onDelete: Cascade)
+  via               ExternalActionMetadataTagVia
+  from              ExternalActionMetadataTagFrom
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+
+  @@index([movieWatchId])
+}

@@ -1,0 +1,15 @@
+model CinemaWatchMetadata {
+    id           String     @id @default(cuid())
+    movieWatchId String     @unique
+    movieWatch   MovieWatch @relation(fields: [movieWatchId], references: [id], onDelete: Cascade)
+
+    cinemaName      String?
+    soundSystemType CinemaSoundSystemType?
+    projectionType  ProjectionType?
+    languageType    LanguageType?
+    aspectRatio     AspectRatio?
+    ticketPrice     Float?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

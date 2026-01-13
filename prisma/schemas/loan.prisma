@@ -1,0 +1,13 @@
+model Loan {
+    id           String     @id @default(cuid())
+    mediaEntryId String     @unique
+    mediaEntry   MediaEntry @relation(fields: [mediaEntryId], references: [id], onDelete: Cascade)
+    borrowerName String
+    loanedAt     DateTime   @default(now())
+    returnedAt   DateTime?
+    notes        String?
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+
+    @@index([mediaEntryId])
+}

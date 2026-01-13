@@ -1,0 +1,12 @@
+model BookTag {
+    id        String   @id @default(cuid())
+    bookId    String
+    book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+    tagId     String
+    tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([bookId, tagId])
+    @@index([bookId])
+    @@index([tagId])
+}

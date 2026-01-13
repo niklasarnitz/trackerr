@@ -1,0 +1,18 @@
+model MediaEntry {
+    id        String    @id @default(cuid())
+    movieId   String
+    movie     Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    medium    MediaType
+    version   String? // e.g. Extended Edition, Director's Cut
+    note      String?
+    price     Float? // Price paid for this media entry
+    isVirtual Boolean   @default(false) // differentiates virtual media server entries
+    isRipped  Boolean   @default(false) // indicates if physical media has been ripped
+    loan      Loan?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@index([userId, movieId])
+}

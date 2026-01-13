@@ -1,0 +1,12 @@
+model ReadingProgress {
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    bookId    String
+    book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+    pagesRead Int // Current page number the user is on
+    createdAt DateTime @default(now())
+
+    @@index([bookId, createdAt])
+    @@index([userId, createdAt])
+}

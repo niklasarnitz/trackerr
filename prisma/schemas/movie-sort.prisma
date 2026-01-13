@@ -1,0 +1,8 @@
+enum MovieSort {
+    CREATED
+    TITLE
+    WATCHED
+    RELEASE_YEAR
+    RATING
+    RUNTIME
+}
