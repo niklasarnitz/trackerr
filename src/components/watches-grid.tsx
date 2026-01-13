@@ -3,11 +3,15 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { toCalendarDate } from "~/lib/watch-date";
-import { Calendar as CalendarIcon, Star, Film } from "lucide-react";
+import { Calendar as CalendarIcon, Film } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { ErrorDisplay } from "~/components/error-display";
 import { Pagination } from "~/components/pagination";
+import { StarRatingDisplay } from "~/components/star-rating-display";
+import { getPosterUrl } from "~/lib/utils";
+import { getLabelFromEnum } from "~/lib/label-utils";
+import { WATCH_LOCATIONS } from "~/lib/form-schemas";
 import { api } from "~/trpc/server";
 import { AddMovieLink } from "~/components/add-movie-button";
 
@@ -17,42 +21,8 @@ interface WatchesGridProps {
   page?: number;
 }
 
-const getPosterUrl = (posterPath: string | null) => {
-  return posterPath ? `${posterPath}` : "/placeholder-movie.jpg";
-};
-
-const renderStars = (rating: number) => {
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => {
-        const isFilled = rating >= star;
-        const isHalfFilled = rating >= star - 0.5 && rating < star;
-
-        return (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${
-              isFilled
-                ? "fill-yellow-400 text-yellow-400"
-                : isHalfFilled
-                  ? "fill-yellow-400/50 text-yellow-400"
-                  : "text-gray-300"
-            }`}
-          />
-        );
-      })}
-    </div>
-  );
-};
-
 const getWatchLocationBadge = (location: string) => {
-  const labels: Record<string, string> = {
-    ON_DEMAND: "On Demand",
-    CINEMA: "Cinema",
-    TV: "TV",
-    OTHER: "Other",
-  };
-  return labels[location] ?? location;
+  return getLabelFromEnum(location, WATCH_LOCATIONS);
 };
 
 export async function WatchesGrid({
@@ -175,7 +145,7 @@ export async function WatchesGrid({
                       {watch.rating && (
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">Rating:</span>
-                          {renderStars(watch.rating)}
+                          <StarRatingDisplay rating={watch.rating} />
                         </div>
                       )}
                     </div>
