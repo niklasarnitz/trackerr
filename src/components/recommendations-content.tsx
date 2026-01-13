@@ -15,6 +15,7 @@ import {
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { getPosterUrl } from "~/lib/utils";
 import { useMovieMutations } from "~/hooks/use-movie-mutations";
 
 export function RecommendationsContent() {
@@ -23,10 +24,6 @@ export function RecommendationsContent() {
 
   const utils = api.useUtils();
   const { createMovie } = useMovieMutations();
-
-  const getPosterUrl = useCallback((posterPath: string | null) => {
-    return posterPath ? `${posterPath}` : "/placeholder-movie.jpg";
-  }, []);
 
   const formatRating = useCallback((rating: number) => {
     return (rating / 2).toFixed(1);
