@@ -6,28 +6,18 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Star, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { toCalendarDate } from "~/lib/watch-date";
 import Link from "next/link";
+import { StarRatingDisplay } from "~/components/star-rating-display";
 import { AddMovieLink } from "~/components/add-movie-button";
 import type { RouterOutputs } from "~/trpc/react";
 
 interface RecentWatchesListProps {
   watches: RouterOutputs["movieWatch"]["getRecent"];
 }
-
-function renderStars(rating: number) {
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => {
-        const isFilled = rating >= star;
-        const isHalfFilled = rating >= star - 0.5 && rating < star;
-
-        return (
-          <Star
-            key={star}
             className={`h-4 w-4 ${
               isFilled
                 ? "fill-yellow-400 text-yellow-400"
@@ -83,7 +73,7 @@ export function RecentWatchesList({ watches }: RecentWatchesListProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Rating:</span>
                   {watch.rating ? (
-                    renderStars(watch.rating)
+                    <StarRatingDisplay rating={watch.rating} />
                   ) : (
                     <span className="text-muted-foreground text-sm">
                       No rating
