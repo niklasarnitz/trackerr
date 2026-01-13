@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
@@ -13,6 +12,8 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useDebounce } from "~/hooks/use-movie-filtering";
+import { useCollectionFilters } from "~/hooks/use-collection-filters";
+import { useEffect } from "react";
 
 export function CollectionFilters() {
   const router = useRouter();
@@ -23,10 +24,22 @@ export function CollectionFilters() {
   const initialType = searchParams.get("type") ?? "all";
   const initialRipped = searchParams.get("ripped") ?? "all";
 
-  const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [filterMedium, setFilterMedium] = useState(initialMedium);
-  const [activeTab, setActiveTab] = useState(initialType);
-  const [rippedFilter, setRippedFilter] = useState(initialRipped);
+  const {
+    searchQuery,
+    setSearchQuery,
+    filterMedium,
+    setFilterMedium,
+    activeTab,
+    setActiveTab,
+    rippedFilter,
+    setRippedFilter,
+  } = useCollectionFilters(
+    undefined,
+    initialSearch,
+    initialMedium,
+    initialType,
+    initialRipped,
+  );
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 

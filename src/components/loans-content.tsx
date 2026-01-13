@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
+import { useLoansForm } from "~/hooks/use-loans-form";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -30,6 +31,17 @@ import {
 
 export function LoansContent() {
   const utils = api.useUtils();
+  const {
+    isOpen,
+    setIsOpen,
+    mediaEntryId,
+    setMediaEntryId,
+    borrowerName,
+    setBorrowerName,
+    notes,
+    setNotes,
+    reset,
+  } = useLoansForm();
 
   const { data: loans, isLoading, error } = api.loan.getAll.useQuery();
   const { data: mediaEntries } = api.mediaEntry.getAll.useQuery({
@@ -37,18 +49,10 @@ export function LoansContent() {
     limit: 100,
   });
 
-  const [open, setOpen] = useState(false);
-  const [mediaEntryId, setMediaEntryId] = useState<string>("");
-  const [borrowerName, setBorrowerName] = useState("");
-  const [notes, setNotes] = useState("");
-
   const createLoan = api.loan.create.useMutation({
     onSuccess: async () => {
       toast.success("Loan created");
-      setOpen(false);
-      setMediaEntryId("");
-      setBorrowerName("");
-      setNotes("");
+      reset();
       await utils.loan.getAll.invalidate();
       await utils.loan.getActive.invalidate();
     },
@@ -105,7 +109,7 @@ export function LoansContent() {
           {loans?.length ?? 0} loan{(loans?.length ?? 0) === 1 ? "" : "s"}
         </p>
 
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button>New Loan</Button>
           </DialogTrigger>

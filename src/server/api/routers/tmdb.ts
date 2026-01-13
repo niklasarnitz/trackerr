@@ -1,28 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
-
-// TMDB API integration
-const TMDB_API_KEY = env.TMDB_API_KEY;
-const TMDB_BASE_URL = "https://api.themoviedb.org/3";
-const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
-
-// Helper to construct full TMDB image URL
-function getTmdbImageUrl(posterPath: string | null): string | null {
-  if (!posterPath) return null;
-  return `${TMDB_IMAGE_BASE_URL}${posterPath}`;
-}
-
-let tmdbGenresCache: {
-  readonly fetchedAtMs: number;
-  readonly genres: Array<{ id: number; name: string }>;
-} | null = null;
-
-let tmdbGenresInFlight: Promise<Array<{ id: number; name: string }>> | null =
-  null;
-
-const TMDB_GENRES_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+import { API_CONFIG } from "~/config/api";
+import { apiClient } from "~/server/api/utils/api-client";
+import { CachedAsyncFunction } from "~/server/api/utils/cache";
 
 // Zod schemas for TMDB API responses
 const tmdbMovieSchema = z.object({
@@ -53,162 +34,137 @@ const tmdbSearchResponseSchema = z.object({
   total_results: z.number(),
 });
 
+const tmdbGenreSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
+
+const tmdbGenresResponseSchema = z.object({
+  genres: z.array(tmdbGenreSchema),
+});
+
 type TMDBMovie = z.infer<typeof tmdbMovieSchema>;
 type TMDBSearchResponse = z.infer<typeof tmdbSearchResponseSchema>;
+type TMDBGenre = z.infer<typeof tmdbGenreSchema>;
 
-async function searchTMDB(
-  query: string,
-  page = 1,
-): Promise<TMDBSearchResponse> {
-  if (!TMDB_API_KEY) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "TMDB API key not configured",
-    });
-  }
+/**
+ * TMDB Client - Handles all TMDB API interactions with unified logic
+ */
+class TMDBClient {
+  private apiKey: string;
+  private baseUrl = API_CONFIG.TMDB.baseUrl;
+  private imageBaseUrl = API_CONFIG.TMDB.imageBaseUrl;
+  private genresCache: CachedAsyncFunction<TMDBGenre[]>;
 
-  const url = new URL(`${TMDB_BASE_URL}/search/movie`);
-  url.searchParams.set("api_key", TMDB_API_KEY);
-  url.searchParams.set("query", query);
-  url.searchParams.set("page", page.toString());
+  constructor(apiKey: string) {
+    if (!apiKey) {
+      throw new Error("TMDB API key is required");
+    }
+    this.apiKey = apiKey;
 
-  const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to search TMDB",
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const data = await response.json();
-
-  try {
-    return tmdbSearchResponseSchema.parse(data);
-  } catch (error) {
-    console.error(
-      "TMDB API response validation failed:",
-      error,
-      "\noriginal data: \n",
-      data,
+    // Initialize genres cache
+    this.genresCache = new CachedAsyncFunction(
+      API_CONFIG.TMDB.genresCacheTtlMs,
+      () => this.fetchGenres(),
     );
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Invalid response from TMDB API",
+  }
+
+  /**
+   * Get full TMDB image URL from poster path
+   */
+  getTmdbImageUrl(posterPath: string | null): string | null {
+    if (!posterPath) return null;
+    return `${this.imageBaseUrl}${posterPath}`;
+  }
+
+  /**
+   * Build TMDB API URL with authentication
+   */
+  private buildUrl(endpoint: string, params?: Record<string, string>): URL {
+    return apiClient.buildUrl(`${this.baseUrl}${endpoint}`, {
+      api_key: this.apiKey,
+      ...params,
     });
+  }
+
+  /**
+   * Search for movies on TMDB
+   */
+  async search(query: string, page = 1): Promise<TMDBSearchResponse> {
+    const url = this.buildUrl("/search/movie", {
+      query,
+      page: page.toString(),
+    });
+    return apiClient.fetch(url, tmdbSearchResponseSchema);
+  }
+
+  /**
+   * Get movie by ID
+   */
+  async getMovie(id: string): Promise<TMDBMovie> {
+    const url = this.buildUrl(`/movie/${id}`);
+    return apiClient.fetch(url, tmdbMovieSchema);
+  }
+
+  /**
+   * Get movie details (includes credits and genres)
+   */
+  async getMovieDetails(id: string): Promise<Record<string, unknown>> {
+    const url = this.buildUrl(`/movie/${id}`, {
+      append_to_response: "credits,genres",
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return apiClient.fetch(url, z.record(z.string(), z.unknown()));
+  }
+
+  /**
+   * Get all genres (cached)
+   */
+  async getGenres(): Promise<TMDBGenre[]> {
+    return this.genresCache.get();
+  }
+
+  /**
+   * Fetch genres from TMDB API
+   */
+  private async fetchGenres(): Promise<TMDBGenre[]> {
+    const url = this.buildUrl("/genre/movie/list");
+    const response = await apiClient.fetch(url, tmdbGenresResponseSchema);
+    return response.genres;
+  }
+
+  /**
+   * Get movie recommendations
+   */
+  async getRecommendations(id: string, page = 1): Promise<TMDBSearchResponse> {
+    const url = this.buildUrl(`/movie/${id}/recommendations`, {
+      page: page.toString(),
+    });
+    return apiClient.fetch(url, tmdbSearchResponseSchema);
+  }
+
+  /**
+   * Format movie data for client response
+   */
+  formatMovie(movie: TMDBMovie) {
+    return {
+      id: movie.id.toString(),
+      title: movie.title,
+      originalTitle: movie.original_title,
+      releaseYear:
+        movie.release_date && movie.release_date.trim() !== ""
+          ? new Date(movie.release_date).getFullYear()
+          : null,
+      posterPath: this.getTmdbImageUrl(movie.poster_path),
+      overview: movie.overview,
+      voteAverage: movie.vote_average,
+      voteCount: movie.vote_count,
+    };
   }
 }
 
-async function getTMDBMovie(id: string): Promise<TMDBMovie> {
-  if (!TMDB_API_KEY) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "TMDB API key not configured",
-    });
-  }
-
-  const url = new URL(`${TMDB_BASE_URL}/movie/${id}`);
-  url.searchParams.set("api_key", TMDB_API_KEY);
-
-  const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Movie not found on TMDB",
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const data = await response.json();
-
-  try {
-    return tmdbMovieSchema.parse(data);
-  } catch (error) {
-    console.error("TMDB API response validation failed:", error);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Invalid response from TMDB API",
-    });
-  }
-}
-
-async function getTMDBMovieDetails(id: string) {
-  if (!TMDB_API_KEY) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "TMDB API key not configured",
-    });
-  }
-
-  const url = new URL(`${TMDB_BASE_URL}/movie/${id}`);
-  url.searchParams.set("api_key", TMDB_API_KEY);
-  url.searchParams.set("append_to_response", "credits,genres");
-
-  const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Movie not found on TMDB",
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  return await response.json();
-}
-
-async function getTMDBGenres() {
-  if (!TMDB_API_KEY) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "TMDB API key not configured",
-    });
-  }
-
-  const url = new URL(`${TMDB_BASE_URL}/genre/movie/list`);
-  url.searchParams.set("api_key", TMDB_API_KEY);
-
-  const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to fetch genres from TMDB",
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const data = await response.json();
-  return data.genres as Array<{ id: number; name: string }>;
-}
-
-async function getTMDBGenresCached() {
-  const now = Date.now();
-  if (
-    tmdbGenresCache &&
-    now - tmdbGenresCache.fetchedAtMs < TMDB_GENRES_TTL_MS
-  ) {
-    return tmdbGenresCache.genres;
-  }
-
-  if (tmdbGenresInFlight) {
-    return await tmdbGenresInFlight;
-  }
-
-  tmdbGenresInFlight = (async () => {
-    const genres = await getTMDBGenres();
-    tmdbGenresCache = { fetchedAtMs: Date.now(), genres };
-    return genres;
-  })();
-
-  try {
-    return await tmdbGenresInFlight;
-  } finally {
-    tmdbGenresInFlight = null;
-  }
-}
+// Initialize TMDB client
+const tmdbClient = new TMDBClient(env.TMDB_API_KEY);
 
 export const tmdbRouter = createTRPCRouter({
   // Search movies on TMDB
@@ -220,23 +176,11 @@ export const tmdbRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const results = await searchTMDB(input.query, input.page);
+      const results = await tmdbClient.search(input.query, input.page);
 
       return {
         ...results,
-        results: results.results.map((movie) => ({
-          id: movie.id.toString(),
-          title: movie.title,
-          originalTitle: movie.original_title,
-          releaseYear:
-            movie.release_date && movie.release_date.trim() !== ""
-              ? new Date(movie.release_date).getFullYear()
-              : null,
-          posterPath: getTmdbImageUrl(movie.poster_path),
-          overview: movie.overview,
-          voteAverage: movie.vote_average,
-          voteCount: movie.vote_count,
-        })),
+        results: results.results.map((movie) => tmdbClient.formatMovie(movie)),
       };
     }),
 
@@ -244,36 +188,31 @@ export const tmdbRouter = createTRPCRouter({
   getMovie: protectedProcedure
     .input(z.object({ tmdbId: z.string() }))
     .query(async ({ input }) => {
-      const movie = await getTMDBMovie(input.tmdbId);
-      const details = await getTMDBMovieDetails(input.tmdbId);
+      const movie = await tmdbClient.getMovie(input.tmdbId);
+      const details = await tmdbClient.getMovieDetails(input.tmdbId);
 
       // Extract director and main cast
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const director =
-        details.credits?.crew?.find(
+        (details.credits as any)?.crew?.find(
           (person: { job: string }) => person.job === "Director",
         )?.name ?? null;
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const cast =
-        details.credits?.cast
+        (details.credits as any)?.cast
           ?.slice(0, 5)
           .map((actor: { name: string }) => actor.name) ?? [];
 
-      // Extract genre names
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const genres =
-        details.genres?.map((genre: { name: string }) => genre.name) ?? [];
+        (details.genres as any)?.map((genre: { name: string }) => genre.name) ??
+        [];
 
       return {
-        id: movie.id.toString(),
-        title: movie.title,
-        originalTitle: movie.original_title,
-        releaseYear:
-          movie.release_date && movie.release_date.trim() !== ""
-            ? new Date(movie.release_date).getFullYear()
-            : null,
-        runtime: details.runtime ?? null,
-        posterPath: getTmdbImageUrl(movie.poster_path),
-        overview: movie.overview,
-        voteAverage: movie.vote_average,
-        voteCount: movie.vote_count,
+        ...tmdbClient.formatMovie(movie),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        runtime: (details.runtime as number | undefined) ?? null,
         genres,
         director,
         cast,
@@ -282,7 +221,7 @@ export const tmdbRouter = createTRPCRouter({
 
   // Get all genres
   getGenres: protectedProcedure.query(async () => {
-    return await getTMDBGenresCached();
+    return await tmdbClient.getGenres();
   }),
 
   // Search and add movie to collection
@@ -291,11 +230,11 @@ export const tmdbRouter = createTRPCRouter({
       z.object({
         query: z.string().min(1),
         page: z.number().min(1).default(1),
-        includedInCollection: z.boolean().default(true), // Show which movies are already in collection
+        includedInCollection: z.boolean().default(true),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const results = await searchTMDB(input.query, input.page);
+      const results = await tmdbClient.search(input.query, input.page);
 
       // Get user's existing movies if requested
       let existingMoviesMap = new Map<string, string>();
@@ -310,7 +249,7 @@ export const tmdbRouter = createTRPCRouter({
       // Get genre names for each movie
       const genreMap = new Map<number, string>();
       try {
-        const genres = await getTMDBGenresCached();
+        const genres = await tmdbClient.getGenres();
         genres.forEach((genre) => {
           genreMap.set(genre.id, genre.name);
         });
@@ -335,17 +274,7 @@ export const tmdbRouter = createTRPCRouter({
       return {
         ...results,
         results: sortedResults.map((movie) => ({
-          id: movie.id.toString(),
-          title: movie.title,
-          originalTitle: movie.original_title,
-          releaseYear:
-            movie.release_date && movie.release_date.trim() !== ""
-              ? new Date(movie.release_date).getFullYear()
-              : null,
-          posterPath: getTmdbImageUrl(movie.poster_path),
-          overview: movie.overview,
-          voteAverage: movie.vote_average,
-          voteCount: movie.vote_count,
+          ...tmdbClient.formatMovie(movie),
           popularity: movie.popularity ?? 0,
           genres:
             movie.genre_ids
@@ -361,47 +290,16 @@ export const tmdbRouter = createTRPCRouter({
   getRecommendations: protectedProcedure
     .input(z.object({ tmdbId: z.string(), page: z.number().min(1).default(1) }))
     .query(async ({ input }) => {
-      if (!TMDB_API_KEY) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "TMDB API key not configured",
-        });
-      }
-
-      const url = new URL(
-        `${TMDB_BASE_URL}/movie/${input.tmdbId}/recommendations`,
+      const results = await tmdbClient.getRecommendations(
+        input.tmdbId,
+        input.page,
       );
-      url.searchParams.set("api_key", TMDB_API_KEY);
-      url.searchParams.set("page", input.page.toString());
-
-      const response = await fetch(url.toString());
-
-      if (!response.ok) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get recommendations from TMDB",
-        });
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const data = await response.json();
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.total_pages ?? 1,
-        totalResults: data.total_results ?? 0,
-        results: (data.results ?? []).map((movie: any) => ({
-          id: movie.id.toString(),
-          title: movie.title,
-          originalTitle: movie.original_title,
-          releaseYear:
-            movie.release_date && movie.release_date.trim() !== ""
-              ? new Date(movie.release_date).getFullYear()
-              : null,
-          posterPath: getTmdbImageUrl(movie.poster_path),
-          overview: movie.overview,
-          voteAverage: movie.vote_average,
-        })),
+        page: results.page,
+        totalPages: results.total_pages,
+        totalResults: results.total_results,
+        results: results.results.map((movie) => tmdbClient.formatMovie(movie)),
       };
     }),
 });

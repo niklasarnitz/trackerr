@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "~/lib/utils";
-import { useState, useEffect } from "react";
+import { useNavigation } from "~/hooks/use-navigation";
 
 const navigationItems = [
   {
@@ -99,13 +99,7 @@ export function Navigation() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { isMobileMenuOpen, setIsMobileMenuOpen, mounted } = useNavigation();
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/signin" });
