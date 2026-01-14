@@ -1,0 +1,22 @@
+model TvShowWatch {
+  id               String            @id @default(cuid())
+  tvShowId         String
+  tvShow           TvShow            @relation(fields: [tvShowId], references: [id], onDelete: Cascade)
+  episodeId        String?
+  episode          TvShowEpisode?    @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  watchedAt        DateTime          @default(now())
+  rating           Float? // 0.0 - 5.0 in 0.5 steps (validated in application layer)
+  review           String?
+  watchLocation    WatchLocation     @default(ON_DEMAND)
+  streamingService StreamingService?
+
+  externalActionMetadataTags ExternalActionMetadataTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, tvShowId, watchedAt])
+  @@index([episodeId])
+}

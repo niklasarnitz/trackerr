@@ -14,6 +14,9 @@ import { readingProgressRouter } from "./routers/readingProgress";
 import { bookCategoryRouter } from "./routers/bookCategory";
 import { bookSearchRouter } from "./routers/bookSearch";
 import { userPreferencesRouter } from "./routers/userPreferences";
+import { tvShowRouter } from "./routers/tvShow";
+import { tvShowWatchRouter } from "./routers/tvShowWatch";
+import { tvdbRouter } from "./routers/tvdb";
 
 /**
  * This is the primary router for your server.
@@ -36,6 +39,9 @@ export const appRouter = createTRPCRouter({
   bookCategory: bookCategoryRouter,
   bookSearch: bookSearchRouter,
   userPreferences: userPreferencesRouter,
+  tvShow: tvShowRouter,
+  tvShowWatch: tvShowWatchRouter,
+  tvdb: tvdbRouter,
 });
 
 // export type definition of API

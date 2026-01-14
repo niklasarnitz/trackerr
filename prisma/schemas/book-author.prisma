@@ -1,14 +1,14 @@
 model BookAuthor {
-    id        String   @id @default(cuid())
-    bookId    String
-    book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-    authorId  String
-    author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-    role      String? // e.g., "Herausgeber", "Editor", "Translator", etc.
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  role      String? // e.g., "Herausgeber", "Editor", "Translator", etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@unique([bookId, authorId])
-    @@index([bookId])
-    @@index([authorId])
+  @@unique([bookId, authorId])
+  @@index([bookId])
+  @@index([authorId])
 }

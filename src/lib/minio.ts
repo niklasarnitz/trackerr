@@ -23,7 +23,7 @@ export async function ensureBucketExists() {
 
 // Generate object name for covers
 export function generateCoverObjectName(
-  type: "movie" | "book",
+  type: "movie" | "book" | "tvshow",
   id: string,
   extension = "jpg",
 ): string {

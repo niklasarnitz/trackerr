@@ -1,0 +1,31 @@
+model TvShow {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  originalTitle String?
+  firstAirDate  DateTime?
+  lastAirDate   DateTime?
+  status        String? // Returning Series, Ended, Canceled, etc.
+  tvdbId        String // TVDB series ID
+  posterPath    String? // store TVDB poster path or URL
+  blurDataUrl   String? // Base64 blur placeholder for poster
+  overview      String? // plot synopsis from TVDB
+  genres        String[] // Array of genre names from TVDB
+  network       String? // Original network/streaming service
+  cast          String[] // Array of main cast member names
+  notes         String? // Personal notes about the show
+  isInWatchlist Boolean   @default(false)
+  isFavorite    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  seasons    TvShowSeason[]
+  watches    TvShowWatch[]
+  tvShowTags TvShowTag[]
+
+  @@unique([userId, tvdbId])
+  @@index([userId, title])
+  @@index([userId, isInWatchlist])
+  @@index([userId, isFavorite])
+}

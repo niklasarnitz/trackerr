@@ -1,12 +1,12 @@
 model UserPreferences {
-    id        String    @id @default(cuid())
-    userId    String    @unique
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    movieSort MovieSort @default(CREATED)
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieSort MovieSort @default(CREATED)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-    jellyfinWebhook JellyfinWebhookConfig?
+  jellyfinWebhook JellyfinWebhookConfig?
 
-    @@index([userId])
+  @@index([userId])
 }

@@ -1,30 +1,30 @@
 model Movie {
-    id            String           @id @default(cuid())
-    userId        String
-    user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-    title         String
-    originalTitle String?
-    releaseYear   Int?
-    runtime       Int? // Runtime in minutes from TMDB
-    tmdbId        String // TMDB movie ID (string to be future-proof even if numeric)
-    posterPath    String? // store TMDB poster path or URL
-    blurDataUrl   String? // Base64 blur placeholder for poster
-    overview      String? // plot synopsis from TMDB
-    genres        String[] // Array of genre names from TMDB
-    director      String? // Director name
-    cast          String[] // Array of main cast member names
-    notes         String? // Personal notes about the movie
-    isInWatchlist Boolean          @default(false)
-    isFavorite    Boolean          @default(false)
-    createdAt     DateTime         @default(now())
-    updatedAt     DateTime         @updatedAt
-    mediaEntries  MediaEntry[]
-    watches       MovieWatch[]
-    movieTags     MovieTag[]
-    listEntries   MovieListEntry[]
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  originalTitle String?
+  releaseYear   Int?
+  runtime       Int? // Runtime in minutes from TMDB
+  tmdbId        String // TMDB movie ID (string to be future-proof even if numeric)
+  posterPath    String? // store TMDB poster path or URL
+  blurDataUrl   String? // Base64 blur placeholder for poster
+  overview      String? // plot synopsis from TMDB
+  genres        String[] // Array of genre names from TMDB
+  director      String? // Director name
+  cast          String[] // Array of main cast member names
+  notes         String? // Personal notes about the movie
+  isInWatchlist Boolean          @default(false)
+  isFavorite    Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  mediaEntries  MediaEntry[]
+  watches       MovieWatch[]
+  movieTags     MovieTag[]
+  listEntries   MovieListEntry[]
 
-    @@unique([userId, tmdbId])
-    @@index([userId, title])
-    @@index([userId, isInWatchlist])
-    @@index([userId, isFavorite])
+  @@unique([userId, tmdbId])
+  @@index([userId, title])
+  @@index([userId, isInWatchlist])
+  @@index([userId, isFavorite])
 }

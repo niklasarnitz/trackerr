@@ -532,3 +532,100 @@ export type ReadingProgressGetByBookInput = z.infer<
 export type BookCategoryCreateInput = z.infer<typeof bookCategoryCreateSchema>;
 export type BookCategoryUpdateInput = z.infer<typeof bookCategoryUpdateSchema>;
 export type BookTagInput = z.infer<typeof bookTagSchema>;
+
+// ============================================================================
+// TV Show Schemas
+// ============================================================================
+
+export const tvShowSearchSchema = z.object({
+  search: z.string().optional(),
+  sort: z.enum(["title", "created", "watched"]).default("title"),
+  skip: z.number().min(0).default(0),
+  limit: z.number().min(1).max(100).default(20),
+  watchlist: z.boolean().optional(),
+  favorites: z.boolean().optional(),
+});
+
+export const tvShowCreateSchema = z.object({
+  tvdbId: z.string(),
+});
+
+export const tvShowUpdateSchema = z.object({
+  id: z.string(),
+  notes: z.string().optional(),
+  isInWatchlist: z.boolean().optional(),
+  isFavorite: z.boolean().optional(),
+});
+
+export const tvdbIdSchema = z.object({
+  tvdbId: z.string(),
+});
+
+// ============================================================================
+// TV Show Watch Schemas
+// ============================================================================
+
+export const tvShowWatchCreateSchema = z.object({
+  tvShowId: z.string(),
+  episodeId: z.string().optional(),
+  watchedAt: z.date().optional(),
+  rating: z.number().min(0).max(5).optional(),
+  review: z.string().optional(),
+  watchLocation: z
+    .enum(["ON_DEMAND", "CINEMA", "TV_BROADCAST", "OTHER"])
+    .default("ON_DEMAND"),
+  streamingService: z
+    .enum([
+      "HOME_MEDIA_LIBRARY",
+      "NETFLIX",
+      "PRIME_VIDEO",
+      "DISNEY_PLUS",
+      "HBO_MAX",
+      "APPLE_TV_PLUS",
+      "HULU",
+      "PARAMOUNT_PLUS",
+      "PEACOCK",
+      "YOUTUBE_PREMIUM",
+      "CRUNCHYROLL",
+      "MAX",
+      "OTHER",
+    ])
+    .optional(),
+});
+
+export const tvShowWatchUpdateSchema = z.object({
+  id: z.string(),
+  watchedAt: z.date().optional(),
+  rating: z.number().min(0).max(5).optional(),
+  review: z.string().optional(),
+  watchLocation: z
+    .enum(["ON_DEMAND", "CINEMA", "TV_BROADCAST", "OTHER"])
+    .optional(),
+  streamingService: z
+    .enum([
+      "HOME_MEDIA_LIBRARY",
+      "NETFLIX",
+      "PRIME_VIDEO",
+      "DISNEY_PLUS",
+      "HBO_MAX",
+      "APPLE_TV_PLUS",
+      "HULU",
+      "PARAMOUNT_PLUS",
+      "PEACOCK",
+      "YOUTUBE_PREMIUM",
+      "CRUNCHYROLL",
+      "MAX",
+      "OTHER",
+    ])
+    .optional(),
+});
+
+// ============================================================================
+// TV Show Type Exports
+// ============================================================================
+
+export type TvShowSearchInput = z.infer<typeof tvShowSearchSchema>;
+export type TvShowCreateInput = z.infer<typeof tvShowCreateSchema>;
+export type TvShowUpdateInput = z.infer<typeof tvShowUpdateSchema>;
+export type TvShowWatchCreateInput = z.infer<typeof tvShowWatchCreateSchema>;
+export type TvShowWatchUpdateInput = z.infer<typeof tvShowWatchUpdateSchema>;

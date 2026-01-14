@@ -28,6 +28,7 @@ export type MediaEntryFormData = z.infer<typeof mediaEntrySchema>;
 export const WATCH_LOCATIONS: Record<WatchLocation, string> = {
   ON_DEMAND: "On Demand",
   CINEMA: "Cinema",
+  TV_BROADCAST: "TV Broadcast",
   TV: "TV",
   OTHER: "Other",
 };

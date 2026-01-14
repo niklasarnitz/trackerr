@@ -1,0 +1,12 @@
+model TvShowTag {
+  id        String   @id @default(cuid())
+  tvShowId  String
+  tvShow    TvShow   @relation(fields: [tvShowId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([tvShowId, tagId])
+  @@index([tvShowId])
+  @@index([tagId])
+}

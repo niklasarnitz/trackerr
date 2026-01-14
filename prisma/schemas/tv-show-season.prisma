@@ -1,0 +1,18 @@
+model TvShowSeason {
+  id           String    @id @default(cuid())
+  tvShowId     String
+  tvShow       TvShow    @relation(fields: [tvShowId], references: [id], onDelete: Cascade)
+  seasonNumber Int
+  name         String?
+  overview     String?
+  airDate      DateTime?
+  episodeCount Int?
+  posterPath   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  episodes TvShowEpisode[]
+
+  @@unique([tvShowId, seasonNumber])
+  @@index([tvShowId])
+}

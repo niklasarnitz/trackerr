@@ -32,6 +32,7 @@ import {
   Bell,
   Sparkles,
   ChevronDown,
+  Tv,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "~/lib/utils";
@@ -47,6 +48,11 @@ const navigationItems = [
     href: "/movies",
     name: "Movies",
     icon: Film,
+  },
+  {
+    href: "/tv-shows",
+    name: "TV Shows",
+    icon: Tv,
   },
   {
     href: "/books",
@@ -126,7 +132,10 @@ export function Navigation() {
 
   const desktopPrimaryItems = navigationItems.filter(
     (item) =>
-      item.href === "/" || item.href === "/movies" || item.href === "/books",
+      item.href === "/" ||
+      item.href === "/movies" ||
+      item.href === "/tv-shows" ||
+      item.href === "/books",
   );
   const libraryItems = navigationItems.filter((item) =>
     ["/watches", "/collection"].includes(item.href),

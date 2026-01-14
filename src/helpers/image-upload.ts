@@ -54,6 +54,50 @@ export async function downloadAndUploadMoviePoster(
 }
 
 /**
+ * Downloads a TV show poster from TVDB and uploads it to Minio
+ * @param tvShowId - Internal TV show ID from database
+ * @param posterPath - TVDB poster path URL
+ * @returns The Minio URL and blur data URL of the uploaded poster
+ */
+export async function downloadAndUploadTvShowPoster(
+  tvShowId: string,
+  posterPath: string,
+): Promise<{ url: string; blurDataUrl: string | null }> {
+  const objectName = generateCoverObjectName("tvshow", tvShowId);
+
+  // Download image
+  const response = await fetch(posterPath);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  }
+
+  const buffer = await response.arrayBuffer();
+  const bufferData = Buffer.from(buffer);
+
+  // Generate blur data
+  const blurDataUrl = await generateBlurDataUrlFromBuffer(bufferData);
+
+  // Upload to Minio
+  const { minioClient, MINIO_BUCKET, ensureBucketExists, getPublicUrl } =
+    await import("~/lib/minio");
+  await ensureBucketExists();
+  await minioClient.putObject(
+    MINIO_BUCKET,
+    objectName,
+    bufferData,
+    bufferData.length,
+    {
+      "Content-Type": "image/jpeg",
+    },
+  );
+
+  return {
+    url: getPublicUrl(objectName),
+    blurDataUrl,
+  };
+}
+
+/**
  * Downloads a book cover from external URL and uploads it to Minio
  * @param bookId - Internal book ID from database
  * @param coverUrl - External cover URL (e.g., Google Books, Open Library)

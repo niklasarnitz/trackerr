@@ -1,6 +1,7 @@
 enum WatchLocation {
-    ON_DEMAND
-    CINEMA
-    TV
-    OTHER
+  ON_DEMAND
+  CINEMA
+  TV_BROADCAST
+  TV
+  OTHER
 }

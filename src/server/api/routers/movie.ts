@@ -259,6 +259,10 @@ export const movieRouter = createTRPCRouter({
         },
         watches: {
           orderBy: { watchedAt: "desc" },
+          include: {
+            cinemaWatchMetadata: true,
+            externalActionMetadataTags: true,
+          },
         },
         _count: {
           select: {

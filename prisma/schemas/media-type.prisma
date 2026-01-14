@@ -1,11 +1,11 @@
 enum MediaType {
-    BLURAY
-    BLURAY4K
-    DVD
-    DIGITAL
-    LASERDISC
-    STREAM
-    FILE
-    VHS
-    OTHER
+  BLURAY
+  BLURAY4K
+  DVD
+  DIGITAL
+  LASERDISC
+  STREAM
+  FILE
+  VHS
+  OTHER
 }

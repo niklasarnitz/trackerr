@@ -1,14 +1,15 @@
 model Tag {
-    id        String     @id @default(cuid())
-    userId    String
-    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-    name      String
-    color     String? // Optional color for tag display
-    movieTags MovieTag[]
-    bookTags  BookTag[]
-    createdAt DateTime   @default(now())
-    updatedAt DateTime   @updatedAt
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  color      String? // Optional color for tag display
+  movieTags  MovieTag[]
+  bookTags   BookTag[]
+  tvShowTags TvShowTag[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
-    @@unique([userId, name])
-    @@index([userId])
+  @@unique([userId, name])
+  @@index([userId])
 }

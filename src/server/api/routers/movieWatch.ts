@@ -393,6 +393,8 @@ export const movieWatchRouter = createTRPCRouter({
         label: {
           ON_DEMAND: "On Demand / Streaming",
           CINEMA: "Cinema",
+          PHYSICAL_MEDIA: "Physical Media",
+          TV_BROADCAST: "TV Broadcast",
           TV: "TV",
           OTHER: "Other",
         }[stat.watchLocation],
@@ -1126,6 +1128,7 @@ export const movieWatchRouter = createTRPCRouter({
             CINEMA: "Cinema",
             TV: "TV",
             OTHER: "Other",
+            TV_BROADCAST: "TV Broadcast",
           }[group.watchLocation],
           averageRating: avg._avg.rating ?? 0,
           count: avg._count.rating ?? 0,

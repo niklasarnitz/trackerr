@@ -15,6 +15,11 @@ const config = {
       },
       {
         protocol: "https",
+        hostname: "artworks.thetvdb.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "minio.app.niklas.services",
         pathname: "/**",
       },

@@ -1,4 +1,4 @@
 enum Currency {
-    EUR
-    USD
+  EUR
+  USD
 }
