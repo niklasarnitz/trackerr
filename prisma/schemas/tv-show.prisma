@@ -8,10 +8,10 @@ model TvShow {
   lastAirDate   DateTime?
   status        String? // Returning Series, Ended, Canceled, etc.
   tmdbId        String? // TMDB series ID
-  posterPath    String? // store TVDB poster path or URL
+  posterPath    String? // store TMDB poster path or URL
   blurDataUrl   String? // Base64 blur placeholder for poster
-  overview      String? // plot synopsis from TVDB
-  genres        String[] // Array of genre names from TVDB
+  overview      String? // plot synopsis from TMDB
+  genres        String[] // Array of genre names from TMDB
   network       String? // Original network/streaming service
   cast          String[] // Array of main cast member names
   notes         String? // Personal notes about the show

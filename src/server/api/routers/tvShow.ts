@@ -9,16 +9,11 @@ import {
   tvShowUpdateSchema,
 } from "~/lib/api-schemas";
 import { downloadAndUploadTvShowPoster } from "~/helpers/image-upload";
-import { TRPCError } from "@trpc/server";
-import { createCaller } from "~/server/api/root";
+import { tmdbTvClient } from "~/server/api/utils/tmdb-tv-client";
 
-// Helper to get TMDB TV details via router caller (to reuse validation & fetch)
-async function getTmdbSeriesDetails(
-  ctx: Parameters<typeof createCaller>[0],
-  tmdbId: string,
-) {
-  const caller = createCaller(ctx);
-  return caller.tmdbTv.getSeries({ tmdbId });
+// Helper to get TMDB TV details via shared client
+async function getTmdbSeriesDetails(tmdbId: string) {
+  return tmdbTvClient.getSeries(tmdbId);
 }
 
 export const tvShowRouter = createTRPCRouter({
@@ -263,7 +258,7 @@ export const tvShowRouter = createTRPCRouter({
 
       let tmdb;
       try {
-        tmdb = await getTmdbSeriesDetails(ctx, input.tmdbId);
+        tmdb = await getTmdbSeriesDetails(input.tmdbId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -312,9 +307,13 @@ export const tvShowRouter = createTRPCRouter({
 
       // Sync seasons and episodes from TMDB upon creation
       try {
-        const seasons = await createCaller(ctx).tmdbTv.getSeasons({
-          tmdbId: tvShow.tmdbId,
-        });
+        if (!tvShow.tmdbId) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "TMDB ID missing for TV show",
+          });
+        }
+        const seasons = await tmdbTvClient.getSeasons(tvShow.tmdbId);
 
         for (const season of seasons) {
           // Skip season 0 (specials) for now
@@ -341,10 +340,10 @@ export const tvShowRouter = createTRPCRouter({
             },
           });
 
-          const episodes = await createCaller(ctx).tmdbTv.getEpisodes({
-            tmdbId: tvShow.tmdbId,
-            seasonNumber: season.number,
-          });
+          const episodes = await tmdbTvClient.getEpisodes(
+            tvShow.tmdbId,
+            season.number,
+          );
 
           for (const episode of episodes) {
             await ctx.db.tvShowEpisode.upsert({
@@ -509,9 +508,13 @@ export const tvShowRouter = createTRPCRouter({
       }
 
       try {
-        const seasons = await createCaller(ctx).tmdbTv.getSeasons({
-          tmdbId: tvShow.tmdbId!,
-        });
+        if (!tvShow.tmdbId) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "TMDB ID missing for TV show",
+          });
+        }
+        const seasons = await tmdbTvClient.getSeasons(tvShow.tmdbId);
 
         for (const season of seasons) {
           if (season.number === 0) continue;
@@ -536,10 +539,10 @@ export const tvShowRouter = createTRPCRouter({
             },
           });
 
-          const episodes = await createCaller(ctx).tmdbTv.getEpisodes({
-            tmdbId: tvShow.tmdbId!,
-            seasonNumber: season.number,
-          });
+          const episodes = await tmdbTvClient.getEpisodes(
+            tvShow.tmdbId,
+            season.number,
+          );
           for (const episode of episodes) {
             await ctx.db.tvShowEpisode.upsert({
               where: {

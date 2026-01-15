@@ -13,7 +13,6 @@ export const env = createEnv({
         : z.string().optional(),
     DATABASE_URL: z.string().url(),
     TMDB_API_KEY: z.string(),
-    // TVDB removed in favor of TMDB TV
     MINIO_ENDPOINT: z.string().url(),
     MINIO_PORT: z.string().default("443"),
     MINIO_ACCESS_KEY: z.string(),
@@ -42,7 +41,6 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     TMDB_API_KEY: process.env.TMDB_API_KEY,
-    // TVDB removed in favor of TMDB TV
     MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
     MINIO_PORT: process.env.MINIO_PORT,
     MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
