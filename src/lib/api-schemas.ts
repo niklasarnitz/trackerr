@@ -547,7 +547,7 @@ export const tvShowSearchSchema = z.object({
 });
 
 export const tvShowCreateSchema = z.object({
-  tvdbId: z.string(),
+  tmdbId: z.string(),
 });
 
 export const tvShowUpdateSchema = z.object({
@@ -557,8 +557,8 @@ export const tvShowUpdateSchema = z.object({
   isFavorite: z.boolean().optional(),
 });
 
-export const tvdbIdSchema = z.object({
-  tvdbId: z.string(),
+export const tvShowTmdbIdSchema = z.object({
+  tmdbId: z.string(),
 });
 
 // ============================================================================

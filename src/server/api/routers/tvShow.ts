@@ -4,17 +4,21 @@ import { z } from "zod";
 import {
   tvShowSearchSchema,
   idSchema,
-  tvdbIdSchema,
+  tvShowTmdbIdSchema,
   tvShowCreateSchema,
   tvShowUpdateSchema,
 } from "~/lib/api-schemas";
 import { downloadAndUploadTvShowPoster } from "~/helpers/image-upload";
-import { getTVDBClient } from "~/server/api/routers/tvdb";
+import { TRPCError } from "@trpc/server";
+import { createCaller } from "~/server/api/root";
 
-// Get TVDB series extended details
-async function getTvdbSeriesExtended(tvdbId: string) {
-  const client = getTVDBClient();
-  return client.getSeriesExtended(tvdbId);
+// Helper to get TMDB TV details via router caller (to reuse validation & fetch)
+async function getTmdbSeriesDetails(
+  ctx: Parameters<typeof createCaller>[0],
+  tmdbId: string,
+) {
+  const caller = createCaller(ctx);
+  return caller.tmdbTv.getSeries({ tmdbId });
 }
 
 export const tvShowRouter = createTRPCRouter({
@@ -202,13 +206,13 @@ export const tvShowRouter = createTRPCRouter({
     return tvShow;
   }),
 
-  // Get single TV show by TVDB ID
-  getByTvdbId: protectedProcedure
-    .input(tvdbIdSchema)
+  // Get single TV show by TMDB ID
+  getByTmdbId: protectedProcedure
+    .input(tvShowTmdbIdSchema)
     .query(async ({ ctx, input }) => {
       const tvShow = await ctx.db.tvShow.findFirst({
         where: {
-          tvdbId: input.tvdbId,
+          tmdbId: input.tmdbId,
           userId: ctx.session.user.id,
         },
         include: {
@@ -236,16 +240,16 @@ export const tvShowRouter = createTRPCRouter({
       return tvShow;
     }),
 
-  // Create TV show from TVDB
+  // Create TV show from TMDB
   create: protectedProcedure
     .input(tvShowCreateSchema)
     .mutation(async ({ ctx, input }) => {
       // Check if TV show already exists for this user
       const existingTvShow = await ctx.db.tvShow.findUnique({
         where: {
-          userId_tvdbId: {
+          userId_tmdbId: {
             userId: ctx.session.user.id,
-            tvdbId: input.tvdbId,
+            tmdbId: input.tmdbId,
           },
         },
       });
@@ -257,13 +261,13 @@ export const tvShowRouter = createTRPCRouter({
         });
       }
 
-      let tvdb;
+      let tmdb;
       try {
-        tvdb = await getTvdbSeriesExtended(input.tvdbId);
+        tmdb = await getTmdbSeriesDetails(ctx, input.tmdbId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch TV show metadata from TVDB",
+          message: "Failed to fetch TV show metadata from TMDB",
           cause: error,
         });
       }
@@ -272,29 +276,26 @@ export const tvShowRouter = createTRPCRouter({
       const tvShow = await ctx.db.tvShow.create({
         data: {
           userId: ctx.session.user.id,
-          tvdbId: input.tvdbId,
-          title: tvdb.name,
-          originalTitle: tvdb.name !== tvdb.name ? tvdb.name : null,
-          firstAirDate: tvdb.firstAired ? new Date(tvdb.firstAired) : null,
-          lastAirDate: tvdb.lastAired ? new Date(tvdb.lastAired) : null,
-          status: tvdb.status?.name ?? null,
+          tmdbId: input.tmdbId,
+          title: tmdb.title,
+          originalTitle: null,
+          firstAirDate: tmdb.firstAirDate ? new Date(tmdb.firstAirDate) : null,
+          lastAirDate: tmdb.lastAirDate ? new Date(tmdb.lastAirDate) : null,
+          status: tmdb.status ?? null,
           posterPath: null, // Will be updated after upload
-          overview: tvdb.overview ?? null,
-          genres: tvdb.genres.map((g) => g.name) ?? [],
-          network: tvdb.originalNetwork?.name ?? null,
-          cast: tvdb.characters
-            .map((c) => c.personName ?? c.name)
-            .filter((name): name is string => !!name)
-            .slice(0, 10),
+          overview: tmdb.overview ?? null,
+          genres: tmdb.genres ?? [],
+          network: tmdb.network ?? null,
+          cast: [],
         },
       });
 
       // Download and upload poster to Minio if available
-      if (tvdb.image) {
+      if (tmdb.posterPath) {
         try {
           const { url, blurDataUrl } = await downloadAndUploadTvShowPoster(
             tvShow.id,
-            tvdb.image,
+            tmdb.posterPath,
           );
           await ctx.db.tvShow.update({
             where: { id: tvShow.id },
@@ -309,10 +310,11 @@ export const tvShowRouter = createTRPCRouter({
         }
       }
 
-      // Sync seasons and episodes from TVDB upon creation
+      // Sync seasons and episodes from TMDB upon creation
       try {
-        const client = getTVDBClient();
-        const seasons = await client.getSeasons(tvShow.tvdbId);
+        const seasons = await createCaller(ctx).tmdbTv.getSeasons({
+          tmdbId: tvShow.tmdbId,
+        });
 
         for (const season of seasons) {
           // Skip season 0 (specials) for now
@@ -339,10 +341,10 @@ export const tvShowRouter = createTRPCRouter({
             },
           });
 
-          const episodes = await client.getEpisodes(
-            tvShow.tvdbId,
-            season.number,
-          );
+          const episodes = await createCaller(ctx).tmdbTv.getEpisodes({
+            tmdbId: tvShow.tmdbId,
+            seasonNumber: season.number,
+          });
 
           for (const episode of episodes) {
             await ctx.db.tvShowEpisode.upsert({
@@ -488,7 +490,7 @@ export const tvShowRouter = createTRPCRouter({
       });
     }),
 
-  // Sync seasons and episodes from TVDB
+  // Sync seasons and episodes from TMDB
   syncSeasonsAndEpisodes: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -507,8 +509,9 @@ export const tvShowRouter = createTRPCRouter({
       }
 
       try {
-        const client = getTVDBClient();
-        const seasons = await client.getSeasons(tvShow.tvdbId);
+        const seasons = await createCaller(ctx).tmdbTv.getSeasons({
+          tmdbId: tvShow.tmdbId!,
+        });
 
         for (const season of seasons) {
           if (season.number === 0) continue;
@@ -533,10 +536,10 @@ export const tvShowRouter = createTRPCRouter({
             },
           });
 
-          const episodes = await client.getEpisodes(
-            tvShow.tvdbId,
-            season.number,
-          );
+          const episodes = await createCaller(ctx).tmdbTv.getEpisodes({
+            tmdbId: tvShow.tmdbId!,
+            seasonNumber: season.number,
+          });
           for (const episode of episodes) {
             await ctx.db.tvShowEpisode.upsert({
               where: {

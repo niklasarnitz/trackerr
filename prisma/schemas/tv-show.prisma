@@ -7,7 +7,7 @@ model TvShow {
   firstAirDate  DateTime?
   lastAirDate   DateTime?
   status        String? // Returning Series, Ended, Canceled, etc.
-  tvdbId        String // TVDB series ID
+  tmdbId        String? // TMDB series ID
   posterPath    String? // store TVDB poster path or URL
   blurDataUrl   String? // Base64 blur placeholder for poster
   overview      String? // plot synopsis from TVDB
@@ -24,7 +24,7 @@ model TvShow {
   watches    TvShowWatch[]
   tvShowTags TvShowTag[]
 
-  @@unique([userId, tvdbId])
+  @@unique([userId, tmdbId])
   @@index([userId, title])
   @@index([userId, isInWatchlist])
   @@index([userId, isFavorite])

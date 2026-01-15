@@ -40,7 +40,7 @@ export function TvShowSearchDialog({
   };
 
   const { data: searchResults, isLoading: isSearching } =
-    api.tvdb.search.useQuery(
+    api.tmdbTv.search.useQuery(
       { query: debouncedQuery },
       { enabled: debouncedQuery.length >= 2 },
     );
@@ -64,8 +64,8 @@ export function TvShowSearchDialog({
     },
   });
 
-  const handleAddShow = (tvdbId: string) => {
-    createTvShow.mutate({ tvdbId });
+  const handleAddShow = (tmdbId: string) => {
+    createTvShow.mutate({ tmdbId });
   };
 
   return (
@@ -74,7 +74,7 @@ export function TvShowSearchDialog({
         <DialogHeader>
           <DialogTitle>Search TV Shows</DialogTitle>
           <DialogDescription>
-            Search for TV shows on TVDB to add to your collection
+            Search for TV shows on TMDB to add to your collection
           </DialogDescription>
         </DialogHeader>
 
@@ -104,7 +104,7 @@ export function TvShowSearchDialog({
                     key={show.id}
                     className="hover:bg-muted/50 flex gap-4 rounded-lg border p-3 transition-colors"
                   >
-                    <div className="bg-muted relative h-24 w-16 flex-shrink-0 overflow-hidden rounded">
+                    <div className="bg-muted relative h-24 w-16 shrink-0 overflow-hidden rounded">
                       {show.posterPath ? (
                         <OptimizedCoverImage
                           src={show.posterPath}

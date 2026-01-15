@@ -54,9 +54,9 @@ export async function downloadAndUploadMoviePoster(
 }
 
 /**
- * Downloads a TV show poster from TVDB and uploads it to Minio
+ * Downloads a TV show poster from TMDB and uploads it to Minio
  * @param tvShowId - Internal TV show ID from database
- * @param posterPath - TVDB poster path URL
+ * @param posterPath - TMDB poster path or full URL
  * @returns The Minio URL and blur data URL of the uploaded poster
  */
 export async function downloadAndUploadTvShowPoster(
@@ -65,8 +65,13 @@ export async function downloadAndUploadTvShowPoster(
 ): Promise<{ url: string; blurDataUrl: string | null }> {
   const objectName = generateCoverObjectName("tvshow", tvShowId);
 
+  // Build TMDB image URL from path if needed
+  const tmdbUrl = posterPath.startsWith("http")
+    ? posterPath
+    : `${TMDB_IMAGE_BASE}${posterPath}`;
+
   // Download image
-  const response = await fetch(posterPath);
+  const response = await fetch(tmdbUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.statusText}`);
   }
