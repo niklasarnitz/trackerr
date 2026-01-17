@@ -66,6 +66,10 @@ export function MovieActions({ movie }: MovieActionsProps) {
     },
   });
 
+  const handleDeleteMovie = async () => {
+    await deleteMovie.mutateAsync({ id: movie.id });
+  };
+
   return (
     <div className="mt-4 space-y-2">
       <Button

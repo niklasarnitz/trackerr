@@ -39,7 +39,7 @@ export function AddMovieWatchDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button size="sm" variant="outline">
           <Plus className="mr-2 h-4 w-4" />
           Log Watch
         </Button>

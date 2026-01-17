@@ -13,12 +13,17 @@ interface MovieDetailPageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    addWatch?: string;
+  }>;
 }
 
 export default async function MovieDetailPage({
   params,
+  searchParams,
 }: MovieDetailPageProps) {
   const { id } = await params;
+  const { addWatch } = await searchParams;
 
   let movie;
   try {
@@ -164,7 +169,11 @@ export default async function MovieDetailPage({
           )}
 
           <Suspense fallback={<div>Loading watch history...</div>}>
-            <MovieWatchHistory movieId={id} watches={movie.watches} />
+            <MovieWatchHistory
+              movieId={id}
+              watches={movie.watches}
+              openAddWatch={addWatch === "true"}
+            />
           </Suspense>
         </div>
       </div>
