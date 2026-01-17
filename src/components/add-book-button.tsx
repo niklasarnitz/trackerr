@@ -1,8 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { BookSearchDialog } from "~/components/book-search-dialog";
+
+const BookSearchDialog = dynamic(
+  () =>
+    import("~/components/book-search-dialog").then(
+      (mod) => mod.BookSearchDialog,
+    ),
+  { ssr: false },
+);
 
 export function AddBookButton() {
   return (

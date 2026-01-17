@@ -1,8 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
-import { MovieSearchDialog } from "~/components/movie-search-dialog";
 import { Plus } from "lucide-react";
+
+const MovieSearchDialog = dynamic(
+  () =>
+    import("~/components/movie-search-dialog").then(
+      (mod) => mod.MovieSearchDialog,
+    ),
+  { ssr: false },
+);
 
 interface AddMovieButtonProps {
   readonly variant?:

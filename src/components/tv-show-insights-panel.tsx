@@ -51,7 +51,7 @@ export function TvShowInsightsPanel({
   const safeDayOfWeek = dayOfWeekStats ?? [];
 
   const peakDay = safeDayOfWeek.reduce(
-    (best, current) => (current.count > best.count ? current : best),
+    (best, current) => (current.count > (best?.count ?? 0) ? current : best),
     safeDayOfWeek[0],
   );
 

@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { TvShowSearchDialog } from "~/components/tv-show-search-dialog";
+
+const TvShowSearchDialog = dynamic(
+  () =>
+    import("~/components/tv-show-search-dialog").then(
+      (mod) => mod.TvShowSearchDialog,
+    ),
+  { ssr: false },
+);
 
 export function AddTvShowButton() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);

@@ -1,7 +1,10 @@
 import { useCallback } from "react";
 import { api, type RouterInputs } from "~/trpc/react";
 import { toast } from "sonner";
-import { normalizeWatchDate, normalizeWatchDateOrToday } from "~/lib/watch-date";
+import {
+  normalizeWatchDate,
+  normalizeWatchDateOrToday,
+} from "~/lib/watch-date";
 
 interface UseDataMutationOptions<TData> {
   onSuccess?: (data: TData) => void;
@@ -29,22 +32,38 @@ export function useMovieMutations() {
       : {}),
   });
 
-  const invalidateMovieQueries = useCallback(() => {
+  // Granular invalidation functions - only invalidate what changed
+  const invalidateMoviesList = useCallback(() => {
     void utils.movie.getAll.invalidate();
-    void utils.movie.getById.invalidate();
+  }, [utils]);
+
+  const invalidateWatchQueries = useCallback(() => {
     void utils.movieWatch.getAll.invalidate();
-    void utils.movieWatch.getByMovieId.invalidate();
     void utils.movieWatch.getRecent.invalidate();
     void utils.movieWatch.getStats.invalidate();
+  }, [utils]);
+
+  const invalidateMediaEntryQueries = useCallback(() => {
     void utils.mediaEntry.getAll.invalidate();
-    void utils.mediaEntry.getByMovieId.invalidate();
     void utils.mediaEntry.getCollectionGroupedByMovie.invalidate();
   }, [utils]);
+
+  const invalidateMovieQueries = useCallback(() => {
+    invalidateMoviesList();
+    invalidateWatchQueries();
+    invalidateMediaEntryQueries();
+    // Note: getById is invalidated separately when a specific movie changes
+  }, [
+    invalidateMoviesList,
+    invalidateWatchQueries,
+    invalidateMediaEntryQueries,
+  ]);
 
   const createMovie = api.movie.create.useMutation({
     onSuccess: (movie) => {
       toast.success(`"${movie.title}" was added to your collection!`);
-      invalidateMovieQueries();
+      invalidateMoviesList();
+      invalidateMediaEntryQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -54,7 +73,8 @@ export function useMovieMutations() {
   const deleteMovie = api.movie.delete.useMutation({
     onSuccess: () => {
       toast.success("Movie removed from collection!");
-      invalidateMovieQueries();
+      invalidateMoviesList();
+      invalidateMediaEntryQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -64,7 +84,7 @@ export function useMovieMutations() {
   const createWatchMutation = api.movieWatch.create.useMutation({
     onSuccess: () => {
       toast.success("Watch recorded successfully!");
-      invalidateMovieQueries();
+      invalidateWatchQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -90,7 +110,7 @@ export function useMovieMutations() {
   const updateWatchMutation = api.movieWatch.update.useMutation({
     onSuccess: () => {
       toast.success("Watch updated!");
-      invalidateMovieQueries();
+      invalidateWatchQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -116,7 +136,7 @@ export function useMovieMutations() {
   const deleteWatch = api.movieWatch.delete.useMutation({
     onSuccess: () => {
       toast.success("Watch entry deleted!");
-      invalidateMovieQueries();
+      invalidateWatchQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -126,7 +146,7 @@ export function useMovieMutations() {
   const createMediaEntry = api.mediaEntry.create.useMutation({
     onSuccess: () => {
       toast.success("Media entry added!");
-      invalidateMovieQueries();
+      invalidateMediaEntryQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -136,7 +156,7 @@ export function useMovieMutations() {
   const updateMediaEntry = api.mediaEntry.update.useMutation({
     onSuccess: () => {
       toast.success("Media entry updated!");
-      invalidateMovieQueries();
+      invalidateMediaEntryQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -146,7 +166,7 @@ export function useMovieMutations() {
   const deleteMediaEntry = api.mediaEntry.delete.useMutation({
     onSuccess: () => {
       toast.success("Media entry deleted!");
-      invalidateMovieQueries();
+      invalidateMediaEntryQueries();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -163,6 +183,9 @@ export function useMovieMutations() {
     updateMediaEntry,
     deleteMediaEntry,
     invalidateMovieQueries,
+    invalidateMoviesList,
+    invalidateWatchQueries,
+    invalidateMediaEntryQueries,
   };
 }
 

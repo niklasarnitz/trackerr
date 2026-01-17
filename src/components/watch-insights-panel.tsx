@@ -67,7 +67,7 @@ export function WatchInsightsPanel({
   const safeMostWatchedGenres = mostWatchedGenres ?? [];
 
   const peakDay = safeDayOfWeekStats.reduce(
-    (best, current) => (current.count > best.count ? current : best),
+    (best, current) => (current.count > (best?.count ?? 0) ? current : best),
     safeDayOfWeekStats[0],
   );
 
