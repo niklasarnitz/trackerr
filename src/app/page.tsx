@@ -4,11 +4,12 @@ import { redirect } from "next/navigation";
 import { HydrateClient, api } from "~/trpc/server";
 import { DashboardStatsCards } from "~/components/dashboard-stats-cards";
 import { RecentWatchesList } from "~/components/recent-watches-list";
-import { DashboardCharts } from "~/components/dashboard-charts";
-import { CinemaDashboardCharts } from "~/components/cinema-dashboard-charts";
+import { WatchAnalyticsCharts } from "~/components/watch-analytics-charts";
+import { CinemaInsightsPanel } from "~/components/cinema-insights-panel";
 import { DashboardAddMovieCard } from "~/components/dashboard-add-movie-card";
-import { AdvancedStatistics } from "~/components/advanced-statistics";
-import { CollectionStatistics } from "~/components/collection-statistics";
+import { WatchInsightsPanel } from "~/components/watch-insights-panel";
+import { CollectionInsightsPanel } from "~/components/collection-insights-panel";
+import { TvShowInsightsPanel } from "~/components/tv-show-insights-panel";
 import { Suspense } from "react";
 import { DashboardYearSelector } from "~/components/dashboard-year-selector";
 import { LoadingSkeleton } from "~/components/loading-skeleton";
@@ -74,7 +75,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
           {/* Watch Analytics */}
           <div className="space-y-4">
-            <h2 className="heading-sm">Watch Analytics</h2>
+            <h2 className="heading-sm">Watch Trends</h2>
             <Suspense
               fallback={
                 <div className="bg-card rounded-lg border p-6">
@@ -83,21 +84,16 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
               }
             >
-              <DashboardChartsWrapper year={year} />
+              <WatchAnalyticsSection year={year} />
             </Suspense>
           </div>
 
-          {/* Collection Statistics */}
+          {/* Watch Insights */}
           <div className="space-y-4">
-            <CollectionStatistics />
+            <WatchInsightsSection year={year} />
           </div>
 
-          {/* Advanced Watch Statistics */}
-          <div className="space-y-4">
-            <AdvancedStatistics />
-          </div>
-
-          {/* Cinema Statistics */}
+          {/* TV Show Insights */}
           <div className="space-y-4">
             <Suspense
               fallback={
@@ -107,7 +103,26 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
               }
             >
-              <CinemaDashboardCharts />
+              <TvShowInsightsSection year={year} />
+            </Suspense>
+          </div>
+
+          {/* Collection Insights */}
+          <div className="space-y-4">
+            <CollectionInsightsSection />
+          </div>
+
+          {/* Cinema Insights */}
+          <div className="space-y-4">
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
+              <CinemaInsightsSection />
             </Suspense>
           </div>
 
@@ -144,8 +159,135 @@ async function DashboardStats({ year }: { year?: number | "all" }) {
 }
 
 // Server component for charts
-async function DashboardChartsWrapper({ year }: { year?: number | "all" }) {
-  return <DashboardCharts year={year} />;
+async function WatchAnalyticsSection({ year }: { year?: number | "all" }) {
+  const [locationStats, ratingStats, monthlyTrends, streamingStats] =
+    await Promise.all([
+      api.movieWatch.getWatchLocationStats({ year }),
+      api.movieWatch.getRatingDistribution({ year }),
+      api.movieWatch.getMonthlyTrends({ year }),
+      api.movieWatch.getStreamingServiceStats({ year }),
+    ]);
+
+  return (
+    <WatchAnalyticsCharts
+      locationStats={locationStats}
+      ratingStats={ratingStats}
+      monthlyTrends={monthlyTrends}
+      streamingStats={streamingStats}
+    />
+  );
+}
+
+async function WatchInsightsSection({ year }: { year?: number | "all" }) {
+  const [
+    topRated,
+    mostWatched,
+    rewatches,
+    ratingByLocation,
+    ratingByService,
+    decadeDistribution,
+    streakStats,
+    dayOfWeekStats,
+    mostWatchedGenres,
+  ] = await Promise.all([
+    api.movieWatch.getTopRatedMovies(),
+    api.movieWatch.getMostWatchedMovies(),
+    api.movieWatch.getRewatchesStats(),
+    api.movieWatch.getRatingByLocation(),
+    api.movieWatch.getRatingByStreamingService(),
+    api.movieWatch.getDecadeDistribution(),
+    api.movieWatch.getWatchStreakStats(),
+    api.movieWatch.getDayOfWeekStats(),
+    api.movieWatch.getMostWatchedGenres({ year }),
+  ]);
+
+  return (
+    <WatchInsightsPanel
+      topRated={topRated}
+      mostWatched={mostWatched}
+      rewatches={rewatches}
+      ratingByLocation={ratingByLocation}
+      ratingByService={ratingByService}
+      decadeDistribution={decadeDistribution}
+      streakStats={streakStats}
+      dayOfWeekStats={dayOfWeekStats}
+      mostWatchedGenres={mostWatchedGenres}
+    />
+  );
+}
+
+async function CollectionInsightsSection() {
+  const [collectionStats, mediumDist, physicalVirtual, rippedStats, growth] =
+    await Promise.all([
+      api.mediaEntry.getCollectionStats(),
+      api.mediaEntry.getMediumDistribution(),
+      api.mediaEntry.getPhysicalVirtualStats(),
+      api.mediaEntry.getRippedStats(),
+      api.mediaEntry.getCollectionGrowth(),
+    ]);
+
+  return (
+    <CollectionInsightsPanel
+      collectionStats={collectionStats}
+      mediumDist={mediumDist}
+      physicalVirtual={physicalVirtual}
+      rippedStats={rippedStats}
+      growth={growth}
+    />
+  );
+}
+
+async function TvShowInsightsSection({ year }: { year?: number | "all" }) {
+  const [stats, monthlyTrends, topRated, mostWatched, dayOfWeekStats] =
+    await Promise.all([
+      api.tvShowWatch.getStats({ year }),
+      api.tvShowWatch.getMonthlyTrends({ year }),
+      api.tvShowWatch.getTopRatedShows(),
+      api.tvShowWatch.getMostWatchedShows(),
+      api.tvShowWatch.getDayOfWeekStats(),
+    ]);
+
+  return (
+    <TvShowInsightsPanel
+      stats={stats}
+      monthlyTrends={monthlyTrends}
+      topRated={topRated}
+      mostWatched={mostWatched}
+      dayOfWeekStats={dayOfWeekStats}
+    />
+  );
+}
+
+async function CinemaInsightsSection() {
+  const [
+    cinemaStats,
+    soundSystemStats,
+    projectionTypeStats,
+    languageTypeStats,
+    aspectRatioStats,
+    ticketPriceStats,
+    monthlySpending,
+  ] = await Promise.all([
+    api.movieWatch.getCinemaStats(),
+    api.movieWatch.getSoundSystemStats(),
+    api.movieWatch.getProjectionTypeStats(),
+    api.movieWatch.getLanguageTypeStats(),
+    api.movieWatch.getAspectRatioStats(),
+    api.movieWatch.getCinemaTicketPriceStats(),
+    api.movieWatch.getMonthlySpendingStats(),
+  ]);
+
+  return (
+    <CinemaInsightsPanel
+      cinemaStats={cinemaStats}
+      soundSystemStats={soundSystemStats}
+      projectionTypeStats={projectionTypeStats}
+      languageTypeStats={languageTypeStats}
+      aspectRatioStats={aspectRatioStats}
+      ticketPriceStats={ticketPriceStats}
+      monthlySpending={monthlySpending}
+    />
+  );
 }
 
 // Server component for recent watches

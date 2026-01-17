@@ -345,4 +345,322 @@ export const tvShowWatchRouter = createTRPCRouter({
         lastWatchedAt: tvShow.watches[0]?.watchedAt ?? null,
       };
     }),
+
+  // Get TV show watch stats for dashboard
+  getStats: protectedProcedure
+    .input(
+      z.object({ year: z.union([z.number(), z.literal("all")]).optional() }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const currentDate = new Date();
+      const isAllTime = input.year === "all";
+      const year =
+        typeof input.year === "number" ? input.year : currentDate.getFullYear();
+      const startOfYear = isAllTime
+        ? new Date("1900-01-01")
+        : new Date(year, 0, 1);
+      const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+
+      const isCurrentYear = !isAllTime && year === currentDate.getFullYear();
+      const monthStart = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1,
+      );
+      const monthEnd = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+      );
+
+      const [
+        totalWatches,
+        totalShows,
+        avgRating,
+        showGroups,
+        allWatches,
+        thisMonth,
+      ] = await Promise.all([
+        ctx.db.tvShowWatch.count({
+          where: {
+            userId,
+            watchedAt: {
+              gte: startOfYear,
+              lte: endOfYear,
+            },
+          },
+        }),
+        ctx.db.tvShow.count({
+          where: { userId },
+        }),
+        ctx.db.tvShowWatch.aggregate({
+          where: {
+            userId,
+            rating: { not: null },
+            watchedAt: {
+              gte: startOfYear,
+              lte: endOfYear,
+            },
+          },
+          _avg: { rating: true },
+        }),
+        ctx.db.tvShowWatch.groupBy({
+          by: ["tvShowId"],
+          where: {
+            userId,
+            watchedAt: {
+              gte: startOfYear,
+              lte: endOfYear,
+            },
+          },
+        }),
+        ctx.db.tvShowWatch.findMany({
+          where: {
+            userId,
+            watchedAt: {
+              gte: startOfYear,
+              lte: endOfYear,
+            },
+          },
+          select: { watchedAt: true },
+        }),
+        isCurrentYear
+          ? ctx.db.tvShowWatch.count({
+              where: {
+                userId,
+                watchedAt: {
+                  gte: monthStart,
+                  lte: monthEnd,
+                },
+              },
+            })
+          : Promise.resolve(0),
+      ]);
+
+      const monthsWithWatches = new Set<string>();
+      allWatches.forEach((watch) => {
+        const monthKey = `${watch.watchedAt.getFullYear()}-${String(
+          watch.watchedAt.getMonth() + 1,
+        ).padStart(2, "0")}`;
+        monthsWithWatches.add(monthKey);
+      });
+
+      const avgPerMonth =
+        monthsWithWatches.size > 0 ? totalWatches / monthsWithWatches.size : 0;
+
+      return {
+        totalWatches,
+        totalShows,
+        uniqueShowsWatched: showGroups.length,
+        averageRating: avgRating._avg.rating,
+        thisMonth: isCurrentYear ? thisMonth : 0,
+        thisYear: totalWatches,
+        avgPerMonth: Math.round(avgPerMonth * 10) / 10,
+      };
+    }),
+
+  // Get monthly TV watch trends
+  getMonthlyTrends: protectedProcedure
+    .input(
+      z.object({ year: z.union([z.number(), z.literal("all")]).optional() }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const currentDate = new Date();
+      const isAllTime = input.year === "all";
+      const year =
+        typeof input.year === "number" ? input.year : currentDate.getFullYear();
+
+      const startDate = isAllTime
+        ? new Date("1900-01-01")
+        : new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+      const monthlyStats = await ctx.db.tvShowWatch.findMany({
+        where: {
+          userId,
+          watchedAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        select: { watchedAt: true },
+      });
+
+      const monthlyGrouped = monthlyStats.reduce(
+        (acc, watch) => {
+          const monthKey = `${watch.watchedAt.getFullYear()}-${String(
+            watch.watchedAt.getMonth() + 1,
+          ).padStart(2, "0")}`;
+          acc[monthKey] = (acc[monthKey] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      const months: Array<{ month: string; label: string; count: number }> = [];
+
+      if (isAllTime) {
+        const sortedMonths = Object.keys(monthlyGrouped).sort();
+        sortedMonths.forEach((monthKey) => {
+          const [yearStr, monthStr] = monthKey.split("-");
+          const monthNum = parseInt(monthStr!) - 1;
+          const date = new Date(parseInt(yearStr!), monthNum, 1);
+          months.push({
+            month: monthKey,
+            label: date.toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            }),
+            count: monthlyGrouped[monthKey] ?? 0,
+          });
+        });
+      } else {
+        for (let i = 0; i < 12; i++) {
+          const date = new Date(year, i, 1);
+          const monthKey = `${date.getFullYear()}-${String(
+            date.getMonth() + 1,
+          ).padStart(2, "0")}`;
+          months.push({
+            month: monthKey,
+            label: date.toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            }),
+            count: monthlyGrouped[monthKey] ?? 0,
+          });
+        }
+      }
+
+      return months;
+    }),
+
+  // Get top rated TV shows
+  getTopRatedShows: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const watchesWithRatings = await ctx.db.tvShowWatch.findMany({
+      where: {
+        userId,
+        rating: { not: null },
+      },
+      include: { tvShow: true },
+    });
+
+    const showRatings = watchesWithRatings.reduce(
+      (acc, watch) => {
+        if (!watch.rating) return acc;
+        const tvShowId = watch.tvShowId;
+        if (!acc[tvShowId]) {
+          acc[tvShowId] = {
+            tvShow: watch.tvShow,
+            ratings: [],
+            watchCount: 0,
+          };
+        }
+        acc[tvShowId]!.ratings.push(watch.rating);
+        acc[tvShowId]!.watchCount += 1;
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          tvShow: { id: string; title: string; firstAirDate: Date | null };
+          ratings: number[];
+          watchCount: number;
+        }
+      >,
+    );
+
+    return Object.values(showRatings)
+      .map((data) => ({
+        tvShow: data.tvShow,
+        averageRating:
+          data.ratings.reduce((sum, r) => sum + r, 0) / data.ratings.length,
+        watchCount: data.watchCount,
+      }))
+      .sort((a, b) => b.averageRating - a.averageRating)
+      .slice(0, 10);
+  }),
+
+  // Get most watched TV shows
+  getMostWatchedShows: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const watchGroups = await ctx.db.tvShowWatch.groupBy({
+      by: ["tvShowId"],
+      where: { userId },
+      _count: { tvShowId: true },
+      orderBy: {
+        _count: {
+          tvShowId: "desc",
+        },
+      },
+      take: 10,
+    });
+
+    const tvShowIds = watchGroups.map((g) => g.tvShowId);
+    const tvShows = await ctx.db.tvShow.findMany({
+      where: {
+        id: { in: tvShowIds },
+        userId,
+      },
+    });
+
+    const tvShowMap = new Map(tvShows.map((show) => [show.id, show]));
+
+    return watchGroups
+      .map((group) => {
+        const tvShow = tvShowMap.get(group.tvShowId);
+        if (!tvShow) return null;
+        return {
+          tvShow: {
+            id: tvShow.id,
+            title: tvShow.title,
+            firstAirDate: tvShow.firstAirDate,
+          },
+          watchCount: group._count.tvShowId,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  }),
+
+  // Get day of week statistics
+  getDayOfWeekStats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const watches = await ctx.db.tvShowWatch.findMany({
+      where: { userId },
+      select: { watchedAt: true },
+    });
+
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    const dayGroups = watches.reduce(
+      (acc, watch) => {
+        const dayOfWeek = new Date(watch.watchedAt).getDay();
+        const dayName = dayNames[dayOfWeek] ?? "Unknown";
+        acc[dayName] = (acc[dayName] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    return dayNames.map((day) => ({
+      day,
+      count: dayGroups[day] ?? 0,
+    }));
+  }),
 });
