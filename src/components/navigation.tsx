@@ -59,7 +59,7 @@ const navigationItems = [
   },
 ];
 
-export function Navigation() {
+function NavigationContent() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { isMobileMenuOpen, setIsMobileMenuOpen, mounted } = useNavigation();
@@ -155,4 +155,8 @@ export function Navigation() {
       </div>
     </nav>
   );
+}
+
+export function Navigation() {
+  return <NavigationContent />;
 }

@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "next-auth/react";
-import { Navigation } from "~/components/navigation";
+import { NavigationWrapper } from "~/components/navigation-wrapper";
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
 
@@ -40,7 +40,7 @@ export default function RootLayout({
                 Skip to main content
               </a>
               <div className="bg-background min-h-screen">
-                <Navigation />
+                <NavigationWrapper />
                 <main id="main-content">{children}</main>
                 <Toaster />
               </div>
