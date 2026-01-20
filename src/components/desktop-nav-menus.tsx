@@ -19,6 +19,11 @@ const navigationItems = [
     icon: null,
   },
   {
+    href: "/statistics",
+    name: "Statistics",
+    icon: null,
+  },
+  {
     href: "/movies",
     name: "Movies",
     icon: null,
@@ -74,6 +79,7 @@ export function DesktopNavMenus({
   const desktopPrimaryItems = navigationItems.filter(
     (item) =>
       item.href === "/" ||
+      item.href === "/statistics" ||
       item.href === "/movies" ||
       item.href === "/tv-shows" ||
       item.href === "/books",

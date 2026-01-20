@@ -18,6 +18,11 @@ const navigationItems = [
     icon: null,
   },
   {
+    href: "/statistics",
+    name: "Statistics",
+    icon: null,
+  },
+  {
     href: "/movies",
     name: "Movies",
     icon: null,

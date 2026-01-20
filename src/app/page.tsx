@@ -4,31 +4,14 @@ import { redirect } from "next/navigation";
 import { HydrateClient, api } from "~/trpc/server";
 import { DashboardStatsCards } from "~/components/dashboard-stats-cards";
 import { RecentWatchesList } from "~/components/recent-watches-list";
-import { WatchAnalyticsCharts } from "~/components/watch-analytics-charts";
-import { CinemaInsightsPanel } from "~/components/cinema-insights-panel";
 import { DashboardAddMovieCard } from "~/components/dashboard-add-movie-card";
-import { WatchInsightsPanel } from "~/components/watch-insights-panel";
-import { CollectionInsightsPanel } from "~/components/collection-insights-panel";
-import { TvShowInsightsPanel } from "~/components/tv-show-insights-panel";
 import { Suspense } from "react";
-import { DashboardYearSelector } from "~/components/dashboard-year-selector";
 import { LoadingSkeleton } from "~/components/loading-skeleton";
+import { Button } from "~/components/ui/button";
+import { BarChart3 } from "lucide-react";
 
-interface HomeProps {
-  searchParams: Promise<{
-    year?: string;
-  }>;
-}
-
-export default async function Home({ searchParams }: HomeProps) {
+export default async function Home() {
   const session = await auth();
-  const params = await searchParams;
-  const year =
-    params.year === "all"
-      ? "all"
-      : params.year
-        ? parseInt(params.year)
-        : undefined;
 
   if (!session?.user) {
     redirect("/signin");
@@ -45,14 +28,19 @@ export default async function Home({ searchParams }: HomeProps) {
           </p>
         </div>
 
-        {/* Year Selector */}
-        <DashboardYearSelector currentYear={year} />
-
         {/* Dashboard Content */}
         <div className="space-y-8">
           {/* Overview Stats Cards */}
           <div className="space-y-4">
-            <h2 className="heading-sm">Overview</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="heading-sm">Overview</h2>
+              <Link href="/statistics">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  View Detailed Statistics
+                </Button>
+              </Link>
+            </div>
             <Suspense
               fallback={
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
@@ -69,60 +57,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
               }
             >
-              <DashboardStats year={year} />
-            </Suspense>
-          </div>
-
-          {/* Watch Analytics */}
-          <div className="space-y-4">
-            <h2 className="heading-sm">Watch Trends</h2>
-            <Suspense
-              fallback={
-                <div className="bg-card rounded-lg border p-6">
-                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
-                  <div className="bg-muted h-64 animate-pulse rounded" />
-                </div>
-              }
-            >
-              <WatchAnalyticsSection year={year} />
-            </Suspense>
-          </div>
-
-          {/* Watch Insights */}
-          <div className="space-y-4">
-            <WatchInsightsSection year={year} />
-          </div>
-
-          {/* TV Show Insights */}
-          <div className="space-y-4">
-            <Suspense
-              fallback={
-                <div className="bg-card rounded-lg border p-6">
-                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
-                  <div className="bg-muted h-64 animate-pulse rounded" />
-                </div>
-              }
-            >
-              <TvShowInsightsSection year={year} />
-            </Suspense>
-          </div>
-
-          {/* Collection Insights */}
-          <div className="space-y-4">
-            <CollectionInsightsSection />
-          </div>
-
-          {/* Cinema Insights */}
-          <div className="space-y-4">
-            <Suspense
-              fallback={
-                <div className="bg-card rounded-lg border p-6">
-                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
-                  <div className="bg-muted h-64 animate-pulse rounded" />
-                </div>
-              }
-            >
-              <CinemaInsightsSection />
+              <DashboardStats />
             </Suspense>
           </div>
 
@@ -153,144 +88,12 @@ export default async function Home({ searchParams }: HomeProps) {
 }
 
 // Server component for stats
-async function DashboardStats({ year }: { year?: number | "all" }) {
+async function DashboardStats() {
   const [stats, top250Stats] = await Promise.all([
-    api.movieWatch.getStats({ year }),
+    api.movieWatch.getDashboardStats(),
     api.movieWatch.getImdbTop250Stats(),
   ]);
   return <DashboardStatsCards stats={stats} top250Stats={top250Stats} />;
-}
-
-// Server component for charts
-async function WatchAnalyticsSection({ year }: { year?: number | "all" }) {
-  const [locationStats, ratingStats, monthlyTrends, streamingStats] =
-    await Promise.all([
-      api.movieWatch.getWatchLocationStats({ year }),
-      api.movieWatch.getRatingDistribution({ year }),
-      api.movieWatch.getMonthlyTrends({ year }),
-      api.movieWatch.getStreamingServiceStats({ year }),
-    ]);
-
-  return (
-    <WatchAnalyticsCharts
-      locationStats={locationStats}
-      ratingStats={ratingStats}
-      monthlyTrends={monthlyTrends}
-      streamingStats={streamingStats}
-    />
-  );
-}
-
-async function WatchInsightsSection({ year }: { year?: number | "all" }) {
-  const [
-    topRated,
-    mostWatched,
-    rewatches,
-    ratingByLocation,
-    ratingByService,
-    decadeDistribution,
-    streakStats,
-    dayOfWeekStats,
-    mostWatchedGenres,
-  ] = await Promise.all([
-    api.movieWatch.getTopRatedMovies(),
-    api.movieWatch.getMostWatchedMovies(),
-    api.movieWatch.getRewatchesStats(),
-    api.movieWatch.getRatingByLocation(),
-    api.movieWatch.getRatingByStreamingService(),
-    api.movieWatch.getDecadeDistribution(),
-    api.movieWatch.getWatchStreakStats(),
-    api.movieWatch.getDayOfWeekStats(),
-    api.movieWatch.getMostWatchedGenres({ year }),
-  ]);
-
-  return (
-    <WatchInsightsPanel
-      topRated={topRated}
-      mostWatched={mostWatched}
-      rewatches={rewatches}
-      ratingByLocation={ratingByLocation}
-      ratingByService={ratingByService}
-      decadeDistribution={decadeDistribution}
-      streakStats={streakStats}
-      dayOfWeekStats={dayOfWeekStats}
-      mostWatchedGenres={mostWatchedGenres}
-    />
-  );
-}
-
-async function CollectionInsightsSection() {
-  const [collectionStats, mediumDist, physicalVirtual, rippedStats, growth] =
-    await Promise.all([
-      api.mediaEntry.getCollectionStats(),
-      api.mediaEntry.getMediumDistribution(),
-      api.mediaEntry.getPhysicalVirtualStats(),
-      api.mediaEntry.getRippedStats(),
-      api.mediaEntry.getCollectionGrowth(),
-    ]);
-
-  return (
-    <CollectionInsightsPanel
-      collectionStats={collectionStats}
-      mediumDist={mediumDist}
-      physicalVirtual={physicalVirtual}
-      rippedStats={rippedStats}
-      growth={growth}
-    />
-  );
-}
-
-async function TvShowInsightsSection({ year }: { year?: number | "all" }) {
-  const [stats, monthlyTrends, topRated, mostWatched, dayOfWeekStats] =
-    await Promise.all([
-      api.tvShowWatch.getStats({ year }),
-      api.tvShowWatch.getMonthlyTrends({ year }),
-      api.tvShowWatch.getTopRatedShows(),
-      api.tvShowWatch.getMostWatchedShows(),
-      api.tvShowWatch.getDayOfWeekStats(),
-    ]);
-
-  return (
-    <TvShowInsightsPanel
-      stats={stats}
-      monthlyTrends={monthlyTrends}
-      topRated={topRated}
-      mostWatched={mostWatched}
-      dayOfWeekStats={dayOfWeekStats}
-    />
-  );
-}
-
-async function CinemaInsightsSection() {
-  const [
-    cinemaStats,
-    soundSystemStats,
-    projectionTypeStats,
-    languageTypeStats,
-    aspectRatioStats,
-    ticketPriceStats,
-    monthlySpending,
-  ] = await Promise.all([
-    api.movieWatch.getCinemaStats(),
-    api.movieWatch.getSoundSystemStats(),
-    api.movieWatch.getProjectionTypeStats(),
-    api.movieWatch.getLanguageTypeStats(),
-    api.movieWatch.getAspectRatioStats(),
-    api.movieWatch.getCinemaTicketPriceStats(),
-    api.movieWatch.getMonthlySpendingStats(),
-  ]);
-
-  return (
-    <CinemaInsightsPanel
-      cinemaStats={cinemaStats}
-      soundSystemStats={soundSystemStats}
-      projectionTypeStats={projectionTypeStats}
-      languageTypeStats={languageTypeStats}
-      aspectRatioStats={aspectRatioStats}
-      ticketPriceStats={ticketPriceStats}
-      monthlySpending={monthlySpending}
-    />
-  );
 }
 
 // Server component for recent watches

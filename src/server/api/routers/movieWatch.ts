@@ -266,6 +266,66 @@ export const movieWatchRouter = createTRPCRouter({
       };
     }),
 
+  getDashboardStats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [
+      totalWatches,
+      totalMovies,
+      physicalMovies,
+      avgRating,
+      thisYearWatches,
+      thisMonthWatches,
+      firstWatch,
+    ] = await Promise.all([
+      ctx.db.movieWatch.count({ where: { userId } }),
+      ctx.db.movie.count({ where: { userId } }),
+      ctx.db.movie.count({
+        where: {
+          userId,
+          mediaEntries: { some: { isVirtual: false } },
+        },
+      }),
+      ctx.db.movieWatch.aggregate({
+        where: { userId, rating: { not: null } },
+        _avg: { rating: true },
+      }),
+      ctx.db.movieWatch.count({
+        where: { userId, watchedAt: { gte: startOfYear } },
+      }),
+      ctx.db.movieWatch.count({
+        where: { userId, watchedAt: { gte: startOfMonth } },
+      }),
+      ctx.db.movieWatch.findFirst({
+        where: { userId },
+        orderBy: { watchedAt: "asc" },
+        select: { watchedAt: true },
+      }),
+    ]);
+
+    let avgPerMonth = 0;
+    if (firstWatch) {
+      const monthsDiff =
+        (now.getFullYear() - firstWatch.watchedAt.getFullYear()) * 12 +
+        (now.getMonth() - firstWatch.watchedAt.getMonth()) +
+        1;
+      avgPerMonth = monthsDiff > 0 ? totalWatches / monthsDiff : totalWatches;
+    }
+
+    return {
+      totalWatches,
+      totalMovies,
+      physicalMovies,
+      averageRating: avgRating._avg.rating,
+      thisMonth: thisMonthWatches,
+      thisYear: thisYearWatches,
+      avgPerMonth: Math.round(avgPerMonth * 10) / 10,
+    };
+  }),
+
   // Get watch stats
   getStats: protectedProcedure
     .input(
@@ -368,6 +428,81 @@ export const movieWatchRouter = createTRPCRouter({
         thisMonth: 0, // Not applicable for historical years
         thisYear: totalWatches,
         avgPerMonth: Math.round(avgPerMonth * 10) / 10,
+      };
+    }),
+
+  // Get creative stats (directors, actors, runtime)
+  getCreativeStats: protectedProcedure
+    .input(
+      z.object({ year: z.union([z.number(), z.literal("all")]).optional() }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const currentDate = new Date();
+      const isAllTime = input.year === "all";
+      const year =
+        typeof input.year === "number" ? input.year : currentDate.getFullYear();
+      const startOfYear = isAllTime
+        ? new Date("1900-01-01")
+        : utcStartOfYear(year);
+      const endOfYear = utcEndOfYear(year);
+
+      const watches = await ctx.db.movieWatch.findMany({
+        where: {
+          userId,
+          watchedAt: {
+            gte: startOfYear,
+            lte: endOfYear,
+          },
+        },
+        select: {
+          movie: {
+            select: {
+              director: true,
+              cast: true,
+              runtime: true,
+            },
+          },
+        },
+      });
+
+      let totalRuntimeMinutes = 0;
+      const directorCounts: Record<string, number> = {};
+      const actorCounts: Record<string, number> = {};
+
+      watches.forEach((watch) => {
+        // Runtime
+        if (watch.movie.runtime) {
+          totalRuntimeMinutes += watch.movie.runtime;
+        }
+
+        // Director
+        if (watch.movie.director) {
+          directorCounts[watch.movie.director] =
+            (directorCounts[watch.movie.director] ?? 0) + 1;
+        }
+
+        // Cast
+        watch.movie.cast.forEach((actor) => {
+          actorCounts[actor] = (actorCounts[actor] ?? 0) + 1;
+        });
+      });
+
+      const topDirectors = Object.entries(directorCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      const topActors = Object.entries(actorCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      return {
+        totalRuntimeMinutes,
+        topDirectors,
+        topActors,
+        watchCount: watches.length,
       };
     }),
 
