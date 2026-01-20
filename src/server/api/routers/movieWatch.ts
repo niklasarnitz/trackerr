@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { revalidateTag } from "next/cache";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -64,7 +65,7 @@ export const movieWatchRouter = createTRPCRouter({
 
       const watchedAt = normalizeWatchDateOrToday(input.watchedAt);
 
-      return await ctx.db.movieWatch.create({
+      const created = await ctx.db.movieWatch.create({
         data: {
           ...watchData,
           cinemaWatchMetadata:
@@ -80,6 +81,19 @@ export const movieWatchRouter = createTRPCRouter({
           watchedAt,
         },
       });
+
+      // If this movie is part of the Top 250, invalidate the user's cache
+      if (movie.tmdbId) {
+        const inTop250 = await ctx.db.imdbTop250.findFirst({
+          where: { tmdbId: movie.tmdbId },
+          select: { id: true },
+        });
+        if (inTop250) {
+          revalidateTag(`tmdbTop250:${ctx.session.user.id}`, "page");
+        }
+      }
+
+      return created;
     }),
 
   // Update watch entry
@@ -1328,5 +1342,36 @@ export const movieWatchRouter = createTRPCRouter({
       day,
       count: dayGroups[day] ?? 0,
     }));
+  }),
+
+  // Get IMDb Top 250 statistics
+  getImdbTop250Stats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    // Get all top 250 movies
+    const top250Movies = await ctx.db.imdbTop250.findMany({
+      select: { tmdbId: true },
+    });
+
+    const tmdbIds = top250Movies.map((m) => m.tmdbId);
+
+    // Find unique movies the user has watched from the top 250
+    const watchedMovies = await ctx.db.movie.findMany({
+      where: {
+        userId,
+        tmdbId: {
+          in: tmdbIds,
+        },
+        watches: {
+          some: {},
+        },
+      },
+      select: { id: true },
+    });
+
+    return {
+      watchedCount: watchedMovies.length,
+      totalCount: 250,
+    };
   }),
 });

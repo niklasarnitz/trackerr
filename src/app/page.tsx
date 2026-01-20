@@ -154,8 +154,11 @@ export default async function Home({ searchParams }: HomeProps) {
 
 // Server component for stats
 async function DashboardStats({ year }: { year?: number | "all" }) {
-  const stats = await api.movieWatch.getStats({ year });
-  return <DashboardStatsCards stats={stats} />;
+  const [stats, top250Stats] = await Promise.all([
+    api.movieWatch.getStats({ year }),
+    api.movieWatch.getImdbTop250Stats(),
+  ]);
+  return <DashboardStatsCards stats={stats} top250Stats={top250Stats} />;
 }
 
 // Server component for charts

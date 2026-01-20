@@ -1,17 +1,23 @@
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Calendar, Clock, Star, TrendingUp, Database } from "lucide-react";
+  Calendar,
+  Clock,
+  Star,
+  TrendingUp,
+  Database,
+  Trophy,
+} from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 
 interface DashboardStatsCardsProps {
   stats: RouterOutputs["movieWatch"]["getStats"];
+  top250Stats?: RouterOutputs["movieWatch"]["getImdbTop250Stats"];
 }
 
-export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
+export function DashboardStatsCards({
+  stats,
+  top250Stats,
+}: DashboardStatsCardsProps) {
   const safeStats = stats ?? {
     totalWatches: 0,
     totalMovies: 0,
@@ -76,6 +82,21 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         </CardContent>
       </Card>
 
+      {top250Stats && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">IMDb Top 250</CardTitle>
+            <Trophy className="text-muted-foreground h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {top250Stats.watchedCount}/{top250Stats.totalCount}
+            </div>
+            <p className="text-muted-foreground text-xs">top rated watched</p>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">This Month</CardTitle>
@@ -95,7 +116,8 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{safeStats.thisYear ?? 0}</div>
           <p className="text-muted-foreground text-xs">movies watched</p>
-        </CardContent>.
+        </CardContent>
+        .
       </Card>
 
       <Card>

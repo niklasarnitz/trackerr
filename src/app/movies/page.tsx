@@ -101,6 +101,9 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
                 Search Movies
               </Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link href="/movies/tmdb-top-250">TMDB Top 250</Link>
+            </Button>
             <AddMovieButton />
           </div>
         </div>

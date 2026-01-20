@@ -1,3 +1,9 @@
+-- CreateEnum
+CREATE TYPE "public"."ExternalActionMetadataTagVia" AS ENUM ('WEBHOOK');
+
+-- CreateEnum
+CREATE TYPE "public"."ExternalActionMetadataTagFrom" AS ENUM ('JELLYFIN');
+
 -- CreateTable
 CREATE TABLE
     "public"."ExternalActionMetadataTag" (
