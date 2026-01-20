@@ -43,6 +43,17 @@ const tmdbGenresResponseSchema = z.object({
   genres: z.array(tmdbGenreSchema),
 });
 
+const tmdbCreditsSchema = z.object({
+  cast: z.array(z.object({ name: z.string() })).optional(),
+  crew: z.array(z.object({ job: z.string(), name: z.string() })).optional(),
+});
+
+const tmdbMovieDetailsSchema = tmdbMovieSchema.extend({
+  credits: tmdbCreditsSchema,
+  genres: z.array(tmdbGenreSchema).optional(),
+  runtime: z.number().nullable().optional(),
+});
+
 type TMDBMovie = z.infer<typeof tmdbMovieSchema>;
 type TMDBSearchResponse = z.infer<typeof tmdbSearchResponseSchema>;
 type TMDBGenre = z.infer<typeof tmdbGenreSchema>;
@@ -109,12 +120,11 @@ class TMDBClient {
   /**
    * Get movie details (includes credits and genres)
    */
-  async getMovieDetails(id: string): Promise<Record<string, unknown>> {
+  async getMovieDetails(id: string): Promise<z.infer<typeof tmdbMovieDetailsSchema>> {
     const url = this.buildUrl(`/movie/${id}`, {
       append_to_response: "credits,genres",
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return apiClient.fetch(url, z.record(z.string(), z.unknown()));
+    return apiClient.fetch(url, tmdbMovieDetailsSchema);
   }
 
   /**
@@ -188,31 +198,26 @@ export const tmdbRouter = createTRPCRouter({
   getMovie: protectedProcedure
     .input(z.object({ tmdbId: z.string() }))
     .query(async ({ input }) => {
-      const movie = await tmdbClient.getMovie(input.tmdbId);
-      const details = await tmdbClient.getMovieDetails(input.tmdbId);
+      const movie = await tmdbClient.getMovieDetails(input.tmdbId);
 
       // Extract director and main cast
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const director =
-        (details.credits as any)?.crew?.find(
-          (person: { job: string }) => person.job === "Director",
+        movie.credits.crew?.find(
+          (person) => person.job === "Director",
         )?.name ?? null;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const cast =
-        (details.credits as any)?.cast
+        movie.credits.cast
           ?.slice(0, 5)
-          .map((actor: { name: string }) => actor.name) ?? [];
+          .map((actor) => actor.name) ?? [];
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       const genres =
-        (details.genres as any)?.map((genre: { name: string }) => genre.name) ??
+        movie.genres?.map((genre) => genre.name) ??
         [];
 
       return {
         ...tmdbClient.formatMovie(movie),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        runtime: (details.runtime as number | undefined) ?? null,
+        runtime: movie.runtime ?? null,
         genres,
         director,
         cast,
