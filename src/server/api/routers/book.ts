@@ -11,24 +11,39 @@ import {
 } from "~/lib/api-schemas";
 import { downloadAndUploadBookCover } from "~/helpers/image-upload";
 
-// Helper function to find or create an author
-async function findOrCreateAuthor(
+// Helper function to find or create multiple authors
+async function findOrCreateAuthors(
   db: any,
-  name: string,
-): Promise<{ id: string; name: string }> {
-  // Try to find existing author
-  let author = await db.author.findUnique({
-    where: { name },
+  names: string[],
+): Promise<Map<string, { id: string; name: string }>> {
+  if (names.length === 0) return new Map();
+
+  // Deduplicate names
+  const uniqueNames = [...new Set(names)];
+
+  // Find existing authors
+  const existingAuthors = await db.author.findMany({
+    where: { name: { in: uniqueNames } },
   });
 
-  // If not found, create new author
-  if (!author) {
-    author = await db.author.create({
-      data: { name },
+  const existingNames = new Set(existingAuthors.map((a: any) => a.name));
+  const missingNames = uniqueNames.filter((name) => !existingNames.has(name));
+
+  // Create missing authors
+  if (missingNames.length > 0) {
+    await db.author.createMany({
+      data: missingNames.map((name) => ({ name })),
+      skipDuplicates: true,
     });
   }
 
-  return author;
+  // Fetch all authors (including newly created ones)
+  // We fetch all again to get IDs for the newly created ones
+  const allAuthors = await db.author.findMany({
+    where: { name: { in: uniqueNames } },
+  });
+
+  return new Map(allAuthors.map((a: any) => [a.name, a]));
 }
 
 // Helper function to handle author updates for a book
@@ -53,15 +68,27 @@ async function updateBookAuthors(
   });
 
   // Create new book-author relations
-  for (const authorData of authors) {
-    const author = await findOrCreateAuthor(db, authorData.name);
+  if (authors.length > 0) {
+    const authorNames = authors.map((a) => a.name);
+    const authorsMap = await findOrCreateAuthors(db, authorNames);
 
-    await db.bookAuthor.create({
-      data: {
+    const bookAuthorsData = authors.map((authorData) => {
+      const author = authorsMap.get(authorData.name);
+      if (!author) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to find or create author: ${authorData.name}`,
+        });
+      }
+      return {
         bookId,
         authorId: author.id,
         role: authorData.role,
-      },
+      };
+    });
+
+    await db.bookAuthor.createMany({
+      data: bookAuthorsData,
     });
   }
 
@@ -249,17 +276,27 @@ export const bookRouter = createTRPCRouter({
 
       // Handle authors if provided
       if (authors && authors.length > 0) {
-        for (const authorData of authors) {
-          const author = await findOrCreateAuthor(ctx.db, authorData.name);
+        const authorNames = authors.map((a) => a.name);
+        const authorsMap = await findOrCreateAuthors(ctx.db, authorNames);
 
-          await ctx.db.bookAuthor.create({
-            data: {
-              bookId: book.id,
-              authorId: author.id,
-              role: authorData.role,
-            },
-          });
-        }
+        const bookAuthorsData = authors.map((authorData) => {
+          const author = authorsMap.get(authorData.name);
+          if (!author) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Failed to find or create author: ${authorData.name}`,
+            });
+          }
+          return {
+            bookId: book.id,
+            authorId: author.id,
+            role: authorData.role,
+          };
+        });
+
+        await ctx.db.bookAuthor.createMany({
+          data: bookAuthorsData,
+        });
       }
 
       // Return book with all relations
