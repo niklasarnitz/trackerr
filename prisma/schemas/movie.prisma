@@ -16,6 +16,7 @@ model Movie {
   notes         String? // Personal notes about the movie
   isInWatchlist Boolean          @default(false)
   isFavorite    Boolean          @default(false)
+  lastWatchedAt DateTime? // De-normalized field for efficient sorting
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   mediaEntries  MediaEntry[]

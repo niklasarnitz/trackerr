@@ -64,7 +64,7 @@ export const movieWatchRouter = createTRPCRouter({
 
       const watchedAt = normalizeWatchDateOrToday(input.watchedAt);
 
-      return await ctx.db.movieWatch.create({
+      const watch = await ctx.db.movieWatch.create({
         data: {
           ...watchData,
           cinemaWatchMetadata:
@@ -80,6 +80,16 @@ export const movieWatchRouter = createTRPCRouter({
           watchedAt,
         },
       });
+
+      // Update movie lastWatchedAt if this watch is newer
+      if (!movie.lastWatchedAt || watchedAt > movie.lastWatchedAt) {
+        await ctx.db.movie.update({
+          where: { id: input.movieId },
+          data: { lastWatchedAt: watchedAt },
+        });
+      }
+
+      return watch;
     }),
 
   // Update watch entry
@@ -110,6 +120,17 @@ export const movieWatchRouter = createTRPCRouter({
       const updatedMovieWatch = await ctx.db.movieWatch.update({
         where: { id },
         data: updateData,
+      });
+
+      // Update movie lastWatchedAt
+      const latestWatch = await ctx.db.movieWatch.findFirst({
+        where: { movieId: movieWatch.movieId, userId: ctx.session.user.id },
+        orderBy: { watchedAt: "desc" },
+      });
+
+      await ctx.db.movie.update({
+        where: { id: movieWatch.movieId },
+        data: { lastWatchedAt: latestWatch?.watchedAt ?? null },
       });
 
       // Handle cinema metadata updates
@@ -172,9 +193,22 @@ export const movieWatchRouter = createTRPCRouter({
         });
       }
 
-      return await ctx.db.movieWatch.delete({
+      const deletedWatch = await ctx.db.movieWatch.delete({
         where: { id: input.id },
       });
+
+      // Update movie lastWatchedAt
+      const latestWatch = await ctx.db.movieWatch.findFirst({
+        where: { movieId: movieWatch.movieId, userId: ctx.session.user.id },
+        orderBy: { watchedAt: "desc" },
+      });
+
+      await ctx.db.movie.update({
+        where: { id: movieWatch.movieId },
+        data: { lastWatchedAt: latestWatch?.watchedAt ?? null },
+      });
+
+      return deletedWatch;
     }),
 
   // Get recent watches for dashboard

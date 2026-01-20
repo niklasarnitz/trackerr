@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 import {
   movieSearchSchema,
@@ -116,74 +117,14 @@ export const movieRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(movieSearchSchema)
     .query(async ({ ctx, input }) => {
-      // For "watched" sorting, we need to do it manually since Prisma doesn't support
-      // complex relation ordering easily with pagination
-      if (input.sort === "watched") {
-        // Get all movies first without pagination for watched sorting
-        const allMovies = await ctx.db.movie.findMany({
-          where: {
-            userId: ctx.session.user.id,
-            ...(input.search && {
-              OR: [
-                { title: { contains: input.search, mode: "insensitive" } },
-                {
-                  originalTitle: {
-                    contains: input.search,
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }),
-            ...(input.watchlist && { isInWatchlist: true }),
-            ...(input.favorites && { isFavorite: true }),
-          },
-          include: {
-            mediaEntries: true,
-            watches: {
-              orderBy: { watchedAt: "desc" },
-              take: 1,
-              include: {
-                externalActionMetadataTags: true,
-              },
-            },
-            _count: {
-              select: {
-                watches: true,
-                mediaEntries: true,
-              },
-            },
-          },
-        });
-
-        // Sort by latest watch date
-        const sortedMovies = [...allMovies];
-        sortedMovies.sort((a, b) => {
-          const aLastWatch = a.watches[0]?.watchedAt;
-          const bLastWatch = b.watches[0]?.watchedAt;
-          if (!aLastWatch && !bLastWatch) return 0;
-          if (!aLastWatch) return 1;
-          if (!bLastWatch) return -1;
-          return (
-            new Date(bLastWatch).getTime() - new Date(aLastWatch).getTime()
-          );
-        });
-
-        // Apply pagination manually
-        const movies = sortedMovies.slice(input.skip, input.skip + input.limit);
-        const total = allMovies.length;
-
-        return {
-          movies,
-          total,
-          hasMore: input.skip + input.limit < total,
-        };
-      }
-
       // For other sorting options, use Prisma's orderBy
       let orderBy;
       switch (input.sort) {
         case "created":
           orderBy = { createdAt: "desc" as const };
+          break;
+        case "watched":
+          orderBy = { lastWatchedAt: "desc" as const };
           break;
         case "title":
         default:
@@ -626,7 +567,7 @@ export const movieRouter = createTRPCRouter({
   getFiltered: protectedProcedure
     .input(advancedMovieFilterSchema)
     .query(async ({ ctx, input }) => {
-      const where: any = {
+      const where: Prisma.MovieWhereInput = {
         userId: ctx.session.user.id,
       };
 
@@ -695,7 +636,7 @@ export const movieRouter = createTRPCRouter({
         };
       }
 
-      let orderBy: any = { title: "asc" };
+      let orderBy: Prisma.MovieOrderByWithRelationInput = { title: "asc" };
       switch (input.sort) {
         case "created":
           orderBy = { createdAt: "desc" };
@@ -707,7 +648,7 @@ export const movieRouter = createTRPCRouter({
           orderBy = { runtime: "desc" };
           break;
         case "watched":
-          // Handle watched sorting after fetching (due to relation complexity)
+          orderBy = { lastWatchedAt: "desc" };
           break;
         case "title":
         default:
@@ -735,41 +676,10 @@ export const movieRouter = createTRPCRouter({
             },
           },
         },
-        ...(input.sort !== "watched" && { orderBy }),
-        skip: input.sort !== "watched" ? input.skip : undefined,
-        take: input.sort !== "watched" ? input.limit : undefined,
+        orderBy,
+        skip: input.skip,
+        take: input.limit,
       });
-
-      // Handle watched sort (sort by latest watch date)
-      if (input.sort === "watched") {
-        const sortedMovies = [...movies];
-        sortedMovies.sort((a, b) => {
-          const aLastWatch = a.watches[0]?.watchedAt;
-          const bLastWatch = b.watches[0]?.watchedAt;
-          if (!aLastWatch && !bLastWatch) return 0;
-          if (!aLastWatch) return 1;
-          if (!bLastWatch) return -1;
-          return (
-            new Date(bLastWatch).getTime() - new Date(aLastWatch).getTime()
-          );
-        });
-
-        // For watched sorting, fetch all and paginate after sorting
-        const allMoviesForCount = await ctx.db.movie.findMany({
-          where,
-          select: { id: true },
-        });
-
-        const paginatedMovies = sortedMovies.slice(
-          input.skip,
-          input.skip + input.limit,
-        );
-        return {
-          movies: paginatedMovies,
-          total: allMoviesForCount.length,
-          hasMore: input.skip + input.limit < allMoviesForCount.length,
-        };
-      }
 
       // Handle rating sort (requires aggregation)
       if (input.sort === "rating") {
