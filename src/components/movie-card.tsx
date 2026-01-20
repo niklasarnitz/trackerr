@@ -13,6 +13,7 @@ import {
   Eye,
   Heart,
   Bookmark,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -23,6 +24,11 @@ import {
 } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { OptimizedCoverImage } from "~/components/optimized-cover-image";
 import { getPosterUrl } from "~/lib/utils";
 import { StarRatingDisplay } from "~/components/star-rating-display";
@@ -217,28 +223,47 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
             onClick={() => toggleWatchlist.mutate({ id: movie.id })}
             disabled={toggleWatchlist.isPending}
           >
-            <Bookmark
-              className={`mr-1 h-3 w-3 ${movie.isInWatchlist ? "fill-current" : ""}`}
-            />
+            {toggleWatchlist.isPending ? (
+              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+            ) : (
+              <Bookmark
+                className={`mr-1 h-3 w-3 ${movie.isInWatchlist ? "fill-current" : ""}`}
+              />
+            )}
             {movie.isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
           </Button>
-          <Button
-            variant={movie.isFavorite ? "secondary" : "outline"}
-            size="sm"
-            className="w-8 px-0"
-            onClick={() => toggleFavorite.mutate({ id: movie.id })}
-            disabled={toggleFavorite.isPending}
-            aria-label={
-              movie.isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
-            title={
-              movie.isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
-          >
-            <Heart
-              className={`h-4 w-4 ${movie.isFavorite ? "fill-red-500 text-red-500" : ""}`}
-            />
-          </Button>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={movie.isFavorite ? "secondary" : "outline"}
+                size="sm"
+                className="w-8 px-0"
+                onClick={() => toggleFavorite.mutate({ id: movie.id })}
+                disabled={toggleFavorite.isPending}
+                aria-label={
+                  movie.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
+              >
+                {toggleFavorite.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Heart
+                    className={`h-4 w-4 ${movie.isFavorite ? "fill-red-500 text-red-500" : ""}`}
+                  />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {movie.isFavorite
+                  ? "Remove from favorites"
+                  : "Add to favorites"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </CardContent>
     </Card>
