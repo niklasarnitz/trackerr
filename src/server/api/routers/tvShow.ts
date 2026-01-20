@@ -514,11 +514,22 @@ export const tvShowRouter = createTRPCRouter({
             message: "TMDB ID missing for TV show",
           });
         }
-        const seasons = await tmdbTvClient.getSeasons(tvShow.tmdbId);
+        const tmdbId = tvShow.tmdbId;
+        const seasons = await tmdbTvClient.getSeasons(tmdbId);
 
-        for (const season of seasons) {
-          if (season.number === 0) continue;
-          const dbSeason = await ctx.db.tvShowSeason.upsert({
+        // Filter seasons first
+        const validSeasons = seasons.filter((s) => s.number !== 0);
+
+        // Parallelize fetching episodes for all seasons
+        const episodesPromises = validSeasons.map((season) =>
+          tmdbTvClient
+            .getEpisodes(tmdbId, season.number)
+            .then((episodes) => ({ seasonNumber: season.number, episodes })),
+        );
+
+        // Parallelize upserting seasons to get DB IDs
+        const dbSeasonsPromises = validSeasons.map((season) =>
+          ctx.db.tvShowSeason.upsert({
             where: {
               tvShowId_seasonNumber: {
                 tvShowId: tvShow.id,
@@ -537,39 +548,59 @@ export const tvShowRouter = createTRPCRouter({
               overview: season.overview ?? null,
               posterPath: season.image ?? null,
             },
-          });
+          }),
+        );
 
-          const episodes = await tmdbTvClient.getEpisodes(
-            tvShow.tmdbId,
-            season.number,
-          );
+        // Wait for both seasons DB upserts and episodes fetching
+        const [episodesResults, dbSeasons] = await Promise.all([
+          Promise.all(episodesPromises),
+          Promise.all(dbSeasonsPromises),
+        ]);
+
+        // Map season number to DB season ID for quick lookup
+        const seasonIdMap = new Map<number, string>();
+        for (const dbSeason of dbSeasons) {
+          seasonIdMap.set(dbSeason.seasonNumber, dbSeason.id);
+        }
+
+        // Parallelize episode upserts
+        const episodeUpsertPromises = [];
+
+        for (const { seasonNumber, episodes } of episodesResults) {
+          const seasonId = seasonIdMap.get(seasonNumber);
+          if (!seasonId) continue; // Should not happen
+
           for (const episode of episodes) {
-            await ctx.db.tvShowEpisode.upsert({
-              where: {
-                seasonId_episodeNumber: {
-                  seasonId: dbSeason.id,
-                  episodeNumber: episode.number,
+            episodeUpsertPromises.push(
+              ctx.db.tvShowEpisode.upsert({
+                where: {
+                  seasonId_episodeNumber: {
+                    seasonId: seasonId,
+                    episodeNumber: episode.number,
+                  },
                 },
-              },
-              create: {
-                seasonId: dbSeason.id,
-                episodeNumber: episode.number,
-                name: episode.name ?? `Episode ${episode.number}`,
-                overview: episode.overview ?? null,
-                airDate: episode.aired ? new Date(episode.aired) : null,
-                runtime: episode.runtime ?? null,
-                stillPath: episode.image ?? null,
-              },
-              update: {
-                name: episode.name ?? `Episode ${episode.number}`,
-                overview: episode.overview ?? null,
-                airDate: episode.aired ? new Date(episode.aired) : null,
-                runtime: episode.runtime ?? null,
-                stillPath: episode.image ?? null,
-              },
-            });
+                create: {
+                  seasonId: seasonId,
+                  episodeNumber: episode.number,
+                  name: episode.name ?? `Episode ${episode.number}`,
+                  overview: episode.overview ?? null,
+                  airDate: episode.aired ? new Date(episode.aired) : null,
+                  runtime: episode.runtime ?? null,
+                  stillPath: episode.image ?? null,
+                },
+                update: {
+                  name: episode.name ?? `Episode ${episode.number}`,
+                  overview: episode.overview ?? null,
+                  airDate: episode.aired ? new Date(episode.aired) : null,
+                  runtime: episode.runtime ?? null,
+                  stillPath: episode.image ?? null,
+                },
+              }),
+            );
           }
         }
+
+        await Promise.all(episodeUpsertPromises);
       } catch (error) {
         console.error("Failed to sync seasons/episodes:", error);
         throw new TRPCError({
