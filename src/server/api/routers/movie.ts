@@ -124,7 +124,7 @@ export const movieRouter = createTRPCRouter({
           orderBy = { createdAt: "desc" as const };
           break;
         case "watched":
-          orderBy = { lastWatchedAt: "desc" as const };
+          orderBy = { lastWatchedAt: { sort: "desc" as const, nulls: "last" as const } };
           break;
         case "title":
         default:
@@ -648,7 +648,7 @@ export const movieRouter = createTRPCRouter({
           orderBy = { runtime: "desc" };
           break;
         case "watched":
-          orderBy = { lastWatchedAt: "desc" };
+          orderBy = { lastWatchedAt: { sort: "desc", nulls: "last" } };
           break;
         case "title":
         default:

@@ -21,7 +21,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "update-movie-overviews": "bun run scripts/update-movie-overviews.ts",
-    "update-movie-metadata": "bun run scripts/update-movie-metadata.ts"
+    "update-movie-metadata": "bun run scripts/update-movie-metadata.ts",
+    "db:populate-last-watched": "bun run scripts/populate-last-watched.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
