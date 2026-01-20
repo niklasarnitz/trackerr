@@ -154,10 +154,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const rawBody = await request.text();
     let body;
     try {
-      body = JSON.parse(rawBody);
+      body = (await request.json()) as {
+        tmdbId?: string;
+        seasonNumber?: string;
+        episodeNumber?: string;
+        totalRunTimeInTicks?: string;
+        currentRunTimeInTicks?: string;
+      };
     } catch (error) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
