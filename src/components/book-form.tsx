@@ -372,6 +372,26 @@ export function BookForm({ initialData, onSuccess, onCancel }: BookFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="isOnWishlist"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Wishlist</FormLabel>
+                    <FormDescription>
+                      Add to wishlist (hidden from main library)
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField

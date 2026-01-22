@@ -95,6 +95,7 @@ export function DesktopNavMenus({
 
   const myListsItems = [
     { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
+    { href: "/books/wishlist", name: "Book Wishlist", icon: Bookmark },
     { href: "/movies/favorites", name: "Favorites", icon: Heart },
   ];
 

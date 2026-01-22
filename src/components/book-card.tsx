@@ -66,6 +66,24 @@ export function BookCard({ book }: BookCardProps) {
     setShowDeleteDialog(false);
   };
 
+  const updateBook = api.book.update.useMutation({
+    onSuccess: async () => {
+      toast.success("Book updated successfully");
+      await utils.book.getAll.invalidate();
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Unable to update book.");
+    },
+  });
+
+  const toggleWishlist = () => {
+    updateBook.mutate({
+      id: book.id,
+      isOnWishlist: !book.isOnWishlist,
+    });
+  };
+
   const readingProgress = book.readingProgress?.[0];
   const progressPercentage = readingProgress?.pagesRead
     ? Math.round((readingProgress.pagesRead / (book.pages ?? 1)) * 100)
@@ -143,6 +161,17 @@ export function BookCard({ book }: BookCardProps) {
             <Button variant="outline" size="sm" className="flex-1" asChild>
               <Link href={`/books/${book.id}`}>View</Link>
             </Button>
+            {book.isOnWishlist ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="flex-1"
+                onClick={toggleWishlist}
+                disabled={updateBook.isPending}
+              >
+                Add to Library
+              </Button>
+            ) : null}
             <Button
               variant="ghost"
               size="sm"
