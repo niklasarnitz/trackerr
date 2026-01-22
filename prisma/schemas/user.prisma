@@ -26,4 +26,6 @@ model User {
   preferences       UserPreferences?
   tvShows           TvShow[]
   tvShowWatches     TvShowWatch[]
+  quotes            Quote[]
+  bookSeries        BookSeries[]
 }

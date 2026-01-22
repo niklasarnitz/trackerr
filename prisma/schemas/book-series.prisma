@@ -1,0 +1,13 @@
+model BookSeries {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  books     Book[]
+
+  @@unique([name, userId])
+  @@index([name])
+  @@index([userId])
+}

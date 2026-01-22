@@ -14,6 +14,8 @@ model Book {
   abstract        String? // Book abstract/summary
   seriesName      String? // Series name if part of a series
   seriesNumber    Float? // Position in series (can be decimal like 1.5)
+  seriesId        String?
+  series          BookSeries?       @relation(fields: [seriesId], references: [id])
   isEbook         Boolean           @default(false)
   categoryId      String?
   category        BookCategory?     @relation(fields: [categoryId], references: [id])
@@ -24,9 +26,11 @@ model Book {
   readingProgress ReadingProgress[]
   bookTags        BookTag[]
   bookAuthors     BookAuthor[]
+  quotes          Quote[]
 
   @@index([userId, title])
   @@index([userId, status])
   @@index([userId, seriesName])
+  @@index([userId, seriesId])
   @@index([userId, categoryId])
 }

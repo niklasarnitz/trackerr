@@ -1,0 +1,16 @@
+model Quote {
+  id        String   @id @default(cuid())
+  title     String?
+  pageStart Int
+  pageEnd   Int?
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bookId    String
+  userId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+  @@index([userId])
+}

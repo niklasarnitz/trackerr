@@ -18,6 +18,8 @@ import { tvShowRouter } from "./routers/tvShow";
 import { tvShowWatchRouter } from "./routers/tvShowWatch";
 import { tmdbTvRouter } from "./routers/tmdbTv";
 import { tmdbTop250Router } from "./routers/tmdbTop250";
+import { quoteRouter } from "./routers/quote";
+import { bookSeriesRouter } from "./routers/bookSeries";
 
 /**
  * This is the primary router for your server.
@@ -44,6 +46,8 @@ export const appRouter = createTRPCRouter({
   tvShowWatch: tvShowWatchRouter,
   tmdbTv: tmdbTvRouter,
   tmdbTop250: tmdbTop250Router,
+  quote: quoteRouter,
+  bookSeries: bookSeriesRouter,
 });
 
 // export type definition of API

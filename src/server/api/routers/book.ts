@@ -138,6 +138,7 @@ export const bookRouter = createTRPCRouter({
           where,
           include: {
             category: true,
+            series: true,
             bookTags: {
               include: {
                 tag: true,
@@ -179,6 +180,7 @@ export const bookRouter = createTRPCRouter({
       },
       include: {
         category: true,
+        series: true,
         bookTags: {
           include: {
             tag: true,
@@ -215,16 +217,43 @@ export const bookRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bookCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { authors, coverUrl, ...bookData } = input;
+      const { authors, coverUrl, seriesId, seriesName, ...bookData } = input;
+
+      // Resolve series
+      let finalSeriesId = seriesId;
+      if (!finalSeriesId && seriesName) {
+        // Try to find existing series by name for this user
+        const existingSeries = await ctx.db.bookSeries.findFirst({
+          where: {
+            name: seriesName,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        if (existingSeries) {
+          finalSeriesId = existingSeries.id;
+        } else {
+          // Create new series
+          const newSeries = await ctx.db.bookSeries.create({
+            data: {
+              name: seriesName,
+              userId: ctx.session.user.id,
+            },
+          });
+          finalSeriesId = newSeries.id;
+        }
+      }
 
       // Create the book first without cover URL
       const book = await ctx.db.book.create({
         data: {
           ...bookData,
+          seriesName,
+          ...(finalSeriesId && { series: { connect: { id: finalSeriesId } } }),
           userId: ctx.session.user.id,
           status: "UNREAD",
-          coverUrl: null, // Will be updated after upload
-        },
+          coverUrl: null,
+        } as any,
       });
 
       // Download and upload cover to Minio if available
@@ -267,6 +296,7 @@ export const bookRouter = createTRPCRouter({
         where: { id: book.id },
         include: {
           category: true,
+          series: true,
           bookTags: {
             include: {
               tag: true,
@@ -285,7 +315,7 @@ export const bookRouter = createTRPCRouter({
   update: protectedProcedure
     .input(bookUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, authors, ...updateData } = input;
+      const { id, authors, seriesId, seriesName, ...updateData } = input;
 
       const book = await ctx.db.book.findFirst({
         where: {
@@ -301,10 +331,39 @@ export const bookRouter = createTRPCRouter({
         });
       }
 
+      // Resolve series
+      let finalSeriesId = seriesId;
+      if (!finalSeriesId && seriesName) {
+        // Try to find existing series by name for this user
+        const existingSeries = await ctx.db.bookSeries.findFirst({
+          where: {
+            name: seriesName,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        if (existingSeries) {
+          finalSeriesId = existingSeries.id;
+        } else {
+          // Create new series
+          const newSeries = await ctx.db.bookSeries.create({
+            data: {
+              name: seriesName,
+              userId: ctx.session.user.id,
+            },
+          });
+          finalSeriesId = newSeries.id;
+        }
+      }
+
       // Update book data
       await ctx.db.book.update({
         where: { id },
-        data: updateData,
+        data: {
+          ...updateData,
+          seriesName,
+          ...(finalSeriesId && { series: { connect: { id: finalSeriesId } } }),
+        } as any,
       });
 
       // Update authors if provided
@@ -317,6 +376,7 @@ export const bookRouter = createTRPCRouter({
         where: { id },
         include: {
           category: true,
+          series: true,
           bookTags: {
             include: {
               tag: true,

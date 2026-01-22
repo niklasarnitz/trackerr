@@ -82,6 +82,7 @@ export function BookCard({ book }: BookCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, 300px"
             fallbackSrc="/placeholder-book.jpg"
+            book={book}
           />
         </div>
 

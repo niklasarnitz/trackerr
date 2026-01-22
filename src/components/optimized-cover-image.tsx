@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { GeneratedBookCover } from "~/components/generated-book-cover";
 
 // Tiny blur placeholder for cover images (10x10 gray placeholder)
 const BLUR_DATA_URL =
@@ -15,6 +16,14 @@ interface OptimizedCoverImageProps {
   priority?: boolean;
   className?: string;
   fallbackSrc?: string;
+  book?: {
+    id: string;
+    title: string;
+    subtitle?: string | null;
+    bookAuthors: { author: { name: string } }[];
+    series?: { name: string } | null;
+    seriesNumber?: number | null;
+  };
 }
 
 /**
@@ -22,6 +31,7 @@ interface OptimizedCoverImageProps {
  * - Uses blur placeholder for smooth loading (from DB if available)
  * - Lazy loads by default (unless priority is set)
  * - Properly sized for Next.js image optimization
+ * - Generates a cover if no image source is provided and book data is available
  */
 export function OptimizedCoverImage({
   src,
@@ -34,7 +44,43 @@ export function OptimizedCoverImage({
   priority = false,
   className = "object-cover",
   fallbackSrc = "/placeholder-movie.jpg",
+  book,
 }: OptimizedCoverImageProps) {
+  // If no source but book data is available, render generated cover
+  if (!src && book) {
+    const authors = book.bookAuthors.map((ba) => ba.author.name);
+    
+    // If fill is true, we want the generated cover to fill the parent
+    if (fill) {
+      return (
+        <GeneratedBookCover
+          title={book.title}
+          subtitle={book.subtitle}
+          authors={authors}
+          seriesName={book.series?.name}
+          seriesNumber={book.seriesNumber}
+          bookId={book.id}
+          className={className.replace("object-cover", "")}
+        />
+      );
+    }
+    
+    // Otherwise wrap it in a div with dimensions
+    return (
+      <div style={{ width, height }} className="overflow-hidden rounded-md">
+        <GeneratedBookCover
+          title={book.title}
+          subtitle={book.subtitle}
+          authors={authors}
+          seriesName={book.series?.name}
+          seriesNumber={book.seriesNumber}
+          bookId={book.id}
+          className={className.replace("object-cover", "")}
+        />
+      </div>
+    );
+  }
+
   const imageSrc = src ?? fallbackSrc;
   const placeholder = blurDataUrl ?? BLUR_DATA_URL;
 

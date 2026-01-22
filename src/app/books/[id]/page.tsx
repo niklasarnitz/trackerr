@@ -7,6 +7,10 @@ import { OptimizedCoverImage } from "~/components/optimized-cover-image";
 import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
 
+import { BookQuotes } from "~/components/book-quotes";
+import { EditBookButton } from "~/components/edit-book-button";
+import { ReadingProgress } from "~/components/reading-progress";
+
 interface BookDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -47,14 +51,15 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Back Button */}
-      <div className="mb-6">
+      {/* Header Actions */}
+      <div className="mb-6 flex items-center justify-between">
         <Link href="/books">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Books
           </Button>
         </Link>
+        <EditBookButton book={book} />
       </div>
 
       {/* Book Details */}
@@ -71,6 +76,15 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   priority
                   fallbackSrc="/placeholder-book.jpg"
+                  book={book}
+                />
+              </div>
+              <div className="mt-4">
+                <ReadingProgress
+                  bookId={book.id}
+                  status={book.status}
+                  totalPages={book.pages ?? null}
+                  currentPage={readingProgress?.pagesRead ?? 0}
                 />
               </div>
             </div>
@@ -193,6 +207,8 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
           </CardContent>
         )}
       </Card>
+
+      <BookQuotes book={book} />
     </div>
   );
 }

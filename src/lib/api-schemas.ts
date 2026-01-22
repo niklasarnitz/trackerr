@@ -455,6 +455,7 @@ export const bookCreateSchema = z.object({
   abstract: z.string().optional(),
   seriesName: z.string().optional(),
   seriesNumber: z.number().optional(),
+  seriesId: z.string().optional(),
   isEbook: z.boolean().default(false),
   categoryId: z.string().optional(),
   notes: z.string().optional(),
@@ -474,6 +475,7 @@ export const bookUpdateSchema = z.object({
   abstract: z.string().optional(),
   seriesName: z.string().optional(),
   seriesNumber: z.number().optional(),
+  seriesId: z.string().optional(),
   isEbook: z.boolean().optional(),
   categoryId: z.string().optional(),
   status: z.enum(["UNREAD", "READING", "READ"]).optional(),
@@ -629,3 +631,44 @@ export type TvShowCreateInput = z.infer<typeof tvShowCreateSchema>;
 export type TvShowUpdateInput = z.infer<typeof tvShowUpdateSchema>;
 export type TvShowWatchCreateInput = z.infer<typeof tvShowWatchCreateSchema>;
 export type TvShowWatchUpdateInput = z.infer<typeof tvShowWatchUpdateSchema>;
+
+// ============================================================================
+// Quote Schemas
+// ============================================================================
+
+export const quoteSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().optional().nullable(),
+  pageStart: z.coerce.number().int().min(1, "Page number must be at least 1"),
+  pageEnd: z.coerce
+    .number()
+    .int()
+    .min(1, "Page number must be at least 1")
+    .optional()
+    .nullable(),
+  text: z.string().min(1, "Quote text is required"),
+  bookId: z.string().min(1, "Book ID is required"),
+});
+
+// ============================================================================
+// Book Series Schemas
+// ============================================================================
+
+export const bookSeriesCreateSchema = z.object({
+  name: z.string().min(1, "Series name is required"),
+});
+
+export const bookSeriesUpdateSchema = bookSeriesCreateSchema.extend({
+  id: z.string(),
+});
+
+export const bookSeriesSearchSchema = z.object({
+  query: z.string().optional(),
+  skip: z.number().min(0).default(0),
+  limit: z.number().min(1).max(100).default(20),
+});
+
+export type QuoteInput = z.infer<typeof quoteSchema>;
+export type BookSeriesCreateInput = z.infer<typeof bookSeriesCreateSchema>;
+export type BookSeriesUpdateInput = z.infer<typeof bookSeriesUpdateSchema>;
+export type BookSeriesSearchInput = z.infer<typeof bookSeriesSearchSchema>;
