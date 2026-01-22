@@ -48,11 +48,18 @@ export async function searchBooksByIsbn(
     const searchUrl = `https://www.amazon.de/s?k=${isbn}`;
 
     console.log(`Fetching from URL: ${searchUrl}`);
+    // Use realistic browser-like headers to reduce 503/robot checks
     const response = await fetch(searchUrl, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9,de;q=0.8",
+        "Upgrade-Insecure-Requests": "1",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Referer: "https://www.amazon.de/",
       },
     });
 
@@ -72,21 +79,42 @@ export async function searchBooksByIsbn(
     const $ = cheerio.load(html);
     const results: AmazonBookSearchResult[] = [];
 
-    // Select search result items
-    const searchResultItems = $('div[data-component-type="s-search-result"]');
+    // Select search result items, try multiple selectors for robustness
+    let searchResultItems = $('div[data-component-type="s-search-result"]');
     console.log(`Found ${searchResultItems.length} search result items`);
+
+    if (searchResultItems.length === 0) {
+      const altSearchResultItems = $("div.s-result-item");
+      console.log(
+        `Found ${altSearchResultItems.length} alternative search result items`,
+      );
+      if (altSearchResultItems.length > 0) {
+        searchResultItems = altSearchResultItems;
+      }
+    }
 
     searchResultItems.each((index, element) => {
       if (results.length >= 10) return false; // Limit to 10 results
 
       const $item = $(element);
 
-      // Using the specified CSS selectors
-      const titleElement = $item.find(".s-line-clamp-2 span").first();
-      const authorElement = $item
-        .find(".a-size-base .a-row a.a-size-base")
-        .first();
-      const detailLinkElement = $item.find("a.s-line-clamp-2").first();
+      // Try multiple possible selectors for title
+      let titleElement = $item.find("h2 .a-link-normal span").first();
+      if (titleElement.length === 0) {
+        titleElement = $item.find(".s-line-clamp-2 span").first();
+      }
+
+      // Try multiple possible selectors for author
+      let authorElement = $item.find(".a-color-secondary .a-row a").first();
+      if (authorElement.length === 0) {
+        authorElement = $item.find(".a-size-base .a-row a.a-size-base").first();
+      }
+
+      // Try multiple possible selectors for detail link
+      let detailLinkElement = $item.find("h2 .a-link-normal").first();
+      if (!detailLinkElement.attr("href")) {
+        detailLinkElement = $item.find("a.s-line-clamp-2").first();
+      }
 
       // @ts-expect-error - Cheerio typings are incorrect
       const title = getTextContent(titleElement);
@@ -95,15 +123,21 @@ export async function searchBooksByIsbn(
       const detailUrlPath = detailLinkElement.attr("href");
 
       if (title && detailUrlPath) {
-        const detailUrl = new URL(
-          detailUrlPath,
-          "https://www.amazon.de",
-        ).toString();
+        let detailUrl: string;
+        try {
+          detailUrl = new URL(
+            detailUrlPath,
+            "https://www.amazon.de",
+          ).toString();
+        } catch {
+          // Fallback if relative path parsing fails
+          detailUrl = `https://www.amazon.de${detailUrlPath.startsWith("/") ? "" : "/"}${detailUrlPath}`;
+        }
 
         const result = {
-          title,
-          author,
-          detailUrl,
+          title: String(title),
+          author: String(author),
+          detailUrl: String(detailUrl),
         };
 
         console.log(`Found book: "${result.title}" by ${result.author}`);
@@ -114,8 +148,9 @@ export async function searchBooksByIsbn(
         console.log(
           `Skipping item #${index + 1} - missing title or detail URL`,
         );
-        if (!title) console.log("No title found");
-        if (!detailUrlPath) console.log("No detail URL found");
+        if (!title) console.log("No title found in selectors tried");
+        if (!detailUrlPath)
+          console.log("No detail URL found in selectors tried");
       }
     });
 
@@ -139,12 +174,31 @@ export async function getBookDetailFromAmazon(
 ): Promise<AmazonBookDetail> {
   try {
     console.log(`Fetching book details from: ${detailUrl}`);
+    // Validate and sanitize the URL to handle encoding issues
+    let validatedUrl = detailUrl;
+    try {
+      // Check if it's a valid URL by trying to parse it
+      new URL(validatedUrl);
+    } catch (err) {
+      // If URL parsing fails, fix relative URLs
+      console.log(
+        `Invalid book detail URL detected: ${detailUrl}, error: ${String(err)}`,
+      );
+      validatedUrl = `https://www.amazon.de${detailUrl.startsWith("/") ? "" : "/"}${detailUrl}`;
+      console.log(`URL fixed to: ${validatedUrl}`);
+    }
 
-    const response = await fetch(detailUrl, {
+    const response = await fetch(validatedUrl, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9,de;q=0.8",
+        "Upgrade-Insecure-Requests": "1",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Referer: "https://www.amazon.de/",
       },
     });
 

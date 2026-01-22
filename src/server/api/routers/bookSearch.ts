@@ -584,4 +584,66 @@ export const bookSearchRouter = createTRPCRouter({
 
       return null;
     }),
+
+  // Fetch book cover from bookcover-api
+  fetchBookCover: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        author: z.string().optional(),
+        isbn: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      try {
+        const bookCoverApiUrl = "https://bookcover.longitood.com";
+        let url: string | null = null;
+
+        // Try ISBN first if available
+        if (input.isbn) {
+          try {
+            const response = await fetch(
+              `${bookCoverApiUrl}/bookcover/${input.isbn}`,
+              { signal: AbortSignal.timeout(5000) },
+            );
+            if (response.ok) {
+              const data = (await response.json()) as { url: string };
+              url = data.url;
+            }
+          } catch (error) {
+            console.error("Failed to fetch cover by ISBN:", error);
+          }
+        }
+
+        // Fall back to title and author search if ISBN didn't work
+        if (!url && input.title) {
+          try {
+            const params = new URLSearchParams();
+            params.set("book_title", input.title);
+            if (input.author) {
+              params.set("author_name", input.author);
+            }
+
+            const response = await fetch(
+              `${bookCoverApiUrl}/bookcover?${params.toString()}`,
+              { signal: AbortSignal.timeout(5000) },
+            );
+            if (response.ok) {
+              const data = (await response.json()) as { url: string };
+              url = data.url;
+            }
+          } catch (error) {
+            console.error("Failed to fetch cover by title/author:", error);
+          }
+        }
+
+        return { url: url ?? null };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch book cover",
+          cause: error,
+        });
+      }
+    }),
 });

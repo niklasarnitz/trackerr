@@ -88,6 +88,7 @@ export function getLargestCover(
 export async function searchGoogleBooksByIsbn(isbn: string) {
   const url = new URL(GOOGLE_BOOKS_BASE_URL);
   url.searchParams.set("q", `isbn:${isbn}`);
+  url.searchParams.set("country", "US");
 
   const response = await fetch(url.toString());
 
@@ -115,6 +116,7 @@ export async function searchGoogleBooks(title: string, author?: string) {
 
   url.searchParams.set("q", queryString);
   url.searchParams.set("maxResults", "20");
+  url.searchParams.set("country", "US");
 
   const response = await fetch(url.toString());
 
