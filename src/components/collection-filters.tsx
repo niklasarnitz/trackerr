@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { useDebounce } from "~/hooks/use-movie-filtering";
+import { useDebounce } from "~/hooks/use-debounce";
 import { useCollectionFilters } from "~/hooks/use-collection-filters";
 import { useEffect } from "react";
 

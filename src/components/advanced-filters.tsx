@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/popover";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { useDebounce } from "~/hooks/use-movie-filtering";
+import { useDebounce } from "~/hooks/use-debounce";
 
 export function AdvancedFilters() {
   const router = useRouter();

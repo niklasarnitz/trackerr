@@ -25,6 +25,7 @@ import type { Session } from "next-auth";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { JellyfinWebhookSettings } from "~/components/jellyfin-webhook-settings";
+import { BookCategorySettings } from "~/components/book-category-settings";
 
 interface SettingsContentProps {
   user: Session["user"];
@@ -229,6 +230,8 @@ export function SettingsContent({ user }: SettingsContentProps) {
           </div>
         </CardContent>
       </Card>
+
+      <BookCategorySettings />
 
       {/* Jellyfin Webhook */}
       <JellyfinWebhookSettings />

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useDebounce } from "~/hooks/use-movie-filtering";
+import { useDebounce } from "~/hooks/use-debounce";
 
 export function WatchesFilters() {
   const router = useRouter();
