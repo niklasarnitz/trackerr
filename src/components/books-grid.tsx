@@ -1,8 +1,6 @@
 import { ErrorDisplay } from "~/components/error-display";
 import { Pagination } from "~/components/pagination";
 import { api } from "~/trpc/server";
-import { BookOpen } from "lucide-react";
-import { AddBookButton } from "./add-book-button";
 import { BookCard } from "./book-card";
 
 type BookSort = "title" | "created" | "updated";
@@ -30,6 +28,7 @@ export async function BooksGrid({
     const limit = 20;
     const skip = (page - 1) * limit;
 
+    // Fetch books with filters including category and tags
     const result = await api.book.getAll({
       search,
       sort: sort as "title" | "created" | "updated",
@@ -46,14 +45,6 @@ export async function BooksGrid({
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6" />
-            <h1 className="text-3xl font-bold">Books</h1>
-          </div>
-          <AddBookButton />
-        </div>
-
         {result.books.length === 0 ? (
           <ErrorDisplay
             title="No books found"

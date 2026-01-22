@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BooksGrid } from "~/components/books-grid";
-import { BooksSearchFilters } from "~/components/books-search-filters";
+import { BooksAdvancedFilters } from "~/components/books-advanced-filters";
+import { AddBookButton } from "~/components/add-book-button";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { api } from "~/trpc/server";
@@ -11,6 +12,8 @@ interface BooksPageProps {
     sort?: "title" | "created" | "updated";
     page?: string;
     status?: "UNREAD" | "READING" | "READ";
+    categoryId?: string;
+    tags?: string;
   }>;
 }
 
@@ -23,6 +26,11 @@ export default async function BooksPage({ searchParams }: BooksPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page ?? "1", 10);
   const sort = (params.sort ?? "created") as "title" | "created" | "updated";
+
+  const tagIds = (params.tags ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
 
   const currentlyReading = await api.book.getAll({
     status: "READING",
@@ -43,6 +51,16 @@ export default async function BooksPage({ searchParams }: BooksPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="heading-lg">My Books</h1>
+          <AddBookButton />
+        </div>
+        <p className="text-muted-foreground body-md">
+          Browse and manage your book collection.
+        </p>
+      </div>
+
       {currentlyReading.books.length > 0 && (
         <div className="mb-10 space-y-4">
           <div className="flex items-center justify-between">
@@ -110,13 +128,15 @@ export default async function BooksPage({ searchParams }: BooksPageProps) {
       )}
 
       <div className="mb-6">
-        <BooksSearchFilters />
+        <BooksAdvancedFilters />
       </div>
       <BooksGrid
         search={params.search}
         sort={sort}
         page={page}
         status={params.status}
+        categoryId={params.categoryId}
+        tagIds={tagIds}
       />
     </div>
   );
