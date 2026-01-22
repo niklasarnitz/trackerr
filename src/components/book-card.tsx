@@ -31,7 +31,6 @@ type Book = RouterOutputs["book"]["getAll"]["books"][number];
 
 interface BookCardProps {
   book: Book;
-  onBookUpdated?: () => void;
 }
 
 const statusColors = {
@@ -46,7 +45,7 @@ const statusLabels = {
   READ: "Read",
 };
 
-export function BookCard({ book, onBookUpdated }: BookCardProps) {
+export function BookCard({ book }: BookCardProps) {
   const router = useRouter();
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -55,7 +54,6 @@ export function BookCard({ book, onBookUpdated }: BookCardProps) {
     onSuccess: async () => {
       toast.success("Book successfully removed from your library");
       await utils.book.getAll.invalidate();
-      onBookUpdated?.();
       router.refresh();
     },
     onError: (error) => {

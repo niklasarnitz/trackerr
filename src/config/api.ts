@@ -16,12 +16,6 @@ export const API_CONFIG = {
   OPEN_LIBRARY: {
     baseUrl: "https://openlibrary.org",
   },
-  AMAZON: {
-    // Configuration for Amazon scraper if needed
-  },
-  HUGENDUBEL: {
-    // Configuration for Hugendubel API if needed
-  },
 } as const;
 
 export type APIConfigType = typeof API_CONFIG;
