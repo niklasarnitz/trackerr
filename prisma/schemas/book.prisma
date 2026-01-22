@@ -17,6 +17,7 @@ model Book {
   seriesId        String?
   series          BookSeries?       @relation(fields: [seriesId], references: [id])
   isEbook         Boolean           @default(false)
+  isOnWishlist    Boolean           @default(false)
   categoryId      String?
   category        BookCategory?     @relation(fields: [categoryId], references: [id])
   status          BookStatus        @default(UNREAD)

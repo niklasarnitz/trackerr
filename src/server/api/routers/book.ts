@@ -119,6 +119,7 @@ export const bookRouter = createTRPCRouter({
               },
             },
           }),
+        isOnWishlist: input.isOnWishlist ?? false,
       };
 
       const orderBy = (() => {

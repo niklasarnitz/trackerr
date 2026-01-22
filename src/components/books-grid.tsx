@@ -15,6 +15,7 @@ interface BooksGridProps {
   readonly categoryId?: string;
   readonly tagIds?: string[];
   readonly baseUrl?: string;
+  readonly isOnWishlist?: boolean;
 }
 
 export async function BooksGrid({
@@ -25,6 +26,7 @@ export async function BooksGrid({
   categoryId,
   tagIds = [],
   baseUrl = "/books",
+  isOnWishlist,
 }: BooksGridProps) {
   try {
     const limit = 20;
@@ -38,6 +40,7 @@ export async function BooksGrid({
       status,
       categoryId,
       tagIds: tagIds.length > 0 ? tagIds : undefined,
+      isOnWishlist,
     });
 
     const hasMore = result.hasMore;

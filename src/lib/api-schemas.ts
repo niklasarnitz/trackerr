@@ -432,6 +432,7 @@ export const bookSearchSchema = z.object({
   status: z.enum(["UNREAD", "READING", "READ"]).optional(),
   categoryId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
+  isOnWishlist: z.boolean().optional(),
   sort: z.enum(["title", "created", "updated", "author"]).default("title"),
   skip: z.number().min(0).default(0),
   limit: z.number().min(1).max(100).default(20),
@@ -457,6 +458,7 @@ export const bookCreateSchema = z.object({
   seriesNumber: z.number().optional(),
   seriesId: z.string().optional(),
   isEbook: z.boolean().default(false),
+  isOnWishlist: z.boolean().default(false),
   categoryId: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -477,6 +479,7 @@ export const bookUpdateSchema = z.object({
   seriesNumber: z.number().optional(),
   seriesId: z.string().optional(),
   isEbook: z.boolean().optional(),
+  isOnWishlist: z.boolean().optional(),
   categoryId: z.string().optional(),
   status: z.enum(["UNREAD", "READING", "READ"]).optional(),
   notes: z.string().optional(),
