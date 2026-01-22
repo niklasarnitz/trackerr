@@ -1,8 +1,6 @@
 import { ErrorDisplay } from "~/components/error-display";
 import { Pagination } from "~/components/pagination";
 import { api } from "~/trpc/server";
-import { BookOpen } from "lucide-react";
-import { AddBookButton } from "./add-book-button";
 import { BookCard } from "./book-card";
 
 type BookSort = "title" | "created" | "updated";

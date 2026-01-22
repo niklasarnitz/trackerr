@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, X } from "lucide-react";
 import { Input } from "~/components/ui/input";
@@ -64,6 +65,30 @@ export function BooksAdvancedFilters() {
     setSelectedTags([]);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSort(value);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+  };
+
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId)
+        ? prev.filter((t) => t !== tagId)
+        : [...prev, tagId],
+    );
+  };
+
   const hasActiveFilters =
     status !== "all" || categoryId !== "all" || selectedTags.length > 0;
 
@@ -76,7 +101,7 @@ export function BooksAdvancedFilters() {
           type="text"
           placeholder="Search books by title, author, or ISBN"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           className="pl-10"
           aria-label="Search books"
         />
@@ -84,7 +109,7 @@ export function BooksAdvancedFilters() {
 
       {/* Quick Filters */}
       <div className="flex flex-wrap items-center gap-2">
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -96,7 +121,7 @@ export function BooksAdvancedFilters() {
           </SelectContent>
         </Select>
 
-        <Select value={sort} onValueChange={setSort}>
+        <Select value={sort} onValueChange={handleSortChange}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
@@ -135,7 +160,7 @@ export function BooksAdvancedFilters() {
               {categories && categories.length > 0 && (
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Select value={categoryId} onValueChange={setCategoryId}>
+                  <Select value={categoryId} onValueChange={handleCategoryChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -176,13 +201,7 @@ export function BooksAdvancedFilters() {
                                 }
                               : undefined
                         }
-                        onClick={() => {
-                          setSelectedTags((prev) =>
-                            prev.includes(tag.id)
-                              ? prev.filter((t) => t !== tag.id)
-                              : [...prev, tag.id],
-                          );
-                        }}
+                        onClick={() => handleTagToggle(tag.id)}
                       >
                         {tag.name}
                       </Badge>

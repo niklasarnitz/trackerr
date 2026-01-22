@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type React from "react";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 import {
@@ -43,6 +44,32 @@ export function BookCategorySettings() {
     },
   });
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (
+      e.key === "Enter" &&
+      newCategoryName.trim() &&
+      !createCategory.isPending
+    ) {
+      createCategory.mutate({
+        name: newCategoryName.trim(),
+      });
+    }
+  };
+
+  const handleCategoryNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewCategoryName(e.target.value);
+  };
+
+  const handleCreateCategory = () => {
+    createCategory.mutate({
+      name: newCategoryName.trim(),
+    });
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    deleteCategory.mutate({ id });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -60,23 +87,13 @@ export function BookCategorySettings() {
             <Input
               id="new-category-name"
               value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newCategoryName.trim()) {
-                  createCategory.mutate({
-                    name: newCategoryName.trim(),
-                  });
-                }
-              }}
+              onChange={handleCategoryNameChange}
+              onKeyDown={handleKeyDown}
               placeholder="e.g. Fiction, Technical, Biography"
             />
           </div>
           <Button
-            onClick={() =>
-              createCategory.mutate({
-                name: newCategoryName.trim(),
-              })
-            }
+            onClick={handleCreateCategory}
             disabled={!newCategoryName.trim() || createCategory.isPending}
           >
             {createCategory.isPending ? (
@@ -104,7 +121,7 @@ export function BookCategorySettings() {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 rounded-full"
-                onClick={() => deleteCategory.mutate({ id: category.id })}
+                onClick={() => handleDeleteCategory(category.id)}
                 disabled={deleteCategory.isPending}
                 aria-label={`Delete ${category.name}`}
               >
