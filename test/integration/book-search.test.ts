@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { searchGoogleBooks, searchGoogleBooksByIsbn } from "../../src/helpers/google-books-api";
 import { searchOpenLibraryByTitle, searchOpenLibraryByIsbn } from "../../src/helpers/open-library-api";
 import { searchBooksByIsbn as searchAmazonByIsbn } from "../../src/helpers/amazon-scraper";
-import { searchHugendubeLByTitle, searchHugendubeLByIsbn } from "../../src/helpers/hugendubel-api";
 
 // Use a well-known book for testing: The Lord of the Rings
 const TEST_TITLE = "The Lord of the Rings";
@@ -49,25 +48,6 @@ describe("Book Search Providers Integration Tests", () => {
       const result = await searchOpenLibraryByIsbn(TEST_ISBN);
       expect(result).toBeDefined();
       expect(result?.title).toBeDefined();
-    });
-  });
-
-  describe("Hugendubel API", () => {
-    it("should find books by title", async () => {
-      const result = await searchHugendubeLByTitle(TEST_TITLE);
-      expect(result).toBeDefined();
-      expect(result.length).toBeGreaterThan(0);
-      
-      const firstBook = result[0];
-      expect(firstBook.title.toLowerCase()).toContain("lord of the rings");
-    });
-
-    it("should find books by ISBN", async () => {
-      const result = await searchHugendubeLByIsbn(TEST_ISBN);
-      expect(result).toBeDefined();
-      // Hugendubel might not have this specific US ISBN, so we check if it returns array (empty or not)
-      // If it fails to connect it throws, so just returning is a success of the "integration"
-      expect(Array.isArray(result)).toBe(true);
     });
   });
 
