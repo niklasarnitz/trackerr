@@ -28,11 +28,11 @@ describe("Book Search Providers (Integration)", () => {
     console.log("Testing Open Library...");
     const results = await searchOpenLibraryByTitle(QUERY);
     expect(results).toBeDefined();
-    expect(results.docs).toBeDefined();
-    expect(results.docs!.length).toBeGreaterThan(0);
+    expect(results?.docs).toBeDefined();
+    expect(results?.docs!.length).toBeGreaterThan(0);
 
     const found = results
-      .docs!.slice(0, 5)
+      ?.docs!.slice(0, 5)
       .some((doc) => doc.title.toLowerCase().includes("lord of the rings"));
     expect(found).toBeTrue();
   }, 10000);

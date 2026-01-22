@@ -24,6 +24,7 @@ import {
   CheckCircle,
   ScanBarcode,
   PenLine,
+  Loader2,
 } from "lucide-react";
 import { useBookMutations } from "~/hooks/use-book-mutations";
 import { useBookSearch } from "~/hooks/use-book-search";
@@ -52,7 +53,10 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
     handleSearch,
     reset,
     getCoverUrl,
-  } = useBookSearch({ enabled: open && !showManualForm, includedInLibrary: true });
+  } = useBookSearch({
+    enabled: open && !showManualForm,
+    includedInLibrary: true,
+  });
 
   const handleAddBook = async (book: {
     id: string;
@@ -190,7 +194,7 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
 
               {showScanner && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-                  <div className="w-full max-w-md rounded-lg bg-background p-1">
+                  <div className="bg-background w-full max-w-md rounded-lg p-1">
                     <BarcodeScanner
                       onScanComplete={handleScanComplete}
                       onClose={() => setShowScanner(false)}
@@ -313,8 +317,17 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
                                       onClick={() => handleAddBook(book)}
                                       disabled={createBook.isPending}
                                     >
-                                      <Plus className="mr-1 h-4 w-4" />
-                                      Add Book
+                                      {createBook.isPending ? (
+                                        <>
+                                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                                          Adding...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Plus className="mr-1 h-4 w-4" />
+                                          Add Book
+                                        </>
+                                      )}
                                     </Button>
                                   )}
                                   <Button

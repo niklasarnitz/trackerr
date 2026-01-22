@@ -449,7 +449,7 @@ export const bookCreateSchema = z.object({
   authors: z.array(bookAuthorSchema).optional(),
   publisher: z.string().optional(),
   publishedYear: z.number().int().optional(),
-  pages: z.number().int().positive().optional(),
+  pages: z.number().int().nonnegative().optional(),
   coverUrl: z.string().url().optional().or(z.literal("")),
   description: z.string().optional(),
   abstract: z.string().optional(),
