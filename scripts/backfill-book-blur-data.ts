@@ -1,4 +1,3 @@
-#!/usr/bin/env bun
 /**
  * Script to generate blur data for all books with cover URLs
  * This script will:
@@ -43,13 +42,13 @@ async function backfillBookBlurData() {
 
   const booksNeedingBlurData = books.filter((book) => !book.blurDataUrl);
 
-  console.log(`📊 Statistics:`);
+  console.log("📊 Statistics:");
   console.log(`  • Total books with covers: ${books.length}`);
   console.log(`  • Books needing blur data: ${booksNeedingBlurData.length}`);
   console.log(
     `  • Books with blur data: ${books.length - booksNeedingBlurData.length}`,
   );
-  console.log("=".repeat(70) + "\n");
+  console.log(`${"=".repeat(70)}\n`);
 
   if (booksNeedingBlurData.length === 0) {
     console.log("✅ All books already have blur data!");
@@ -57,7 +56,6 @@ async function backfillBookBlurData() {
   }
 
   const results: BookProcessingResult[] = [];
-  let processedCount = 0;
 
   // Process books in batches
   for (let i = 0; i < booksNeedingBlurData.length; i += BATCH_SIZE) {
@@ -98,7 +96,6 @@ async function backfillBookBlurData() {
               title: book.title,
               status: "success",
             });
-            processedCount++;
           } else {
             console.log("✗");
             results.push({
@@ -127,7 +124,7 @@ async function backfillBookBlurData() {
   }
 
   // Print summary
-  console.log("\n" + "=".repeat(70));
+  console.log(`\n${"=".repeat(70)}`);
   console.log("📊 Summary:");
   console.log("=".repeat(70));
 
