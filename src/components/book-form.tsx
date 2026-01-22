@@ -402,7 +402,7 @@ export function BookForm({ initialData, onSuccess, onCancel }: BookFormProps) {
                 <FormLabel>Book Cover</FormLabel>
                 <FormControl>
                   <CoverUploader
-                    onImageUpload={(url) => field.onChange(url)}
+                      onImageUpload={field.onChange}
                     defaultImageUrl={field.value ?? undefined}
                     onRemoveCover={() => field.onChange(null)}
                   />

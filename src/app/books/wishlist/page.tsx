@@ -33,7 +33,7 @@ export default async function BookWishlistPage({
         sort={sort}
         page={page}
         status={params.status}
-        isOnWishlist={true}
+        isOnWishlist
         baseUrl="/books/wishlist"
       />
     </div>
