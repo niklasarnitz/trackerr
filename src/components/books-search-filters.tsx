@@ -36,6 +36,8 @@ export function BooksSearchFilters({
     : "created";
   const initialStatus = searchParams.get("status") as BookStatus | null;
 
+  // Default to 'UNREAD' status on wishlist route
+  const isWishlist = baseUrl === "/books/wishlist";
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [sortBy, setSortBy] = useState<BookSort>(initialSort);
   const [status, setStatus] = useState<BookStatusFilter>(
@@ -43,7 +45,9 @@ export function BooksSearchFilters({
       initialStatus === "READING" ||
       initialStatus === "READ"
       ? initialStatus
-      : "all",
+      : isWishlist
+        ? "UNREAD"
+        : "all",
   );
 
   const debouncedSearch = useDebounce(searchInput, 400);
@@ -59,13 +63,22 @@ export function BooksSearchFilters({
       params.set("sort", sortBy);
     }
 
-    if (status !== "all") {
-      params.set("status", status);
+    // On wishlist, only allow valid status values
+    if (isWishlist) {
+      if (status === "UNREAD" || status === "READING" || status === "READ") {
+        params.set("status", status);
+      } else {
+        params.set("status", "UNREAD");
+      }
+    } else {
+      if (status !== "all") {
+        params.set("status", status);
+      }
     }
 
     const newUrl = params.toString() ? `?${params.toString()}` : "";
     router.replace(`${baseUrl}${newUrl}`, { scroll: false });
-  }, [debouncedSearch, sortBy, status, router, baseUrl]);
+  }, [debouncedSearch, sortBy, status, router, baseUrl, isWishlist]);
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
