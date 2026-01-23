@@ -2,229 +2,209 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Bookmark, Archive, Sparkles, ChevronDown } from "lucide-react";
+import {
+  Heart,
+  Bookmark,
+  Archive,
+  Sparkles,
+  LayoutDashboard,
+  BarChart2,
+  Film,
+  Tv,
+  Book,
+  History,
+  Library,
+  List,
+  HandHelping,
+  ThumbsUp,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { cn } from "~/lib/utils";
 
-const navigationItems = [
-  {
-    href: "/",
-    name: "Dashboard",
-    icon: null,
-  },
-  {
-    href: "/statistics",
-    name: "Statistics",
-    icon: null,
-  },
-  {
-    href: "/movies",
-    name: "Movies",
-    icon: null,
-  },
-  {
-    href: "/tv-shows",
-    name: "TV Shows",
-    icon: null,
-  },
-  {
-    href: "/books",
-    name: "Books",
-    icon: null,
-  },
-  {
-    href: "/watches",
-    name: "History",
-    icon: null,
-  },
-  {
-    href: "/collection",
-    name: "Collection",
-    icon: null,
-  },
-  {
-    href: "/lists",
-    name: "Lists",
-    icon: null,
-  },
-  {
-    href: "/loans",
-    name: "Loans",
-    icon: null,
-  },
-  {
-    href: "/recommendations",
-    name: "Recommendations",
-    icon: null,
-  },
+// Define strict structure for items (mirroring desktop)
+interface NavItem {
+  href: string;
+  name: string;
+  icon: React.ElementType;
+}
+
+const topLevelItems: NavItem[] = [
+  { href: "/", name: "Dashboard", icon: LayoutDashboard },
+  { href: "/statistics", name: "Statistics", icon: BarChart2 },
+  { href: "/movies", name: "Movies", icon: Film },
+  { href: "/tv-shows", name: "TV Shows", icon: Tv },
+  { href: "/books", name: "Books", icon: Book },
+];
+
+const libraryItems: NavItem[] = [
+  { href: "/collection", name: "Collection", icon: Library },
+  { href: "/watches", name: "History", icon: History },
+];
+
+const listItems: NavItem[] = [
+  { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
+  { href: "/books/wishlist", name: "Book Wishlist", icon: Bookmark },
+  { href: "/movies/favorites", name: "Favorites", icon: Heart },
+  { href: "/lists", name: "Custom Lists", icon: List },
+];
+
+const moreItems: NavItem[] = [
+  { href: "/loans", name: "Loans", icon: HandHelping },
+  { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
 ];
 
 interface MobileNavMenuProps {
   readonly isActive: (href: string) => boolean;
-  readonly isGroupActive: (items: typeof navigationItems) => boolean;
+  readonly isGroupActive: (items: any[]) => boolean;
   readonly onClose: () => void;
 }
 
 export function MobileNavMenu({
   isActive,
-  isGroupActive,
   onClose,
 }: MobileNavMenuProps) {
   const pathname = usePathname();
 
-  const desktopPrimaryItems = navigationItems.filter(
-    (item) =>
-      item.href === "/" ||
-      item.href === "/statistics" ||
-      item.href === "/movies" ||
-      item.href === "/tv-shows" ||
-      item.href === "/books",
-  );
-
-  const libraryItems = navigationItems.filter((item) =>
-    ["/watches", "/collection"].includes(item.href),
-  );
-
-  const featureItems = navigationItems.filter((item) =>
-    ["/lists", "/loans", "/recommendations"].includes(item.href),
-  );
-
-  const myListsItems = [
-    { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
-    { href: "/books/wishlist", name: "Book Wishlist", icon: Bookmark },
-    { href: "/movies/favorites", name: "Favorites", icon: Heart },
-  ];
+  // Helper to check if any item in a list is active (for accordion highlighting)
+  const isAnyActive = (items: NavItem[]) => {
+    return items.some((item) => isActive(item.href));
+  };
 
   return (
     <div className="border-t py-4 md:hidden">
-      <div className="grid gap-2">
-        {desktopPrimaryItems.map((item) => {
+      <div className="grid gap-1">
+        {/* Top Level Items */}
+        {topLevelItems.map((item) => {
           const isItemActive = isActive(item.href);
-
           return (
             <Link key={item.href} href={item.href} onClick={onClose}>
               <Button
                 variant={isItemActive ? "secondary" : "ghost"}
                 size="sm"
                 className={cn(
-                  "flex w-full items-center justify-start space-x-2",
+                  "flex w-full items-center justify-start space-x-2 px-3",
                   isItemActive && "bg-secondary",
                 )}
               >
+                <item.icon className="h-4 w-4" />
                 <span>{item.name}</span>
               </Button>
             </Link>
           );
         })}
 
-        {/* My Lists */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={
-                pathname.startsWith("/movies/watchlist") ||
-                pathname.startsWith("/movies/favorites")
-                  ? "secondary"
-                  : "ghost"
-              }
-              size="sm"
-              className={cn(
-                "flex w-full items-center justify-start space-x-2",
-                (pathname.startsWith("/movies/watchlist") ||
-                  pathname.startsWith("/movies/favorites")) &&
-                  "bg-secondary",
-              )}
-              aria-label="My Lists menu"
-            >
-              <Heart className="h-4 w-4" />
-              <span>My Lists</span>
-              <ChevronDown className="ml-auto h-4 w-4 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)]">
-            {myListsItems.map((item) => {
-              const Icon = item.icon as typeof Heart | null;
-              return (
-                <DropdownMenuItem key={item.href} asChild>
-                  <Link href={item.href} onClick={onClose}>
-                    {Icon && <Icon className="mr-2 h-4 w-4" />}
-                    <span>{item.name}</span>
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Accordion type="multiple" className="w-full">
+          {/* Library Section */}
+          <AccordionItem value="library" className="border-b-0">
+            <AccordionTrigger className={cn(
+               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
+               isAnyActive(libraryItems) && "bg-secondary text-secondary-foreground"
+            )}>
+              <div className="flex items-center space-x-2">
+                <Archive className="h-4 w-4" />
+                <span className="text-sm font-medium">Library</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-1">
+              <div className="flex flex-col space-y-1 pl-6">
+                {libraryItems.map((item) => {
+                  const isItemActive = isActive(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} onClick={onClose}>
+                      <Button
+                        variant={isItemActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "flex w-full items-center justify-start space-x-2",
+                          isItemActive && "bg-secondary",
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Library */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={isGroupActive(libraryItems) ? "secondary" : "ghost"}
-              size="sm"
-              className={cn(
-                "flex w-full items-center justify-start space-x-2",
-                isGroupActive(libraryItems) && "bg-secondary",
-              )}
-              aria-label="Library menu"
-            >
-              <Archive className="h-4 w-4" />
-              <span>Library</span>
-              <ChevronDown className="ml-auto h-4 w-4 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)]">
-            {libraryItems.map((item) => {
-              const Icon = item.icon as typeof Heart | null;
-              return (
-                <DropdownMenuItem key={item.href} asChild>
-                  <Link href={item.href} onClick={onClose}>
-                    {Icon && <Icon className="mr-2 h-4 w-4" />}
-                    <span>{item.name}</span>
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* Lists Section */}
+          <AccordionItem value="lists" className="border-b-0">
+            <AccordionTrigger className={cn(
+               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
+               (isAnyActive(listItems) || pathname.startsWith("/movies/watchlist") || pathname.startsWith("/books/wishlist") || pathname.startsWith("/movies/favorites")) && "bg-secondary text-secondary-foreground"
+            )}>
+              <div className="flex items-center space-x-2">
+                <List className="h-4 w-4" />
+                <span className="text-sm font-medium">Lists</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-1">
+              <div className="flex flex-col space-y-1 pl-6">
+                {listItems.map((item) => {
+                  const isItemActive = isActive(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} onClick={onClose}>
+                      <Button
+                        variant={isItemActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "flex w-full items-center justify-start space-x-2",
+                          isItemActive && "bg-secondary",
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* More Features */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={isGroupActive(featureItems) ? "secondary" : "ghost"}
-              size="sm"
-              className={cn(
-                "flex w-full items-center justify-start space-x-2",
-                isGroupActive(featureItems) && "bg-secondary",
-              )}
-              aria-label="More features menu"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>More</span>
-              <ChevronDown className="ml-auto h-4 w-4 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)]">
-            {featureItems.map((item) => {
-              const Icon = item.icon as typeof Heart | null;
-              return (
-                <DropdownMenuItem key={item.href} asChild>
-                  <Link href={item.href} onClick={onClose}>
-                    {Icon && <Icon className="mr-2 h-4 w-4" />}
-                    <span>{item.name}</span>
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* More Section */}
+          <AccordionItem value="more" className="border-b-0">
+            <AccordionTrigger className={cn(
+               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
+               isAnyActive(moreItems) && "bg-secondary text-secondary-foreground"
+            )}>
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm font-medium">More</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-1">
+               <div className="flex flex-col space-y-1 pl-6">
+                {moreItems.map((item) => {
+                  const isItemActive = isActive(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} onClick={onClose}>
+                      <Button
+                        variant={isItemActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "flex w-full items-center justify-start space-x-2",
+                          isItemActive && "bg-secondary",
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );
