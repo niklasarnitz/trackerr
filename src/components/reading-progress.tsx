@@ -102,13 +102,34 @@ export function ReadingProgress({
   };
 
   return (
-    <div className="space-y-4 rounded-lg border p-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Reading Progress</h3>
+        <div className="flex items-center gap-2">
+          {status === "UNREAD" && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Circle className="h-4 w-4" />
+              <span className="text-sm font-medium">Not Started</span>
+            </div>
+          )}
+          {status === "READING" && (
+            <div className="flex items-center gap-2 text-blue-500">
+              <BookOpen className="h-4 w-4" />
+              <span className="text-sm font-medium">Currently Reading</span>
+            </div>
+          )}
+          {status === "READ" && (
+            <div className="flex items-center gap-2 text-green-500">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Finished</span>
+            </div>
+          )}
+        </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -125,110 +146,96 @@ export function ReadingProgress({
         </DropdownMenu>
       </div>
 
-      <div className="flex items-center gap-4">
-        {status === "UNREAD" && (
-          <div className="text-muted-foreground flex items-center gap-2">
-            <Circle className="h-5 w-5" />
-            <span>Not Started</span>
-          </div>
-        )}
-        {status === "READING" && (
-          <div className="flex items-center gap-2 text-blue-500">
-            <BookOpen className="h-5 w-5" />
-            <span>Reading</span>
-          </div>
-        )}
-        {status === "READ" && (
-          <div className="flex items-center gap-2 text-green-500">
-            <CheckCircle className="h-5 w-5" />
-            <span>Finished</span>
-          </div>
-        )}
+      {status === "READING" && (
+        <div className="space-y-3">
+             <div className="flex items-end justify-between text-sm">
+                <span className="text-2xl font-bold text-foreground">
+                  {progressPercentage}%
+                </span>
+                <span className="text-muted-foreground pb-1">
+                  {currentPage} of {totalPages ?? "?"} pages
+                </span>
+              </div>
+              
+              {totalPages && (
+                <Progress value={progressPercentage} className="h-3 w-full rounded-full" />
+              )}
 
-        {hasProgress && (
-          <div className="text-muted-foreground ml-auto text-sm">
-            {progressLabel}
-          </div>
-        )}
-      </div>
-
-      {hasProgress && totalPages && (
-        <Progress value={progressPercentage} className="h-2" />
+              <div className="flex gap-2 pt-1">
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex-1" size="sm">
+                      Log Progress
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Update Progress</DialogTitle>
+                      <DialogDescription>
+                        Update the number of pages you have read.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="pages" className="text-right">
+                          Pages Read
+                        </Label>
+                        <Input
+                          id="pages"
+                          value={pagesRead}
+                          onChange={(e) => setPagesRead(e.target.value)}
+                          type="number"
+                          className="col-span-3"
+                        />
+                      </div>
+                      {totalPages && (
+                        <div className="text-muted-foreground text-center text-sm">
+                          Total Pages: {totalPages}
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        onClick={handleUpdateProgress}
+                        disabled={createProgress.isPending}
+                      >
+                        Save
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  className="flex-1"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleStatusChange("READ")}
+                >
+                  Finish
+                </Button>
+              </div>
+        </div>
       )}
 
-      <div className="flex gap-2">
-        {status === "UNREAD" && (
-          <Button
-            className="w-full"
-            onClick={() => handleStatusChange("READING")}
-          >
-            Start Reading
-          </Button>
-        )}
+      {status === "UNREAD" && (
+        <Button
+          className="w-full"
+          size="sm"
+          onClick={() => handleStatusChange("READING")}
+        >
+          Start Reading
+        </Button>
+      )}
 
-        {status === "READING" && (
-          <>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex-1" variant="outline">
-                  Log Progress
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Update Progress</DialogTitle>
-                  <DialogDescription>
-                    Update the number of pages you have read.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="pages" className="text-right">
-                      Pages Read
-                    </Label>
-                    <Input
-                      id="pages"
-                      value={pagesRead}
-                      onChange={(e) => setPagesRead(e.target.value)}
-                      type="number"
-                      className="col-span-3"
-                    />
-                  </div>
-                  {totalPages && (
-                    <div className="text-muted-foreground text-center text-sm">
-                      Total Pages: {totalPages}
-                    </div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button
-                    onClick={handleUpdateProgress}
-                    disabled={createProgress.isPending}
-                  >
-                    Save
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Button
-              className="flex-1"
-              onClick={() => handleStatusChange("READ")}
-            >
-              Finish Book
-            </Button>
-          </>
-        )}
-
-        {status === "READ" && (
-          <Button
-            className="w-full"
-            variant="outline"
-            onClick={() => handleStatusChange("READING")}
-          >
-            Read Again
-          </Button>
-        )}
-      </div>
+      {status === "READ" && (
+        <Button
+          className="w-full"
+          variant="outline"
+          size="sm"
+          onClick={() => handleStatusChange("READING")}
+        >
+          Read Again
+        </Button>
+      )}
     </div>
   );
 }
