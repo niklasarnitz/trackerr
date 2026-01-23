@@ -10,6 +10,7 @@ import {
   type BookAuthorInput,
 } from "~/lib/api-schemas";
 import { downloadAndUploadBookCover } from "~/helpers/image-upload";
+import { getHighQualityCoverUrl } from "./bookSearch";
 
 // Helper function to find or create an author
 async function findOrCreateAuthor(
@@ -257,57 +258,45 @@ export const bookRouter = createTRPCRouter({
         } as any,
       });
 
-      // Try to fetch a higher quality cover from bookcover-api
+      // Try to fetch a higher quality cover from bookcover-api.
+      // If an ISBN is present we always call the ISBN endpoint first.
       let finalCoverUrl = coverUrl;
-      if (input.title || input.isbn) {
-        try {
-          const bookCoverApiUrl = "https://bookcover.longitood.com";
-          let apiCoverUrl: string | null = null;
+      try {
+        let apiCoverUrl: string | null = null;
 
-          // Try ISBN first if available
-          if (input.isbn) {
-            try {
-              const response = await fetch(
-                `${bookCoverApiUrl}/bookcover/${input.isbn}`,
-                { signal: AbortSignal.timeout(5000) },
-              );
-              if (response.ok) {
-                const data = (await response.json()) as { url: string };
-                apiCoverUrl = data.url;
-              }
-            } catch (error) {
-              console.error("Failed to fetch cover by ISBN:", error);
-            }
-          }
-
-          // Fall back to title and author search if ISBN didn't work
-          if (!apiCoverUrl && input.title && authors && authors.length > 0) {
-            try {
-              const params = new URLSearchParams();
-              params.set("book_title", input.title);
-              params.set("author_name", authors[0]!.name);
-
-              const response = await fetch(
-                `${bookCoverApiUrl}/bookcover?${params.toString()}`,
-                { signal: AbortSignal.timeout(5000) },
-              );
-              if (response.ok) {
-                const data = (await response.json()) as { url: string };
-                apiCoverUrl = data.url;
-              }
-            } catch (error) {
-              console.error("Failed to fetch cover by title/author:", error);
-            }
-          }
-
-          // Use the API cover if found, otherwise fall back to provided cover
-          if (apiCoverUrl) {
-            finalCoverUrl = apiCoverUrl;
-          }
-        } catch (error) {
-          console.error("Failed to fetch cover from bookcover-api:", error);
-          // Continue with the original cover if API call fails
+        // Always try ISBN endpoint first when ISBN is available
+        if (input.isbn) {
+          apiCoverUrl = await getHighQualityCoverUrl(input.isbn, null);
         }
+
+        // If ISBN endpoint didn't return a URL, fall back to title/author search
+        if (!apiCoverUrl && input.title && authors && authors.length > 0) {
+          try {
+            const bookCoverApiUrl = "https://bookcover.longitood.com";
+            const params = new URLSearchParams();
+            params.set("book_title", input.title);
+            params.set("author_name", authors[0]!.name);
+
+            const response = await fetch(
+              `${bookCoverApiUrl}/bookcover?${params.toString()}`,
+              { signal: AbortSignal.timeout(5000) },
+            );
+            if (response.ok) {
+              const data = (await response.json()) as { url: string };
+              apiCoverUrl = data.url;
+            }
+          } catch (error) {
+            console.error("Failed to fetch cover by title/author:", error);
+          }
+        }
+
+        // Use the API cover if found, otherwise keep the provided cover
+        if (apiCoverUrl) {
+          finalCoverUrl = apiCoverUrl;
+        }
+      } catch (error) {
+        console.error("Failed to fetch cover from bookcover-api:", error);
+        // Continue with the original cover if API call fails
       }
 
       // Download and upload cover to Minio if available

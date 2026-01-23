@@ -10,12 +10,49 @@ import {
   searchGoogleBooksByIsbn,
   extractIsbn,
   getLargestCover,
+  type GoogleBooksImageLinks,
 } from "~/helpers/google-books-api";
+
 import {
   searchOpenLibraryByIsbn,
   searchOpenLibraryByTitle,
   getOpenLibraryAuthorNames,
 } from "~/helpers/open-library-api";
+
+// Helper to fetch high-quality cover URL or fallback
+export async function getHighQualityCoverUrl(
+  isbn: string | null,
+  fallbackCoverUrl: string | null,
+): Promise<string | null> {
+  const bookCoverApiUrl = "https://bookcover.longitood.com";
+  let highQualityUrl: string | null = null;
+
+  if (isbn) {
+    try {
+      const response = await fetch(`${bookCoverApiUrl}/bookcover/${isbn}`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) {
+        const data = (await response.json()) as { url: string };
+        if (data.url) {
+          highQualityUrl = data.url;
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Failed to fetch high-quality cover for ISBN ${isbn}:`,
+        error,
+      );
+    }
+  }
+
+  // Fallback to provided cover if high-quality cover not found
+  if (!highQualityUrl) {
+    highQualityUrl = fallbackCoverUrl;
+  }
+
+  return highQualityUrl;
+}
 
 export const bookSearchRouter = createTRPCRouter({
   // Search books using Google Books API
@@ -193,7 +230,6 @@ export const bookSearchRouter = createTRPCRouter({
         });
       }
     }),
-
   // Search by ISBN using Google Books
   searchByIsbnGoogle: protectedProcedure
     .input(z.object({ isbn: z.string().min(1) }))

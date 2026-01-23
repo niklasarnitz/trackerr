@@ -8,7 +8,7 @@ const googleBooksIndustryIdentifierSchema = z.object({
   identifier: z.string(),
 });
 
-const googleBooksImageLinksSchema = z.object({
+export const googleBooksImageLinksSchema = z.object({
   smallThumbnail: z.string().optional(),
   thumbnail: z.string().optional(),
   small: z.string().optional(),
@@ -16,6 +16,8 @@ const googleBooksImageLinksSchema = z.object({
   large: z.string().optional(),
   extraLarge: z.string().optional(),
 });
+
+export type GoogleBooksImageLinks = z.infer<typeof googleBooksImageLinksSchema>;
 
 const googleBooksVolumeInfoSchema = z.object({
   title: z.string(),
