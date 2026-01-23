@@ -6,6 +6,7 @@ import { CinemaInsightsPanel } from "~/components/cinema-insights-panel";
 import { WatchInsightsPanel } from "~/components/watch-insights-panel";
 import { CollectionInsightsPanel } from "~/components/collection-insights-panel";
 import { TvShowInsightsPanel } from "~/components/tv-show-insights-panel";
+import { BookInsightsPanel } from "~/components/book-insights-panel";
 import { CreativeInsightsPanel } from "~/components/creative-insights-panel";
 import { Suspense } from "react";
 import { StatisticsSummaryCards } from "~/components/statistics-summary-cards";
@@ -87,6 +88,20 @@ export default async function StatisticsPage() {
               }
             >
               <TvShowInsightsSection year="all" />
+            </Suspense>
+          </div>
+
+          {/* Book Insights */}
+          <div className="space-y-4">
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
+              <BookInsightsSection />
             </Suspense>
           </div>
 
@@ -217,6 +232,11 @@ async function TvShowInsightsSection({ year }: { year?: number | "all" }) {
       dayOfWeekStats={dayOfWeekStats}
     />
   );
+}
+
+async function BookInsightsSection() {
+  const stats = await api.book.getStats();
+  return <BookInsightsPanel stats={stats} />;
 }
 
 async function CinemaInsightsSection() {

@@ -575,4 +575,94 @@ export const bookRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  // Get book statistics
+  getStats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const [
+      totalBooks,
+      readBooks,
+      readingBooks,
+      unreadBooks,
+      readBooksData,
+      topAuthorsData,
+      topCategoriesData,
+    ] = await Promise.all([
+      ctx.db.book.count({ where: { userId } }),
+      ctx.db.book.count({ where: { userId, status: "READ" } }),
+      ctx.db.book.count({ where: { userId, status: "READING" } }),
+      ctx.db.book.count({ where: { userId, status: "UNREAD" } }),
+      ctx.db.book.findMany({
+        where: { userId, status: "READ" },
+        select: { pages: true },
+      }),
+      ctx.db.bookAuthor.groupBy({
+        by: ["authorId"],
+        where: { book: { userId } },
+        _count: { bookId: true },
+        orderBy: { _count: { bookId: "desc" } },
+        take: 5,
+      }),
+      ctx.db.book.groupBy({
+        by: ["categoryId"],
+        where: { userId, categoryId: { not: null } },
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: 5,
+      }),
+    ]);
+
+    // Calculate total pages read
+    const totalPagesRead = readBooksData.reduce(
+      (sum, book) => sum + (book.pages ?? 0),
+      0,
+    );
+
+    // Fetch author names
+    const topAuthors = await Promise.all(
+      topAuthorsData.map(async (item) => {
+        const author = await ctx.db.author.findUnique({
+          where: { id: item.authorId },
+          select: { name: true },
+        });
+        return {
+          name: author?.name ?? "Unknown",
+          count: item._count.bookId,
+        };
+      }),
+    );
+
+    // Fetch category names
+    const topCategories = await Promise.all(
+      topCategoriesData.map(async (item) => {
+        if (!item.categoryId) return null;
+        const category = await ctx.db.bookCategory.findUnique({
+          where: { id: item.categoryId },
+          select: { name: true },
+        });
+        return {
+          name: category?.name ?? "Unknown",
+          count: item._count.id,
+        };
+      }),
+    );
+
+    return {
+      totalBooks,
+      readBooks,
+      readingBooks,
+      unreadBooks,
+      totalPagesRead,
+      topAuthors,
+      topCategories: topCategories.filter(
+        Boolean,
+      ) as { name: string; count: number }[],
+      statusDistribution: [
+        { status: "Read", count: readBooks },
+        { status: "Reading", count: readingBooks },
+        { status: "Unread", count: unreadBooks },
+      ],
+    };
+  }),
 });
