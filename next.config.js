@@ -34,7 +34,7 @@ const config = {
       },
       {
         protocol: "https",
-        hostname: "minio.app.niklas.services",
+        hostname: "minio.app.arnitz.org",
         pathname: "/**",
       },
       {
