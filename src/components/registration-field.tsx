@@ -28,6 +28,10 @@ export function RegistrationField({
   const isPassword = type === "password";
   const inputType = isPassword ? (isVisible ? "text" : "password") : type;
 
+  const toggleVisibility = () => {
+    setIsVisible(!isVisible);
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor={name} className="label">
@@ -52,7 +56,7 @@ export function RegistrationField({
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-foreground absolute right-0 top-0 h-full w-9 hover:bg-transparent"
-            onClick={() => setIsVisible(!isVisible)}
+            onClick={toggleVisibility}
             aria-label={isVisible ? "Hide password" : "Show password"}
           >
             {isVisible ? (
