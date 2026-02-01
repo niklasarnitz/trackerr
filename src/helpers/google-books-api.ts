@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { env } from "~/env";
 
 const GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1/volumes";
 
@@ -90,12 +91,14 @@ export function getLargestCover(
 export async function searchGoogleBooksByIsbn(isbn: string) {
   const url = new URL(GOOGLE_BOOKS_BASE_URL);
   url.searchParams.set("q", `isbn:${isbn}`);
-  url.searchParams.set("country", "US");
+  url.searchParams.set("key", env.GOOGLE_API_KEY);
 
   const response = await fetch(url.toString());
 
   if (!response.ok) {
-    throw new Error("Failed to search Google Books by ISBN");
+    throw new Error("Failed to search Google Books by ISBN", {
+      cause: await response.text(),
+    });
   }
 
   const data = await response.json();
@@ -117,13 +120,14 @@ export async function searchGoogleBooks(title: string, author?: string) {
   }
 
   url.searchParams.set("q", queryString);
-  url.searchParams.set("maxResults", "20");
-  url.searchParams.set("country", "US");
+  url.searchParams.set("key", env.GOOGLE_API_KEY);
 
   const response = await fetch(url.toString());
 
   if (!response.ok) {
-    throw new Error("Failed to search Google Books");
+    throw new Error("Failed to search Google Books", {
+      cause: await response.text(),
+    });
   }
 
   const data = await response.json();
@@ -132,6 +136,6 @@ export async function searchGoogleBooks(title: string, author?: string) {
     return googleBooksResponseSchema.parse(data);
   } catch (error) {
     console.error("Google Books API response validation failed:", error);
-    throw new Error("Invalid response from Google Books API");
+    throw new Error("Invalid response from Google Books API", { cause: error });
   }
 }

@@ -19,6 +19,7 @@ export const env = createEnv({
     MINIO_SECRET_KEY: z.string(),
     MINIO_BUCKET: z.string().default("bookworm"),
     MINIO_USE_SSL: z.string().default("true"),
+    GOOGLE_API_KEY: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -47,6 +48,7 @@ export const env = createEnv({
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
     MINIO_BUCKET: process.env.MINIO_BUCKET,
     MINIO_USE_SSL: process.env.MINIO_USE_SSL,
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**

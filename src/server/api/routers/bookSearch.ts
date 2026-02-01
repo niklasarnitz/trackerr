@@ -74,43 +74,43 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
 
-        const results = response.items
-          .map((item) => {
-            const { volumeInfo } = item;
+        const results = response.items.map((item) => {
+          const { volumeInfo } = item;
 
-            // Extract published year
-            const publishedYear = volumeInfo.publishedDate
-              ? parseInt(volumeInfo.publishedDate.split("-")[0] ?? "0", 10) ||
-                null
-              : null;
+          // Extract published year
+          const publishedYear = volumeInfo.publishedDate
+            ? parseInt(volumeInfo.publishedDate.split("-")[0] ?? "0", 10) ||
+              null
+            : null;
 
-            return {
-              id: item.id,
-              title: volumeInfo.title,
-              subtitle: volumeInfo.subtitle ?? null,
-              authors: volumeInfo.authors
-                ? volumeInfo.authors.map((author) => ({
-                    name: author,
-                    role: null as string | null,
-                  }))
-                : [],
-              publisher: volumeInfo.publisher ?? null,
-              publishedYear,
-              description: volumeInfo.description ?? null,
-              coverUrl: getLargestCover(volumeInfo.imageLinks),
-              categories: volumeInfo.categories ?? null,
-              isbn: extractIsbn(volumeInfo.industryIdentifiers),
-              pages: volumeInfo.pageCount ?? null,
-              language: volumeInfo.language ?? null,
-            };
-          })
-          .filter((result) => result.title); // Filter out any results without a title
+          return {
+            id: item.id,
+            title: volumeInfo.title,
+            subtitle: volumeInfo.subtitle ?? null,
+            authors: volumeInfo.authors
+              ? volumeInfo.authors.map((author) => ({
+                  name: author,
+                  role: null as string | null,
+                }))
+              : [],
+            publisher: volumeInfo.publisher ?? null,
+            publishedYear,
+            description: volumeInfo.description ?? null,
+            coverUrl: getLargestCover(volumeInfo.imageLinks),
+            categories: volumeInfo.categories ?? null,
+            isbn: extractIsbn(volumeInfo.industryIdentifiers),
+            pages: volumeInfo.pageCount ?? null,
+            language: volumeInfo.language ?? null,
+          };
+        });
 
-        return {
-          results,
-          totalItems: response.totalItems,
-        };
+        return results;
       } catch (error) {
+        console.error("Google Books search failed:", {
+          input,
+          error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to search Google Books",
@@ -223,6 +223,11 @@ export const bookSearchRouter = createTRPCRouter({
           totalItems: response.totalItems,
         };
       } catch (error) {
+        console.error("Search and Add failed:", {
+          input,
+          error,
+          stack: error instanceof Error ? error.stack : undefined,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to search Google Books",
@@ -270,6 +275,10 @@ export const bookSearchRouter = createTRPCRouter({
           source: "google" as const,
         };
       } catch (error) {
+        console.error("Google Books ISBN search failed:", {
+          isbn: input.isbn,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to search Google Books by ISBN",
@@ -331,6 +340,10 @@ export const bookSearchRouter = createTRPCRouter({
           source: "openlibrary" as const,
         };
       } catch (error) {
+        console.error("Open Library ISBN search failed:", {
+          isbn: input.isbn,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to search Open Library",
@@ -375,7 +388,10 @@ export const bookSearchRouter = createTRPCRouter({
           source: "amazon" as const,
         };
       } catch (error) {
-        console.error("Amazon ISBN search failed:", error);
+        console.error("Amazon ISBN search failed:", {
+          isbn: input.isbn,
+          error,
+        });
         return null;
       }
     }),
@@ -430,7 +446,10 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Google Books ISBN search failed:", error);
+        console.error("Google Books ISBN search failed in combined search:", {
+          isbn: input.isbn,
+          error,
+        });
       }
 
       // Fallback to Open Library
@@ -478,7 +497,10 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Open Library ISBN search failed:", error);
+        console.error("Open Library ISBN search failed in combined search:", {
+          isbn: input.isbn,
+          error,
+        });
       }
 
       // Last fallback - try Amazon
@@ -514,7 +536,13 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Amazon ISBN search fallback failed:", error);
+        console.error(
+          "Amazon ISBN search fallback failed in combined search:",
+          {
+            isbn: input.isbn,
+            error,
+          },
+        );
       }
 
       return null;
@@ -573,7 +601,10 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Google Books title search failed:", error);
+        console.error("Google Books title search failed:", {
+          title: input.title,
+          error,
+        });
       }
 
       // Fallback to Open Library search
@@ -615,7 +646,10 @@ export const bookSearchRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Open Library title search failed:", error);
+        console.error("Open Library title search failed:", {
+          title: input.title,
+          error,
+        });
       }
 
       return null;
@@ -647,7 +681,10 @@ export const bookSearchRouter = createTRPCRouter({
               url = data.url;
             }
           } catch (error) {
-            console.error("Failed to fetch cover by ISBN:", error);
+            console.error("Failed to fetch cover by ISBN:", {
+              isbn: input.isbn,
+              error,
+            });
           }
         }
 
@@ -669,12 +706,20 @@ export const bookSearchRouter = createTRPCRouter({
               url = data.url;
             }
           } catch (error) {
-            console.error("Failed to fetch cover by title/author:", error);
+            console.error("Failed to fetch cover by title/author:", {
+              title: input.title,
+              author: input.author,
+              error,
+            });
           }
         }
 
         return { url: url ?? null };
       } catch (error) {
+        console.error("fetchBookCover procedure failed:", {
+          input,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch book cover",
