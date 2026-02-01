@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Trash2 } from "lucide-react";
+import { BookOpen, Loader2, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -55,15 +55,16 @@ export function BookCard({ book }: BookCardProps) {
       toast.success("Book successfully removed from your library");
       await utils.book.getAll.invalidate();
       router.refresh();
+      setShowDeleteDialog(false);
     },
     onError: (error) => {
       toast.error(error.message || "Unable to delete book. Please try again.");
     },
   });
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
     deleteBook.mutate({ id: book.id });
-    setShowDeleteDialog(false);
   };
 
   const updateBook = api.book.update.useMutation({
@@ -147,7 +148,14 @@ export function BookCard({ book }: BookCardProps) {
                     {progressPercentage}%
                   </span>
                 </div>
-                <div className="bg-muted h-1.5 w-full rounded-full">
+                <div
+                  className="bg-muted h-1.5 w-full rounded-full"
+                  role="progressbar"
+                  aria-valuenow={progressPercentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Reading progress: ${progressPercentage}%`}
+                >
                   <div
                     className="bg-primary h-1.5 rounded-full transition-all"
                     style={{ width: `${progressPercentage}%` }}
@@ -169,6 +177,9 @@ export function BookCard({ book }: BookCardProps) {
                 onClick={toggleWishlist}
                 disabled={updateBook.isPending}
               >
+                {updateBook.isPending && (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                )}
                 Add to Library
               </Button>
             ) : null}
@@ -177,6 +188,7 @@ export function BookCard({ book }: BookCardProps) {
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
               disabled={deleteBook.isPending}
+              aria-label="Delete book"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -189,17 +201,27 @@ export function BookCard({ book }: BookCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Book</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{book.title}"? This action cannot
-              be undone.
+              Are you sure you want to delete &quot;{book.title}&quot;? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-2">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteBook.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteBook.isPending}
             >
-              Delete
+              {deleteBook.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
