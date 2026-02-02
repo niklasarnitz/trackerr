@@ -182,7 +182,7 @@ export const bibleRouter = createTRPCRouter({
         const count = end - start + 1;
         
         // 1. Accumulate total verses read for intensity/completion count
-        bookIntensity[entry.chapter] += count;
+        bookIntensity[entry.chapter] = (bookIntensity[entry.chapter] ?? 0) + count;
 
         // 2. Track unique verses for percentage
         for (let i = start; i <= end; i++) {
