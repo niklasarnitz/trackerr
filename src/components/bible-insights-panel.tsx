@@ -199,7 +199,7 @@ export function BibleInsightsPanel({ progress }: BibleInsightsPanelProps) {
               <Legend />
               <Bar
                 dataKey="percentage"
-                fill={CHART_COLORS.primary}
+                fill={CHART_COLORS.purple}
                 name="Completion %"
               />
             </BarChart>
