@@ -20,14 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import {
-  Book,
-  BookOpen,
-  Library,
-  TrendingUp,
-  User,
-  Tag,
-} from "lucide-react";
+import { Book, BookOpen, Library, TrendingUp, User, Tag } from "lucide-react";
 import { CHART_COLORS, getChartColor } from "~/lib/chart-colors";
 import { StatCard } from "~/components/stat-card";
 import type { RouterOutputs } from "~/trpc/react";
@@ -46,6 +39,12 @@ export function BookInsightsPanel({ stats }: BookInsightsPanelProps) {
     topAuthors,
     topCategories,
     statusDistribution,
+    ebookCount,
+    physicalBookCount,
+    wishlistCount,
+    booksInSeries,
+    totalSeries,
+    avgBooksPerSeries,
   } = stats;
 
   return (
@@ -83,6 +82,34 @@ export function BookInsightsPanel({ stats }: BookInsightsPanelProps) {
         />
       </div>
 
+      {/* Additional Stats Row */}
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <StatCard
+          title="eBooks"
+          value={ebookCount ?? 0}
+          description={`${physicalBookCount ?? 0} physical books`}
+          icon={<Book className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Series"
+          value={totalSeries ?? 0}
+          description={`${booksInSeries ?? 0} books in series`}
+          icon={<Library className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Avg per Series"
+          value={avgBooksPerSeries ?? 0}
+          description="books per series"
+          icon={<TrendingUp className="h-4 w-4" />}
+        />
+        <StatCard
+          title="Wishlist"
+          value={wishlistCount ?? 0}
+          description="books to acquire"
+          icon={<Tag className="h-4 w-4" />}
+        />
+      </div>
+
       {/* Charts */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Status Distribution */}
@@ -108,10 +135,7 @@ export function BookInsightsPanel({ stats }: BookInsightsPanelProps) {
                     nameKey="status"
                   >
                     {statusDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={getChartColor(index)}
-                      />
+                      <Cell key={`cell-${index}`} fill={getChartColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip

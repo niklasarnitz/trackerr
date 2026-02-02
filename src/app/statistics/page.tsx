@@ -8,6 +8,8 @@ import { CollectionInsightsPanel } from "~/components/collection-insights-panel"
 import { TvShowInsightsPanel } from "~/components/tv-show-insights-panel";
 import { BookInsightsPanel } from "~/components/book-insights-panel";
 import { CreativeInsightsPanel } from "~/components/creative-insights-panel";
+import { LibraryInsightsPanel } from "~/components/library-insights-panel";
+import { BibleInsightsPanel } from "~/components/bible-insights-panel";
 import { Suspense } from "react";
 import { StatisticsSummaryCards } from "~/components/statistics-summary-cards";
 
@@ -102,6 +104,34 @@ export default async function StatisticsPage() {
               }
             >
               <BookInsightsSection />
+            </Suspense>
+          </div>
+
+          {/* Library Insights */}
+          <div className="space-y-4">
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
+              <LibraryInsightsSection />
+            </Suspense>
+          </div>
+
+          {/* Bible Reading Insights */}
+          <div className="space-y-4">
+            <Suspense
+              fallback={
+                <div className="bg-card rounded-lg border p-6">
+                  <div className="bg-muted mb-4 h-6 w-48 animate-pulse rounded" />
+                  <div className="bg-muted h-64 animate-pulse rounded" />
+                </div>
+              }
+            >
+              <BibleInsightsSection />
             </Suspense>
           </div>
 
@@ -237,6 +267,16 @@ async function TvShowInsightsSection({ year }: { year?: number | "all" }) {
 async function BookInsightsSection() {
   const stats = await api.book.getStats();
   return <BookInsightsPanel stats={stats} />;
+}
+
+async function LibraryInsightsSection() {
+  const stats = await api.libraryStats.getOverview();
+  return <LibraryInsightsPanel stats={stats} />;
+}
+
+async function BibleInsightsSection() {
+  const progress = await api.bible.getProgress();
+  return <BibleInsightsPanel progress={progress} />;
 }
 
 async function CinemaInsightsSection() {

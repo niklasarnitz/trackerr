@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -62,7 +62,7 @@ const formSchema = z
     {
       message: "End verse must be greater than or equal to start verse",
       path: ["endVerse"],
-    }
+    },
   );
 
 type FormValues = z.infer<typeof formSchema>;
@@ -117,8 +117,10 @@ export function ReadingTrackerForm() {
     }
 
     // Clean up verses
-    const startVerse = values.startVerse === "" ? undefined : Number(values.startVerse);
-    const endVerse = values.endVerse === "" ? undefined : Number(values.endVerse);
+    const startVerse =
+      values.startVerse === "" ? undefined : Number(values.startVerse);
+    const endVerse =
+      values.endVerse === "" ? undefined : Number(values.endVerse);
 
     createMutation.mutate({
       bookId: values.bookId,
@@ -133,7 +135,7 @@ export function ReadingTrackerForm() {
     <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-4 grid-cols-1">
+          <div className="grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="bookId"
@@ -165,29 +167,29 @@ export function ReadingTrackerForm() {
                       <Command>
                         <CommandInput placeholder="Search book..." />
                         <CommandList>
-                            <CommandEmpty>No book found.</CommandEmpty>
-                            <CommandGroup>
+                          <CommandEmpty>No book found.</CommandEmpty>
+                          <CommandGroup>
                             {BIBLE_BOOKS.map((book) => (
-                                <CommandItem
+                              <CommandItem
                                 value={book.name}
                                 key={book.id}
                                 onSelect={() => {
-                                    form.setValue("bookId", book.id);
-                                    setOpen(false);
+                                  form.setValue("bookId", book.id);
+                                  setOpen(false);
                                 }}
-                                >
+                              >
                                 <Check
-                                    className={cn(
+                                  className={cn(
                                     "mr-2 h-4 w-4",
                                     book.id === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0",
-                                    )}
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
                                 />
                                 {book.name}
-                                </CommandItem>
+                              </CommandItem>
                             ))}
-                            </CommandGroup>
+                          </CommandGroup>
                         </CommandList>
                       </Command>
                     </PopoverContent>
@@ -233,6 +235,9 @@ export function ReadingTrackerForm() {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      Leave blank for full chapter
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -300,7 +305,20 @@ export function ReadingTrackerForm() {
               )}
             />
           </div>
-          <Button type="submit" className="w-full">Log Reading</Button>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={createMutation.isPending}
+          >
+            {createMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logging...
+              </>
+            ) : (
+              "Log Reading"
+            )}
+          </Button>
         </form>
       </Form>
     </div>

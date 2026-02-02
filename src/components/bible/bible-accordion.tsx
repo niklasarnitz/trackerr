@@ -9,6 +9,7 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { type BibleBook } from "~/lib/bible-data";
 import { ChapterHeatmap } from "./chapter-heatmap";
+import { useMemo } from "react";
 
 interface BookProgress extends BibleBook {
   uniqueChaptersRead: number;
@@ -29,20 +30,40 @@ const CATEGORIES = [
 ] as const;
 
 export function BibleAccordion({ books }: BibleAccordionProps) {
+  const booksByCategory = useMemo(() => {
+    const categorized: Record<string, BookProgress[]> = {};
+    for (const book of books) {
+      if (!categorized[book.category]) {
+        categorized[book.category] = [];
+      }
+      categorized[book.category]!.push(book);
+    }
+    return categorized;
+  }, [books]);
+
+  const defaultValuesByCategory: Record<string, string[]> = useMemo(() => {
+    const defaults: Record<string, string[]> = {};
+    for (const category of CATEGORIES) {
+      const categoryBooks = booksByCategory[category.id] || [];
+      defaults[category.id] = categoryBooks
+        .filter((book) => book.percentage < 100)
+        .map((book) => book.id);
+    }
+    return defaults;
+  }, [booksByCategory]);
+
   return (
     <div className="space-y-8">
       {CATEGORIES.map((category) => {
-        const categoryBooks = books.filter((b) => b.category === category.id);
+        const categoryBooks = booksByCategory[category.id] || [];
         if (categoryBooks.length === 0) return null;
-
-        const allBookIds = categoryBooks.map((b) => b.id);
 
         return (
           <div key={category.id} className="space-y-4">
             <h2 className="text-xl font-semibold">{category.label}</h2>
             <Accordion
               type="multiple"
-              defaultValue={allBookIds}
+              defaultValue={defaultValuesByCategory[category.id]}
               className="w-full"
             >
               {categoryBooks.map((book) => (
@@ -57,7 +78,10 @@ export function BibleAccordion({ books }: BibleAccordionProps) {
                       </div>
                       <div className="flex items-center gap-2">
                         {book.completionCount > 0 && (
-                          <Badge variant="outline" className="border-green-500 text-green-600">
+                          <Badge
+                            variant="outline"
+                            className="border-green-500 text-green-600"
+                          >
                             x{book.completionCount}
                           </Badge>
                         )}

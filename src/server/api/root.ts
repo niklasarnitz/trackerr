@@ -21,6 +21,7 @@ import { tmdbTop250Router } from "./routers/tmdbTop250";
 import { quoteRouter } from "./routers/quote";
 import { bookSeriesRouter } from "./routers/bookSeries";
 import { bibleRouter } from "./routers/bible";
+import { libraryStatsRouter } from "./routers/libraryStats";
 
 /**
  * This is the primary router for your server.
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
   quote: quoteRouter,
   bookSeries: bookSeriesRouter,
   bible: bibleRouter,
+  libraryStats: libraryStatsRouter,
 });
 
 // export type definition of API

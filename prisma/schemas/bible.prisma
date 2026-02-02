@@ -15,6 +15,13 @@ model BibleReadingEntry {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Indexes for common query patterns
+  @@index([userId])
   @@index([userId, bookId, chapter])
   @@index([userId, date])
+  @@index([date])
+  @@index([bookId])
+  
+  // Prevent duplicate entries for same reading on same day
+  @@unique([userId, bookId, chapter, startVerse, endVerse, date])
 }

@@ -588,6 +588,11 @@ export const bookRouter = createTRPCRouter({
       readBooksData,
       topAuthorsData,
       topCategoriesData,
+      ebookCount,
+      physicalBookCount,
+      wishlistCount,
+      booksInSeries,
+      uniqueSeries,
     ] = await Promise.all([
       ctx.db.book.count({ where: { userId } }),
       ctx.db.book.count({ where: { userId, status: "READ" } }),
@@ -610,6 +615,15 @@ export const bookRouter = createTRPCRouter({
         _count: { id: true },
         orderBy: { _count: { id: "desc" } },
         take: 5,
+      }),
+      ctx.db.book.count({ where: { userId, isEbook: true } }),
+      ctx.db.book.count({ where: { userId, isEbook: false } }),
+      ctx.db.book.count({ where: { userId, isOnWishlist: true } }),
+      ctx.db.book.count({ where: { userId, seriesId: { not: null } } }),
+      ctx.db.book.groupBy({
+        by: ["seriesId"],
+        where: { userId, seriesId: { not: null } },
+        _count: { id: true },
       }),
     ]);
 
@@ -664,6 +678,19 @@ export const bookRouter = createTRPCRouter({
         { status: "Reading", count: readingBooks },
         { status: "Unread", count: unreadBooks },
       ],
+      ebookCount,
+      physicalBookCount,
+      wishlistCount,
+      booksInSeries,
+      totalSeries: uniqueSeries.length,
+      avgBooksPerSeries:
+        uniqueSeries.length > 0
+          ? Math.round(
+              (uniqueSeries.reduce((sum, s) => sum + s._count.id, 0) /
+                uniqueSeries.length) *
+                10,
+            ) / 10
+          : 0,
     };
   }),
 });

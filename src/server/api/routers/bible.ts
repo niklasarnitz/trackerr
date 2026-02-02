@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { BIBLE_BOOKS } from "~/lib/bible-data";
 import { BIBLE_VERSE_COUNTS } from "~/lib/bible-verses-data";
 import { TRPCError } from "@trpc/server";
+import { startOfDay, endOfDay } from "date-fns";
 
 export const bibleRouter = createTRPCRouter({
   logReading: protectedProcedure
@@ -14,6 +15,28 @@ export const bibleRouter = createTRPCRouter({
         endVerse: z.number().int().min(1).optional(),
         date: z.date(),
       })
+      .refine(
+        (data) => {
+          // Validate chapter is within bounds
+          const book = BIBLE_BOOKS.find((b) => b.id === data.bookId);
+          return !book || data.chapter <= book.chapters;
+        },
+        { message: "Invalid chapter number for selected book", path: ["chapter"] }
+      )
+      .refine(
+        (data) => {
+          // Validate verses are within chapter bounds
+          if (data.startVerse || data.endVerse) {
+            const maxVerses = BIBLE_VERSE_COUNTS[data.bookId]?.[data.chapter - 1];
+            if (!maxVerses) return true; // Skip validation if verse count not found
+            const start = data.startVerse ?? 1;
+            const end = data.endVerse ?? maxVerses;
+            return start <= maxVerses && end <= maxVerses;
+          }
+          return true;
+        },
+        { message: "Verses exceed the chapter's verse count", path: ["endVerse"] }
+      )
     )
     .mutation(async ({ ctx, input }) => {
       const book = BIBLE_BOOKS.find((b) => b.id === input.bookId);
@@ -42,6 +65,31 @@ export const bibleRouter = createTRPCRouter({
         }
       }
 
+      // Normalize date to UTC midnight to avoid timezone issues
+      const normalizedDate = startOfDay(input.date);
+
+      // Check for duplicate entries
+      const existingEntry = await ctx.db.bibleReadingEntry.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          bookId: input.bookId,
+          chapter: input.chapter,
+          startVerse: startVerse ?? null,
+          endVerse: endVerse ?? null,
+          date: {
+            gte: startOfDay(normalizedDate),
+            lt: endOfDay(normalizedDate),
+          },
+        },
+      });
+
+      if (existingEntry) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Reading already logged for this chapter on this date",
+        });
+      }
+
       return await ctx.db.bibleReadingEntry.create({
         data: {
           userId: ctx.session.user.id,
@@ -49,7 +97,7 @@ export const bibleRouter = createTRPCRouter({
           chapter: input.chapter,
           startVerse,
           endVerse,
-          date: input.date,
+          date: normalizedDate,
         },
       });
     }),
@@ -64,6 +112,28 @@ export const bibleRouter = createTRPCRouter({
         endVerse: z.number().int().min(1).optional(),
         date: z.date(),
       })
+      .refine(
+        (data) => {
+          // Validate chapter is within bounds
+          const book = BIBLE_BOOKS.find((b) => b.id === data.bookId);
+          return !book || data.chapter <= book.chapters;
+        },
+        { message: "Invalid chapter number for selected book", path: ["chapter"] }
+      )
+      .refine(
+        (data) => {
+          // Validate verses are within chapter bounds
+          if (data.startVerse || data.endVerse) {
+            const maxVerses = BIBLE_VERSE_COUNTS[data.bookId]?.[data.chapter - 1];
+            if (!maxVerses) return true; // Skip validation if verse count not found
+            const start = data.startVerse ?? 1;
+            const end = data.endVerse ?? maxVerses;
+            return start <= maxVerses && end <= maxVerses;
+          }
+          return true;
+        },
+        { message: "Verses exceed the chapter's verse count", path: ["endVerse"] }
+      )
     )
     .mutation(async ({ ctx, input }) => {
       const book = BIBLE_BOOKS.find((b) => b.id === input.bookId);
@@ -81,6 +151,21 @@ export const bibleRouter = createTRPCRouter({
         });
       }
 
+      // Verify record exists and belongs to user
+      const existingEntry = await ctx.db.bibleReadingEntry.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!existingEntry || existingEntry.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Reading entry not found",
+        });
+      }
+
+      // Normalize date to UTC midnight
+      const normalizedDate = startOfDay(input.date);
+
       return await ctx.db.bibleReadingEntry.update({
         where: {
           id: input.id,
@@ -91,7 +176,7 @@ export const bibleRouter = createTRPCRouter({
           chapter: input.chapter,
           startVerse: input.startVerse,
           endVerse: input.endVerse,
-          date: input.date,
+          date: normalizedDate,
         },
       });
     }),
@@ -172,7 +257,13 @@ export const bibleRouter = createTRPCRouter({
 
       // Fallback for legacy data
       if (!start || !end) {
-        const total = BIBLE_VERSE_COUNTS[entry.bookId]?.[entry.chapter - 1] ?? 0;
+        const verseCount = BIBLE_VERSE_COUNTS[entry.bookId]?.[entry.chapter - 1];
+        if (verseCount === undefined) {
+          console.warn(
+            `Missing verse count for ${entry.bookId} chapter ${entry.chapter}`
+          );
+        }
+        const total = verseCount ?? 0;
         if (!start) start = 1;
         if (!end) end = total;
       }
