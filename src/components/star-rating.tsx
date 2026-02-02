@@ -34,6 +34,7 @@ export function StarRating({
         variant="ghost"
         size="sm"
         className="h-auto p-1"
+        aria-label={`Rate ${i} stars`}
         onClick={() => {
           if (!editable) return;
 
