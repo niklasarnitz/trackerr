@@ -28,4 +28,5 @@ model User {
   tvShowWatches     TvShowWatch[]
   quotes            Quote[]
   bookSeries        BookSeries[]
+  bibleReadings     BibleReadingEntry[]
 }

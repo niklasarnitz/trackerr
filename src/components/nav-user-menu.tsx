@@ -13,14 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import type { Session } from "next-auth";
 
 interface NavUserMenuProps {
   readonly mounted: boolean;
+  readonly user?: Session["user"];
 }
 
-export function NavUserMenu({ mounted }: NavUserMenuProps) {
+export function NavUserMenu({ mounted, user: initialUser }: NavUserMenuProps) {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
+
+  const user = initialUser ?? session?.user;
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/signin" });
@@ -46,17 +50,17 @@ export function NavUserMenu({ mounted }: NavUserMenuProps) {
       )}
 
       {/* User Profile Dropdown */}
-      {session?.user && (
+      {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src={session.user.image ?? ""}
-                  alt={session.user.name ?? ""}
+                  src={user.image ?? ""}
+                  alt={user.name ?? ""}
                 />
                 <AvatarFallback>
-                  {session.user.name?.charAt(0)?.toUpperCase() ?? (
+                  {user.name?.charAt(0)?.toUpperCase() ?? (
                     <User className="h-4 w-4" />
                   )}
                 </AvatarFallback>
@@ -67,10 +71,10 @@ export function NavUserMenu({ mounted }: NavUserMenuProps) {
             <DropdownMenuItem className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm leading-none font-medium">
-                  {session.user.name}
+                  {user.name}
                 </p>
                 <p className="text-muted-foreground text-xs leading-none">
-                  {session.user.email}
+                  {user.email}
                 </p>
               </div>
             </DropdownMenuItem>

@@ -655,9 +655,10 @@ export const bookRouter = createTRPCRouter({
       unreadBooks,
       totalPagesRead,
       topAuthors,
-      topCategories: topCategories.filter(
-        Boolean,
-      ) as { name: string; count: number }[],
+      topCategories: topCategories.filter(Boolean) as {
+        name: string;
+        count: number;
+      }[],
       statusDistribution: [
         { status: "Read", count: readBooks },
         { status: "Reading", count: readingBooks },

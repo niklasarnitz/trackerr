@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Film, Menu } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { useSession } from "next-auth/react";
 import { cn } from "~/lib/utils";
 import { useNavigation } from "~/hooks/use-navigation";
 import { DesktopNavMenus } from "~/components/desktop-nav-menus";
 import { NavUserMenu } from "~/components/nav-user-menu";
 import { MobileNavMenu } from "~/components/mobile-nav-menu";
+import type { Session } from "next-auth";
 
 const navigationItems = [
   {
@@ -35,6 +35,11 @@ const navigationItems = [
   {
     href: "/books",
     name: "Books",
+    icon: null,
+  },
+  {
+    href: "/bible",
+    name: "Bible",
     icon: null,
   },
   {
@@ -64,13 +69,16 @@ const navigationItems = [
   },
 ];
 
-function NavigationContent() {
+interface NavigationProps {
+  readonly user?: Session["user"];
+}
+
+function NavigationContent({ user }: NavigationProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
   const { isMobileMenuOpen, setIsMobileMenuOpen, mounted } = useNavigation();
 
   // Don't render navigation if user is not logged in
-  if (!session?.user) {
+  if (!user) {
     return null;
   }
 
@@ -133,7 +141,7 @@ function NavigationContent() {
 
           {/* User Menu & Mobile Button */}
           <div className="flex items-center space-x-2">
-            <NavUserMenu mounted={mounted} />
+            <NavUserMenu mounted={mounted} user={user} />
 
             {/* Mobile Menu Button */}
             <Button
@@ -162,6 +170,6 @@ function NavigationContent() {
   );
 }
 
-export function Navigation() {
-  return <NavigationContent />;
+export function Navigation({ user }: NavigationProps) {
+  return <NavigationContent user={user} />;
 }

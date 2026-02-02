@@ -41,6 +41,7 @@ const topLevelItems: NavItem[] = [
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
+  { href: "/bible", name: "Bible", icon: Book },
 ];
 
 const libraryItems: NavItem[] = [

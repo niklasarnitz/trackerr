@@ -1,5 +1,8 @@
 import { Navigation } from "~/components/navigation";
+import { auth } from "~/server/auth";
 
-export function NavigationWrapper() {
-  return <Navigation />;
+export async function NavigationWrapper() {
+  const session = await auth();
+
+  return <Navigation user={session?.user} />;
 }
