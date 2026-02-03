@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Heart, Bookmark, Trash2 } from "lucide-react";
+import { Heart, Bookmark, Trash2, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   AlertDialog,
@@ -17,6 +17,7 @@ import {
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import type { RouterOutputs } from "~/trpc/react";
+import { useState } from "react";
 
 type Movie = RouterOutputs["movie"]["getById"];
 
@@ -27,6 +28,7 @@ interface MovieActionsProps {
 export function MovieActions({ movie }: MovieActionsProps) {
   const router = useRouter();
   const utils = api.useUtils();
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleWatchlist = api.movie.toggleWatchlist.useMutation({
     onSuccess: async () => {
@@ -60,14 +62,16 @@ export function MovieActions({ movie }: MovieActionsProps) {
       await utils.movie.getAll.invalidate();
       router.push("/movies");
       router.refresh();
+      setIsOpen(false);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to delete movie");
     },
   });
 
-  const handleDeleteMovie = async () => {
-    await deleteMovie.mutateAsync({ id: movie.id });
+  const handleDeleteMovie = (e: React.MouseEvent) => {
+    e.preventDefault();
+    deleteMovie.mutate({ id: movie.id });
   };
 
   return (
@@ -96,7 +100,7 @@ export function MovieActions({ movie }: MovieActionsProps) {
         {movie.isFavorite ? "Favorite" : "Add to Favorites"}
       </Button>
 
-      <AlertDialog>
+      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogTrigger asChild>
           <Button className="w-full" variant="destructive">
             <Trash2 className="mr-2 h-4 w-4" />
@@ -112,12 +116,22 @@ export function MovieActions({ movie }: MovieActionsProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMovie.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMovie.mutate({ id: movie.id })}
+              onClick={handleDeleteMovie}
+              disabled={deleteMovie.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleteMovie.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
