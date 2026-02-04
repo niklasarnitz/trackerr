@@ -21,6 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { OptimizedCoverImage } from "~/components/optimized-cover-image";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -183,15 +188,22 @@ export function BookCard({ book }: BookCardProps) {
                 Add to Library
               </Button>
             ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={deleteBook.isPending}
-              aria-label="Delete book"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={deleteBook.isPending}
+                  aria-label="Delete book"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete Book</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </CardContent>
       </Card>
