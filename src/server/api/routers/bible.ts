@@ -348,7 +348,8 @@ export const bibleRouter = createTRPCRouter({
       }
 
       // Track translation statistics
-      translationStats[entry.translation] = (translationStats[entry.translation] ?? 0) + 1;
+      translationStats[entry.translation] =
+        (translationStats[entry.translation] ?? 0) + 1;
 
       // Determine range
       let start = entry.startVerse;
