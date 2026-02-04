@@ -329,6 +329,8 @@ export const bibleRouter = createTRPCRouter({
     const uniqueStats: Record<string, Record<number, Set<number>>> = {};
     // bookId -> chapter -> Total count of verses read (accumulated)
     const intensityStats: Record<string, Record<number, number>> = {};
+    // translation -> count of readings
+    const translationStats: Record<string, number> = {};
 
     for (const entry of readings) {
       if (!uniqueStats[entry.bookId]) {
@@ -344,6 +346,9 @@ export const bibleRouter = createTRPCRouter({
       if (!bookIntensity[entry.chapter]) {
         bookIntensity[entry.chapter] = 0;
       }
+
+      // Track translation statistics
+      translationStats[entry.translation] = (translationStats[entry.translation] ?? 0) + 1;
 
       // Determine range
       let start = entry.startVerse;
@@ -466,6 +471,7 @@ export const bibleRouter = createTRPCRouter({
       overallPercentage,
       totalUniqueChaptersRead,
       totalChaptersInBible,
+      translationStats,
     };
   }),
 });

@@ -25,6 +25,7 @@ import { BookMarked, BookOpen, Calendar, TrendingUp } from "lucide-react";
 import { CHART_COLORS, getChartColor } from "~/lib/chart-colors";
 import type { RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
+import { BIBLE_TRANSLATIONS } from "~/lib/bible-translations-data";
 
 interface BibleInsightsPanelProps {
   progress: RouterOutputs["bible"]["getProgress"];
@@ -36,6 +37,7 @@ export function BibleInsightsPanel({ progress }: BibleInsightsPanelProps) {
     overallPercentage,
     totalUniqueChaptersRead,
     totalChaptersInBible,
+    translationStats,
   } = progress;
 
   // Group books by category
@@ -274,6 +276,45 @@ export function BibleInsightsPanel({ progress }: BibleInsightsPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Translation Usage */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Translation Usage</CardTitle>
+          <CardDescription>Readings by Bible translation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {Object.entries(translationStats)
+              .map(([translationId, count]) => {
+                const translation = BIBLE_TRANSLATIONS.find(
+                  (t) => t.id === translationId,
+                );
+                return {
+                  id: translationId,
+                  name: translation?.name ?? translationId,
+                  count,
+                };
+              })
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 8)
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm font-medium">{item.name}</span>
+                  <Badge variant="secondary">{item.count}</Badge>
+                </div>
+              ))}
+            {Object.entries(translationStats).length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                No translation data yet
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Book Completion Status */}
       <Card>
