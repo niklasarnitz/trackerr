@@ -1,6 +1,6 @@
 "use client";
 
-import { quoteSchema } from "~/lib/api-schemas";
+import { quoteSchema } from "~/lib/schemas/quoteSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

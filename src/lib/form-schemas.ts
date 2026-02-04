@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { type cinemaMetadataSchema, movieWatchFormSchema } from "./api-schemas";
+import { type cinemaMetadataSchema } from "./schemas/cinemaSchemas";
+import { movieWatchFormSchema } from "./schemas/movieWatchSchemas";
 import {
   MediaType,
   type AspectRatio,

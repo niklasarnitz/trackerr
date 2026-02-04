@@ -2,10 +2,10 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   bookSeriesCreateSchema,
-  bookSeriesUpdateSchema,
   bookSeriesSearchSchema,
-  idSchema,
-} from "~/lib/api-schemas";
+  bookSeriesUpdateSchema,
+} from "~/lib/schemas/bookSeriesSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import { TRPCError } from "@trpc/server";
 
 export const bookSeriesRouter = createTRPCRouter({
@@ -37,37 +37,35 @@ export const bookSeriesRouter = createTRPCRouter({
       };
     }),
 
-  getById: protectedProcedure
-    .input(idSchema)
-    .query(async ({ ctx, input }) => {
-      const series = await ctx.db.bookSeries.findFirst({
-        where: {
-          id: input.id,
-          userId: ctx.session.user.id,
-        },
-        include: {
-          books: {
-            include: {
-              bookAuthors: {
-                include: {
-                  author: true,
-                },
+  getById: protectedProcedure.input(idSchema).query(async ({ ctx, input }) => {
+    const series = await ctx.db.bookSeries.findFirst({
+      where: {
+        id: input.id,
+        userId: ctx.session.user.id,
+      },
+      include: {
+        books: {
+          include: {
+            bookAuthors: {
+              include: {
+                author: true,
               },
             },
-            orderBy: { seriesNumber: "asc" },
           },
+          orderBy: { seriesNumber: "asc" },
         },
+      },
+    });
+
+    if (!series) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Series not found",
       });
+    }
 
-      if (!series) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Series not found",
-        });
-      }
-
-      return series;
-    }),
+    return series;
+  }),
 
   create: protectedProcedure
     .input(bookSeriesCreateSchema)

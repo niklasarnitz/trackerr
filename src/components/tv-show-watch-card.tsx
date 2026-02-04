@@ -60,7 +60,7 @@ import {
   getStreamingServiceLabel,
 } from "~/lib/label-utils";
 import { normalizeWatchDate, toCalendarDate } from "~/lib/watch-date";
-import { tvShowWatchUpdateSchema } from "~/lib/api-schemas";
+import { tvShowWatchUpdateSchema } from "~/lib/schemas/tvShowWatchSchemas";
 import type { z } from "zod";
 
 type Watch = RouterOutputs["tvShow"]["getById"]["watches"][number];

@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { idSchema } from "~/lib/api-schemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { env } from "~/env";
@@ -32,7 +32,9 @@ const tmdbRecommendationsResponseSchema = z.object({
 
 type TmdbRecommendationMovie = z.infer<typeof tmdbRecommendationMovieSchema>;
 
-async function getTmdbRecommendationsForMovie(tmdbId: string): Promise<TmdbRecommendationMovie[]> {
+async function getTmdbRecommendationsForMovie(
+  tmdbId: string,
+): Promise<TmdbRecommendationMovie[]> {
   if (!TMDB_API_KEY) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
@@ -60,7 +62,9 @@ async function getTmdbRecommendationsForMovie(tmdbId: string): Promise<TmdbRecom
 export const recommendationRouter = createTRPCRouter({
   // Get recommendations based on watch history
   getRecommendations: protectedProcedure
-    .input(z.object({ limit: z.number().min(1).max(100).optional() }).optional())
+    .input(
+      z.object({ limit: z.number().min(1).max(100).optional() }).optional(),
+    )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { limit: requestedLimit } = (input ?? {}) as { limit?: number };
@@ -100,9 +104,13 @@ export const recommendationRouter = createTRPCRouter({
         where: { userId },
         select: { id: true, tmdbId: true },
       });
-      const userMoviesMap = new Map(userMovieTmdbIds.map((m) => [m.tmdbId, m.id]));
+      const userMoviesMap = new Map(
+        userMovieTmdbIds.map((m) => [m.tmdbId, m.id]),
+      );
 
-      const userMovieIdToTmdbId = new Map(userMovieTmdbIds.map((m) => [m.id, m.tmdbId]));
+      const userMovieIdToTmdbId = new Map(
+        userMovieTmdbIds.map((m) => [m.id, m.tmdbId]),
+      );
       const watchedMovieIds = await ctx.db.movieWatch.findMany({
         where: {
           userId,
@@ -114,13 +122,17 @@ export const recommendationRouter = createTRPCRouter({
       const watchedTmdbIds = new Set(
         watchedMovieIds
           .map((w) => userMovieIdToTmdbId.get(w.movieId))
-          .filter((id): id is string => typeof id === "string" && id.trim() !== ""),
+          .filter(
+            (id): id is string => typeof id === "string" && id.trim() !== "",
+          ),
       );
 
       // Get movies with similar genres that user doesn't have
       const seedTmdbIds = topRatedWatches
         .map((watch) => watch.movie.tmdbId)
-        .filter((id): id is string => typeof id === "string" && id.trim() !== "")
+        .filter(
+          (id): id is string => typeof id === "string" && id.trim() !== "",
+        )
         .slice(0, 5);
 
       const seedRecommendations = await Promise.all(
@@ -149,7 +161,10 @@ export const recommendationRouter = createTRPCRouter({
             aggregated.set(key, { movie, sources: 1 });
             continue;
           }
-          aggregated.set(key, { movie: existing.movie, sources: existing.sources + 1 });
+          aggregated.set(key, {
+            movie: existing.movie,
+            sources: existing.sources + 1,
+          });
         }
       }
 
@@ -225,9 +240,10 @@ export const recommendationRouter = createTRPCRouter({
         where: {
           userId,
           id: { not: id },
-          ...(movie.genres && movie.genres.length > 0 && {
-            genres: { hasSome: movie.genres },
-          }),
+          ...(movie.genres &&
+            movie.genres.length > 0 && {
+              genres: { hasSome: movie.genres },
+            }),
         },
         include: {
           _count: {
@@ -249,4 +265,3 @@ export const recommendationRouter = createTRPCRouter({
       };
     }),
 });
-

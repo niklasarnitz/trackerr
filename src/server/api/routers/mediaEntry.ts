@@ -1,13 +1,13 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { idSchema } from "~/lib/schemas/baseSchemas";
+import { movieIdSchema } from "~/lib/schemas/movieSchemas";
 import {
-  movieIdSchema,
-  idSchema,
-  mediaEntryCreateSchema,
-  mediaEntryUpdateSchema,
-  mediaEntryGetAllSchema,
   mediaEntryCollectionOverviewSchema,
-} from "~/lib/api-schemas";
+  mediaEntryCreateSchema,
+  mediaEntryGetAllSchema,
+  mediaEntryUpdateSchema,
+} from "~/lib/schemas/mediaEntrySchemas";
 
 export const mediaEntryRouter = createTRPCRouter({
   // Get all media entries for a movie
@@ -157,7 +157,9 @@ export const mediaEntryRouter = createTRPCRouter({
           some: {
             userId,
             ...(input.medium && { medium: input.medium }),
-            ...(input.isVirtual !== undefined && { isVirtual: input.isVirtual }),
+            ...(input.isVirtual !== undefined && {
+              isVirtual: input.isVirtual,
+            }),
             ...(input.isRipped !== undefined && { isRipped: input.isRipped }),
           },
         },
@@ -174,7 +176,9 @@ export const mediaEntryRouter = createTRPCRouter({
                 ...(input.isVirtual !== undefined && {
                   isVirtual: input.isVirtual,
                 }),
-                ...(input.isRipped !== undefined && { isRipped: input.isRipped }),
+                ...(input.isRipped !== undefined && {
+                  isRipped: input.isRipped,
+                }),
               },
               orderBy: { createdAt: "desc" },
             },
@@ -264,8 +268,7 @@ export const mediaEntryRouter = createTRPCRouter({
     ).length;
 
     // Calculate average entries per movie
-    const avgEntriesPerMovie =
-      totalMovies > 0 ? totalEntries / totalMovies : 0;
+    const avgEntriesPerMovie = totalMovies > 0 ? totalEntries / totalMovies : 0;
 
     return {
       totalEntries,
@@ -275,10 +278,12 @@ export const mediaEntryRouter = createTRPCRouter({
       rippedEntries,
       thisYearEntries,
       avgEntriesPerMovie: Math.round(avgEntriesPerMovie * 10) / 10,
-      mediumDistribution: Object.entries(mediumGroups).map(([medium, count]) => ({
-        medium,
-        count,
-      })),
+      mediumDistribution: Object.entries(mediumGroups).map(
+        ([medium, count]) => ({
+          medium,
+          count,
+        }),
+      ),
     };
   }),
 

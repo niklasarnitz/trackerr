@@ -1,12 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import {
-  idSchema,
-  tagCreateSchema,
-  tagUpdateSchema,
-  movieTagSchema,
-} from "~/lib/api-schemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
+import { movieTagSchema } from "~/lib/schemas/movieSchemas";
+import { tagCreateSchema, tagUpdateSchema } from "~/lib/schemas/tagSchemas";
 
 export const tagRouter = createTRPCRouter({
   // Get all tags for user
@@ -225,4 +222,3 @@ export const tagRouter = createTRPCRouter({
       return movieTags.map((mt) => mt.tag);
     }),
 });
-

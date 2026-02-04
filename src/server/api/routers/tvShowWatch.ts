@@ -1,11 +1,11 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import {
-  idSchema,
   tvShowWatchCreateSchema,
   tvShowWatchUpdateSchema,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/tvShowWatchSchemas";
 
 export const tvShowWatchRouter = createTRPCRouter({
   // Get all watches for a TV show

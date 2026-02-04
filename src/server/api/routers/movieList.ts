@@ -1,12 +1,12 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import {
-  idSchema,
   movieListCreateSchema,
-  movieListUpdateSchema,
   movieListEntrySchema,
-} from "~/lib/api-schemas";
+  movieListUpdateSchema,
+} from "~/lib/schemas/movieSchemas";
 
 export const movieListRouter = createTRPCRouter({
   // Get all lists for user
@@ -23,42 +23,40 @@ export const movieListRouter = createTRPCRouter({
   }),
 
   // Get list by ID
-  getById: protectedProcedure
-    .input(idSchema)
-    .query(async ({ ctx, input }) => {
-      const list = await ctx.db.movieList.findFirst({
-        where: {
-          id: input.id,
-          userId: ctx.session.user.id,
-        },
-        include: {
-          listEntries: {
-            include: {
-              movie: {
-                include: {
-                  _count: {
-                    select: {
-                      watches: true,
-                      mediaEntries: true,
-                    },
+  getById: protectedProcedure.input(idSchema).query(async ({ ctx, input }) => {
+    const list = await ctx.db.movieList.findFirst({
+      where: {
+        id: input.id,
+        userId: ctx.session.user.id,
+      },
+      include: {
+        listEntries: {
+          include: {
+            movie: {
+              include: {
+                _count: {
+                  select: {
+                    watches: true,
+                    mediaEntries: true,
                   },
                 },
               },
             },
-            orderBy: { order: "asc" },
           },
+          orderBy: { order: "asc" },
         },
+      },
+    });
+
+    if (!list) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "List not found",
       });
+    }
 
-      if (!list) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "List not found",
-        });
-      }
-
-      return list;
-    }),
+    return list;
+  }),
 
   // Create list
   create: protectedProcedure
@@ -247,4 +245,3 @@ export const movieListRouter = createTRPCRouter({
       return { success: true };
     }),
 });
-

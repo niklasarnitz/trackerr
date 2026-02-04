@@ -36,7 +36,7 @@ import { toast } from "sonner";
 import {
   movieWatchUpdateSchema,
   type MovieWatchUpdateInput,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/movieWatchSchemas";
 import { STREAMING_SERVICES } from "~/lib/form-schemas";
 import { normalizeWatchDate, toCalendarDate } from "~/lib/watch-date";
 import { CinemaMetadataFields } from "./cinema-metadata-fields";

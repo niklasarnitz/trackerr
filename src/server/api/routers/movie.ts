@@ -1,16 +1,16 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import {
-  movieSearchSchema,
-  idSchema,
-  tmdbIdSchema,
-  movieCreateSchema,
-  movieWithMediaSearchSchema,
-  movieUpdateSchema,
-  bulkOperationSchema,
   advancedMovieFilterSchema,
-} from "~/lib/api-schemas";
+  bulkOperationSchema,
+  movieCreateSchema,
+  movieSearchSchema,
+  movieUpdateSchema,
+  movieWithMediaSearchSchema,
+  tmdbIdSchema,
+} from "~/lib/schemas/movieSchemas";
 import { env } from "~/env";
 import { downloadAndUploadMoviePoster } from "~/helpers/image-upload";
 

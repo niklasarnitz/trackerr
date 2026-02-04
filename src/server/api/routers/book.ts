@@ -1,14 +1,14 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import {
-  bookSearchSchema,
-  idSchema,
-  bookIdSchema,
   bookCreateSchema,
-  bookUpdateSchema,
+  bookIdSchema,
+  bookSearchSchema,
   bookTagSchema,
+  bookUpdateSchema,
   type BookAuthorInput,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/bookSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import { downloadAndUploadBookCover } from "~/helpers/image-upload";
 import { getHighQualityCoverUrl } from "./bookSearch";
 

@@ -2,14 +2,14 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { revalidateTag } from "next/cache";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { cinemaSearchSchema } from "~/lib/schemas/cinemaSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
+import { movieIdSchema } from "~/lib/schemas/movieSchemas";
 import {
-  movieIdSchema,
-  idSchema,
   movieWatchCreateSchema,
   movieWatchGetAllSchema,
   movieWatchUpdateSchema,
-  cinemaSearchSchema,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/movieWatchSchemas";
 import {
   SOUND_SYSTEM_TYPES,
   PROJECTION_TYPES,

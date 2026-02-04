@@ -1,27 +1,68 @@
+enum BibleTranslation {
+  // German translations (first)
+  LUTHER_1912
+  LUTHER_1984
+  LUTHER_2017
+  LUTHER_21
+  NEUE_GENFER
+  NEUE_EVANGELISTISCHE
+  EINHEITSÜBERSETZUNG
+  ELBERFELDER
+  GUTE_NACHRICHT
+  HOFFNUNG_FUER_ALLE
+  MENGE_BIBEL
+  NEUES_LEBEN
+  SCHLACHTER_2000
+  ZUERICHER_BIBEL
+  BASIS_BIBEL
+
+  // English translations
+  KJV
+  NKJV
+  NASB
+  NASB_1995
+  ESV
+  NIV
+  NLT
+  THE_MESSAGE
+  NIRV
+  ASV
+  BSB
+  RSV
+  LSB
+
+  // Ancient/Original languages
+  BHS
+  NA28
+  LXX
+  VUL
+}
+
 model BibleReadingEntry {
-  id        String   @id @default(uuid())
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  bookId    String   // Matches ID in bible-data.ts (e.g., "gen", "exo")
-  chapter   Int
-  
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookId  String // Matches ID in bible-data.ts (e.g., "gen", "exo")
+  chapter Int
+
   // Optional: range of verses read. If null, implies whole chapter.
   startVerse Int?
   endVerse   Int?
-  
+
+  translation BibleTranslation @default(LUTHER_1984)
+
   date      DateTime // The date the user assigns to this reading (e.g. "read this morning")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Prevent duplicate entries for same reading on same day
+  @@unique([userId, bookId, chapter, startVerse, endVerse, date])
   // Indexes for common query patterns
   @@index([userId])
   @@index([userId, bookId, chapter])
   @@index([userId, date])
   @@index([date])
   @@index([bookId])
-  
-  // Prevent duplicate entries for same reading on same day
-  @@unique([userId, bookId, chapter, startVerse, endVerse, date])
 }

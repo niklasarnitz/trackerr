@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { quoteSchema } from "~/lib/api-schemas";
+import { quoteSchema } from "~/lib/schemas/quoteSchemas";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";

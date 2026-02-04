@@ -34,6 +34,12 @@ import {
 } from "~/components/ui/command";
 import { api } from "~/trpc/react";
 import { BIBLE_BOOKS } from "~/lib/bible-data";
+import {
+  BIBLE_TRANSLATIONS,
+  GERMAN_TRANSLATIONS,
+  ENGLISH_TRANSLATIONS,
+  ANCIENT_TRANSLATIONS,
+} from "~/lib/bible-translations-data";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -46,6 +52,7 @@ const formSchema = z
       .min(1, { message: "Chapter must be at least 1." }),
     startVerse: z.union([z.coerce.number().min(1), z.literal("")]).optional(),
     endVerse: z.union([z.coerce.number().min(1), z.literal("")]).optional(),
+    translation: z.string().default("LUTHER_1984"),
     date: z.date({
       message: "A date of reading is required.",
     }),
@@ -71,6 +78,7 @@ export function ReadingTrackerForm() {
   const router = useRouter();
   const utils = api.useUtils();
   const [open, setOpen] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -78,6 +86,7 @@ export function ReadingTrackerForm() {
       chapter: 1,
       startVerse: "",
       endVerse: "",
+      translation: "LUTHER_1984",
       date: new Date(),
     },
   });
@@ -94,6 +103,7 @@ export function ReadingTrackerForm() {
         chapter: (form.getValues("chapter") || 0) + 1,
         startVerse: "",
         endVerse: "",
+        translation: form.getValues("translation"),
         date: new Date(),
       });
       utils.bible.getProgress.invalidate();
@@ -128,6 +138,7 @@ export function ReadingTrackerForm() {
       date: values.date,
       startVerse,
       endVerse,
+      translation: values.translation as any,
     });
   }
 
@@ -235,9 +246,6 @@ export function ReadingTrackerForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-xs">
-                      Leave blank for full chapter
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -262,6 +270,120 @@ export function ReadingTrackerForm() {
                 )}
               />
             </div>
+
+            <FormDescription className="text-xs">
+              Leave blank for Start/End to read full chapter
+            </FormDescription>
+
+            <FormField
+              control={form.control}
+              name="translation"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Translation</FormLabel>
+                  <Popover
+                    open={translationOpen}
+                    onOpenChange={setTranslationOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={translationOpen}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value
+                            ? BIBLE_TRANSLATIONS.find(
+                                (t) => t.id === field.value,
+                              )?.name
+                            : "Select translation..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[250px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search translation..." />
+                        <CommandList>
+                          <CommandEmpty>No translation found.</CommandEmpty>
+                          <CommandGroup heading="German">
+                            {GERMAN_TRANSLATIONS.map((translation) => (
+                              <CommandItem
+                                value={translation.name}
+                                key={translation.id}
+                                onSelect={() => {
+                                  form.setValue("translation", translation.id);
+                                  setTranslationOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    translation.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {translation.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                          <CommandGroup heading="English">
+                            {ENGLISH_TRANSLATIONS.map((translation) => (
+                              <CommandItem
+                                value={translation.name}
+                                key={translation.id}
+                                onSelect={() => {
+                                  form.setValue("translation", translation.id);
+                                  setTranslationOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    translation.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {translation.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                          <CommandGroup heading="Ancient/Original">
+                            {ANCIENT_TRANSLATIONS.map((translation) => (
+                              <CommandItem
+                                value={translation.name}
+                                key={translation.id}
+                                onSelect={() => {
+                                  form.setValue("translation", translation.id);
+                                  setTranslationOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    translation.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {translation.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

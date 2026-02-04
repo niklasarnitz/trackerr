@@ -1,10 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import {
-  idSchema,
-  loanCreateSchema,
-  loanUpdateSchema,
-} from "~/lib/api-schemas";
+import { loanCreateSchema, loanUpdateSchema } from "~/lib/schemas/loanSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 
 export const loanRouter = createTRPCRouter({
   // Get all loans for user

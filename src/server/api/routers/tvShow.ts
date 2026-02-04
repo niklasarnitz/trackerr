@@ -2,12 +2,12 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-  tvShowSearchSchema,
-  idSchema,
-  tvShowTmdbIdSchema,
   tvShowCreateSchema,
+  tvShowSearchSchema,
+  tvShowTmdbIdSchema,
   tvShowUpdateSchema,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/tvShowSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 import { downloadAndUploadTvShowPoster } from "~/helpers/image-upload";
 import { tmdbTvClient } from "~/server/api/utils/tmdb-tv-client";
 

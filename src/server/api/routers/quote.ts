@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { quoteSchema } from "~/lib/api-schemas";
+import { quoteSchema } from "~/lib/schemas/quoteSchemas";
 import { TRPCError } from "@trpc/server";
 
 export const quoteRouter = createTRPCRouter({

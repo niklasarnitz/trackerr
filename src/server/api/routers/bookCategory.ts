@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import {
   bookCategoryCreateSchema,
   bookCategoryUpdateSchema,
-  idSchema,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/bookCategorySchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 
 export const bookCategoryRouter = createTRPCRouter({
   // Get all book categories for user

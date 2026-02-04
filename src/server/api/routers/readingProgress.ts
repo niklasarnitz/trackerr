@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import {
   readingProgressCreateSchema,
   readingProgressGetByBookSchema,
-  idSchema,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/readingProgressSchemas";
+import { idSchema } from "~/lib/schemas/baseSchemas";
 
 export const readingProgressRouter = createTRPCRouter({
   // Get reading progress for a book

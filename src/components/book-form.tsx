@@ -33,7 +33,7 @@ import {
   bookCreateSchema,
   type BookCreateInput,
   type BookUpdateInput,
-} from "~/lib/api-schemas";
+} from "~/lib/schemas/bookSchemas";
 import type { RouterOutputs } from "~/trpc/react";
 
 // Helper type for the form data - using z.input to get the actual input type
@@ -402,7 +402,7 @@ export function BookForm({ initialData, onSuccess, onCancel }: BookFormProps) {
                 <FormLabel>Book Cover</FormLabel>
                 <FormControl>
                   <CoverUploader
-                      onImageUpload={field.onChange}
+                    onImageUpload={field.onChange}
                     defaultImageUrl={field.value ?? undefined}
                     onRemoveCover={() => field.onChange(null)}
                   />
