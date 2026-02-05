@@ -12,6 +12,8 @@ import {
   DialogDescription,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { X, CameraOff, RefreshCw } from "lucide-react";
 
 interface BarcodeScannerProps {
@@ -269,6 +271,7 @@ export function BarcodeScanner({
               autoPlay
               playsInline
               muted
+              aria-label="Barcode scanner camera view"
             />
 
             {/* Scanning frame */}
@@ -352,7 +355,7 @@ export function BarcodeScanner({
 
           {/* Result display */}
           {result && (
-            <div className="text-center">
+            <div className="text-center" aria-live="polite">
               <p className="mb-1 font-medium">Detected code:</p>
               <p
                 className={`text-xl font-bold ${
@@ -371,16 +374,17 @@ export function BarcodeScanner({
 
           {/* Manual ISBN input - show for both error cases and as an alternative */}
           <div className="mt-2 w-full rounded-md border p-4">
-            <h4 className="mb-2 font-medium">Enter ISBN manually</h4>
+            <Label htmlFor="manual-isbn" className="mb-2 block font-medium">
+              Enter ISBN manually
+            </Label>
             <form onSubmit={handleManualSubmit} className="flex gap-2">
-              <input
+              <Input
+                id="manual-isbn"
                 type="text"
                 value={manualIsbn}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setManualIsbn(e.target.value)
-                }
+                onChange={(e) => setManualIsbn(e.target.value)}
                 placeholder="e.g., 9781234567890"
-                className="flex-1 rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
+                className="flex-1"
               />
               <Button type="submit">Use</Button>
             </form>
