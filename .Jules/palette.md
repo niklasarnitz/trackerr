@@ -5,3 +5,7 @@
 ## 2025-02-18 - Making Star Ratings Speak
 **Learning:** Icon-only buttons are a black hole for screen readers. A rating component without labels is just a sequence of "Button" announcements, making it impossible to rate content.
 **Action:** Always add descriptive aria-labels to interactive icons, especially when they represent specific values like ratings.
+
+## 2026-02-06 - Composing Tooltips with Radix Triggers
+**Learning:** When adding tooltips to buttons that are already triggers for other Radix primitives (DropdownMenu, AlertDialog), wrap the existing Trigger in the TooltipTrigger using `asChild`. The order should be Tooltip > TooltipTrigger > [Other]Trigger > Button. This ensures both hover (tooltip) and click ([Other]) events work correctly.
+**Action:** Apply this nesting pattern whenever enhancing existing interactive elements with tooltips.
