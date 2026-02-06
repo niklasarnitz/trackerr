@@ -37,16 +37,18 @@ interface NavItem {
 
 const topLevelItems: NavItem[] = [
   { href: "/", name: "Dashboard", icon: LayoutDashboard },
-  { href: "/statistics", name: "Statistics", icon: BarChart2 },
+];
+
+const mediaDiscoveryItems: NavItem[] = [
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
   { href: "/bible", name: "Bible", icon: Book },
 ];
 
-const libraryItems: NavItem[] = [
-  { href: "/collection", name: "Collection", icon: Library },
-  { href: "/watches", name: "History", icon: History },
+const myLibraryItems: NavItem[] = [
+  { href: "/watches", name: "Watch History", icon: History },
+  { href: "/collection", name: "Library", icon: Library },
 ];
 
 const listItems: NavItem[] = [
@@ -59,6 +61,7 @@ const listItems: NavItem[] = [
 const moreItems: NavItem[] = [
   { href: "/loans", name: "Loans", icon: HandHelping },
   { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
+  { href: "/statistics", name: "Statistics", icon: BarChart2 },
 ];
 
 interface DesktopNavMenusProps {
@@ -92,31 +95,61 @@ export function DesktopNavMenus({
                 isItemActive && "bg-secondary",
               )}
             >
+              <item.icon className="h-4 w-4" />
               <span className="hidden sm:inline">{item.name}</span>
             </Button>
           </Link>
         );
       })}
 
-      {/* Library Dropdown */}
+      {/* Media Discovery Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant={isAnyActive(libraryItems) ? "secondary" : "ghost"}
+            variant={isAnyActive(mediaDiscoveryItems) ? "secondary" : "ghost"}
             size="sm"
             className={cn(
               "flex items-center space-x-2",
-              isAnyActive(libraryItems) && "bg-secondary",
+              isAnyActive(mediaDiscoveryItems) && "bg-secondary",
             )}
-            aria-label="Library menu"
+            aria-label="Media discovery menu"
           >
-            <Archive className="h-4 w-4" />
-            <span className="hidden sm:inline">Library</span>
+            <Film className="h-4 w-4" />
+            <span className="hidden sm:inline">Media</span>
             <ChevronDown className="h-4 w-4 opacity-70" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          {libraryItems.map((item) => (
+          {mediaDiscoveryItems.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href}>
+                <item.icon className="mr-2 h-4 w-4" />
+                <span>{item.name}</span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* My Library Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant={isAnyActive(myLibraryItems) ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "flex items-center space-x-2",
+              isAnyActive(myLibraryItems) && "bg-secondary",
+            )}
+            aria-label="My library menu"
+          >
+            <Library className="h-4 w-4" />
+            <span className="hidden sm:inline">My Library</span>
+            <ChevronDown className="h-4 w-4 opacity-70" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {myLibraryItems.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href}>
                 <item.icon className="mr-2 h-4 w-4" />

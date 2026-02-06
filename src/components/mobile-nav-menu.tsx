@@ -36,16 +36,18 @@ interface NavItem {
 
 const topLevelItems: NavItem[] = [
   { href: "/", name: "Dashboard", icon: LayoutDashboard },
-  { href: "/statistics", name: "Statistics", icon: BarChart2 },
+];
+
+const mediaDiscoveryItems: NavItem[] = [
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
   { href: "/bible", name: "Bible", icon: Book },
 ];
 
-const libraryItems: NavItem[] = [
-  { href: "/collection", name: "Collection", icon: Library },
-  { href: "/watches", name: "History", icon: History },
+const myLibraryItems: NavItem[] = [
+  { href: "/watches", name: "Watch History", icon: History },
+  { href: "/collection", name: "Library", icon: Library },
 ];
 
 const listItems: NavItem[] = [
@@ -58,6 +60,7 @@ const listItems: NavItem[] = [
 const moreItems: NavItem[] = [
   { href: "/loans", name: "Loans", icon: HandHelping },
   { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
+  { href: "/statistics", name: "Statistics", icon: BarChart2 },
 ];
 
 interface MobileNavMenuProps {
@@ -101,20 +104,55 @@ export function MobileNavMenu({
         })}
 
         <Accordion type="multiple" className="w-full">
-          {/* Library Section */}
-          <AccordionItem value="library" className="border-b-0">
+          {/* Media Discovery Section */}
+          <AccordionItem value="media" className="border-b-0">
             <AccordionTrigger className={cn(
                "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
-               isAnyActive(libraryItems) && "bg-secondary text-secondary-foreground"
+               isAnyActive(mediaDiscoveryItems) && "bg-secondary text-secondary-foreground"
             )}>
               <div className="flex items-center space-x-2">
-                <Archive className="h-4 w-4" />
-                <span className="text-sm font-medium">Library</span>
+                <Film className="h-4 w-4" />
+                <span className="text-sm font-medium">Media</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-1">
               <div className="flex flex-col space-y-1 pl-6">
-                {libraryItems.map((item) => {
+                {mediaDiscoveryItems.map((item) => {
+                  const isItemActive = isActive(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} onClick={onClose}>
+                      <Button
+                        variant={isItemActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "flex w-full items-center justify-start space-x-2",
+                          isItemActive && "bg-secondary",
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* My Library Section */}
+          <AccordionItem value="library" className="border-b-0">
+            <AccordionTrigger className={cn(
+               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
+               isAnyActive(myLibraryItems) && "bg-secondary text-secondary-foreground"
+            )}>
+              <div className="flex items-center space-x-2">
+                <Library className="h-4 w-4" />
+                <span className="text-sm font-medium">My Library</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-1">
+              <div className="flex flex-col space-y-1 pl-6">
+                {myLibraryItems.map((item) => {
                   const isItemActive = isActive(item.href);
                   return (
                     <Link key={item.href} href={item.href} onClick={onClose}>
