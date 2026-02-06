@@ -9,6 +9,7 @@ import { useNavigation } from "~/hooks/use-navigation";
 import { DesktopNavMenus } from "~/components/desktop-nav-menus";
 import { NavUserMenu } from "~/components/nav-user-menu";
 import { MobileNavMenu } from "~/components/mobile-nav-menu";
+import { UnifiedSearchDialog } from "~/components/unified-search-dialog";
 import type { Session } from "next-auth";
 
 // Navigation items grouped by category (for reference/consistency)
@@ -146,6 +147,11 @@ function NavigationContent({ user }: NavigationProps) {
               isActive={isNavigationItemActive}
               isGroupActive={isGroupActive}
             />
+          </div>
+
+          {/* Search Dialog */}
+          <div className="max-sm:hidden">
+            <UnifiedSearchDialog />
           </div>
 
           {/* User Menu & Mobile Button */}
