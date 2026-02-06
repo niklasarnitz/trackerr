@@ -475,4 +475,74 @@ export const bibleRouter = createTRPCRouter({
       translationStats,
     };
   }),
+
+  getReadingStreakStats: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const readings = await ctx.db.bibleReadingEntry.findMany({
+      where: { userId },
+      select: { date: true },
+      orderBy: { date: "asc" },
+    });
+
+    if (readings.length === 0) {
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalReadingDays: 0,
+      };
+    }
+
+    // Get unique dates
+    const uniqueDates = new Set<string>();
+    readings.forEach((reading) => {
+      const date = new Date(reading.date);
+      date.setHours(0, 0, 0, 0);
+      uniqueDates.add(date.toISOString().split("T")[0] ?? "");
+    });
+
+    const sortedDates = Array.from(uniqueDates)
+      .map((d) => new Date(d))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    // Calculate longest streak
+    let longestStreak = 1;
+    let currentStreak = 1;
+
+    for (let i = 1; i < sortedDates.length; i++) {
+      const prevDate = sortedDates[i - 1]!;
+      const currDate = sortedDates[i]!;
+      const daysDiff =
+        (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (daysDiff === 1) {
+        currentStreak++;
+        longestStreak = Math.max(longestStreak, currentStreak);
+      } else {
+        currentStreak = 1;
+      }
+    }
+
+    // Calculate current streak (from today backwards)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let currentStreakDays = 0;
+    let checkDate = new Date(today);
+
+    while (true) {
+      const dateStr = checkDate.toISOString().split("T")[0];
+      if (uniqueDates.has(dateStr ?? "")) {
+        currentStreakDays++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return {
+      currentStreak: currentStreakDays,
+      longestStreak,
+      totalReadingDays: uniqueDates.size,
+    };
+  }),
 });

@@ -3,6 +3,7 @@ import { api } from "~/trpc/server";
 import { BibleAccordion } from "~/components/bible/bible-accordion";
 import { ReadingTrackerForm } from "~/components/bible/reading-tracker";
 import { ReadingHistoryList } from "~/components/bible/reading-history";
+import { ReadingStats } from "~/components/bible/reading-stats";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 
 export default async function BiblePage() {
   const data = await api.bible.getProgress();
+  const streakStats = await api.bible.getReadingStreakStats();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -37,8 +39,8 @@ export default async function BiblePage() {
             </CardContent>
           </Card>
 
-           {/* Overall Progress */}
-           <Card>
+          {/* Overall Progress */}
+          <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Overall Progress</CardTitle>
@@ -58,7 +60,7 @@ export default async function BiblePage() {
 
           {/* History List */}
           <Card>
-             <CardHeader>
+            <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
@@ -69,7 +71,10 @@ export default async function BiblePage() {
 
         {/* Main Content (Accordion) */}
         <div className="lg:col-span-2">
+          <ReadingStats progress={data} streakStats={streakStats} />
+          <div className="mt-8">
             <BibleAccordion books={data.bookProgress} />
+          </div>
         </div>
       </div>
     </div>
