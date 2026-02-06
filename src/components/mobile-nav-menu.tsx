@@ -50,10 +50,15 @@ const myLibraryItems: NavItem[] = [
   { href: "/collection", name: "Library", icon: Library },
 ];
 
-const listItems: NavItem[] = [
-  { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
-  { href: "/books/wishlist", name: "Book Wishlist", icon: Bookmark },
+const watchlistItems: NavItem[] = [
+  { href: "/watchlist", name: "All Watchlist", icon: Bookmark },
+  { href: "/movies/watchlist", name: "Movies", icon: Film },
+  { href: "/tv-shows", name: "TV Shows", icon: Tv },
+  { href: "/books/wishlist", name: "Books", icon: Book },
   { href: "/movies/favorites", name: "Favorites", icon: Heart },
+];
+
+const customListItems: NavItem[] = [
   { href: "/lists", name: "Custom Lists", icon: List },
 ];
 
@@ -69,10 +74,7 @@ interface MobileNavMenuProps {
   readonly onClose: () => void;
 }
 
-export function MobileNavMenu({
-  isActive,
-  onClose,
-}: MobileNavMenuProps) {
+export function MobileNavMenu({ isActive, onClose }: MobileNavMenuProps) {
   const pathname = usePathname();
 
   // Helper to check if any item in a list is active (for accordion highlighting)
@@ -106,16 +108,19 @@ export function MobileNavMenu({
         <Accordion type="multiple" className="w-full">
           {/* Media Discovery Section */}
           <AccordionItem value="media" className="border-b-0">
-            <AccordionTrigger className={cn(
-               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
-               isAnyActive(mediaDiscoveryItems) && "bg-secondary text-secondary-foreground"
-            )}>
+            <AccordionTrigger
+              className={cn(
+                "hover:bg-muted/50 flex w-full items-center justify-between rounded-md px-3 py-2 hover:no-underline",
+                isAnyActive(mediaDiscoveryItems) &&
+                  "bg-secondary text-secondary-foreground",
+              )}
+            >
               <div className="flex items-center space-x-2">
                 <Film className="h-4 w-4" />
                 <span className="text-sm font-medium">Media</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-0 pt-1">
+            <AccordionContent className="pt-1 pb-0">
               <div className="flex flex-col space-y-1 pl-6">
                 {mediaDiscoveryItems.map((item) => {
                   const isItemActive = isActive(item.href);
@@ -141,16 +146,19 @@ export function MobileNavMenu({
 
           {/* My Library Section */}
           <AccordionItem value="library" className="border-b-0">
-            <AccordionTrigger className={cn(
-               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
-               isAnyActive(myLibraryItems) && "bg-secondary text-secondary-foreground"
-            )}>
+            <AccordionTrigger
+              className={cn(
+                "hover:bg-muted/50 flex w-full items-center justify-between rounded-md px-3 py-2 hover:no-underline",
+                isAnyActive(myLibraryItems) &&
+                  "bg-secondary text-secondary-foreground",
+              )}
+            >
               <div className="flex items-center space-x-2">
                 <Library className="h-4 w-4" />
                 <span className="text-sm font-medium">My Library</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-0 pt-1">
+            <AccordionContent className="pt-1 pb-0">
               <div className="flex flex-col space-y-1 pl-6">
                 {myLibraryItems.map((item) => {
                   const isItemActive = isActive(item.href);
@@ -176,18 +184,63 @@ export function MobileNavMenu({
 
           {/* Lists Section */}
           <AccordionItem value="lists" className="border-b-0">
-            <AccordionTrigger className={cn(
-               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
-               (isAnyActive(listItems) || pathname.startsWith("/movies/watchlist") || pathname.startsWith("/books/wishlist") || pathname.startsWith("/movies/favorites")) && "bg-secondary text-secondary-foreground"
-            )}>
+            <AccordionTrigger
+              className={cn(
+                "hover:bg-muted/50 flex w-full items-center justify-between rounded-md px-3 py-2 hover:no-underline",
+                (isAnyActive(watchlistItems) ||
+                  pathname.startsWith("/movies/watchlist") ||
+                  pathname.startsWith("/books/wishlist") ||
+                  pathname.startsWith("/movies/favorites") ||
+                  pathname.startsWith("/watchlist")) &&
+                  "bg-secondary text-secondary-foreground",
+              )}
+            >
+              <div className="flex items-center space-x-2">
+                <Bookmark className="h-4 w-4" />
+                <span className="text-sm font-medium">Watchlist</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-1 pb-0">
+              <div className="flex flex-col space-y-1 pl-6">
+                {watchlistItems.map((item) => {
+                  const isItemActive = isActive(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} onClick={onClose}>
+                      <Button
+                        variant={isItemActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={cn(
+                          "flex w-full items-center justify-start space-x-2",
+                          isItemActive && "bg-secondary",
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Custom Lists Section */}
+          <AccordionItem value="custom-lists" className="border-b-0">
+            <AccordionTrigger
+              className={cn(
+                "hover:bg-muted/50 flex w-full items-center justify-between rounded-md px-3 py-2 hover:no-underline",
+                isAnyActive(customListItems) &&
+                  "bg-secondary text-secondary-foreground",
+              )}
+            >
               <div className="flex items-center space-x-2">
                 <List className="h-4 w-4" />
                 <span className="text-sm font-medium">Lists</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-0 pt-1">
+            <AccordionContent className="pt-1 pb-0">
               <div className="flex flex-col space-y-1 pl-6">
-                {listItems.map((item) => {
+                {customListItems.map((item) => {
                   const isItemActive = isActive(item.href);
                   return (
                     <Link key={item.href} href={item.href} onClick={onClose}>
@@ -211,17 +264,20 @@ export function MobileNavMenu({
 
           {/* More Section */}
           <AccordionItem value="more" className="border-b-0">
-            <AccordionTrigger className={cn(
-               "flex w-full items-center justify-between py-2 px-3 hover:no-underline hover:bg-muted/50 rounded-md",
-               isAnyActive(moreItems) && "bg-secondary text-secondary-foreground"
-            )}>
+            <AccordionTrigger
+              className={cn(
+                "hover:bg-muted/50 flex w-full items-center justify-between rounded-md px-3 py-2 hover:no-underline",
+                isAnyActive(moreItems) &&
+                  "bg-secondary text-secondary-foreground",
+              )}
+            >
               <div className="flex items-center space-x-2">
                 <Sparkles className="h-4 w-4" />
                 <span className="text-sm font-medium">More</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-0 pt-1">
-               <div className="flex flex-col space-y-1 pl-6">
+            <AccordionContent className="pt-1 pb-0">
+              <div className="flex flex-col space-y-1 pl-6">
                 {moreItems.map((item) => {
                   const isItemActive = isActive(item.href);
                   return (

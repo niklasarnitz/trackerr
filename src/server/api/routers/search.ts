@@ -63,7 +63,13 @@ export const searchRouter = createTRPCRouter({
           OR: [
             { title: { contains: query, mode: "insensitive" } },
             { synopsis: { contains: query, mode: "insensitive" } },
-            { authors: { some: { author: { name: { contains: query, mode: "insensitive" } } } } },
+            {
+              authors: {
+                some: {
+                  author: { name: { contains: query, mode: "insensitive" } },
+                },
+              },
+            },
           ],
         },
         select: {
@@ -230,7 +236,13 @@ export const searchRouter = createTRPCRouter({
             OR: [
               { title: { contains: query, mode: "insensitive" } },
               { synopsis: { contains: query, mode: "insensitive" } },
-              { authors: { some: { author: { name: { contains: query, mode: "insensitive" } } } } },
+              {
+                authors: {
+                  some: {
+                    author: { name: { contains: query, mode: "insensitive" } },
+                  },
+                },
+              },
             ],
           },
           select: {
@@ -252,7 +264,13 @@ export const searchRouter = createTRPCRouter({
             OR: [
               { title: { contains: query, mode: "insensitive" } },
               { synopsis: { contains: query, mode: "insensitive" } },
-              { authors: { some: { author: { name: { contains: query, mode: "insensitive" } } } } },
+              {
+                authors: {
+                  some: {
+                    author: { name: { contains: query, mode: "insensitive" } },
+                  },
+                },
+              },
             ],
           },
         }),

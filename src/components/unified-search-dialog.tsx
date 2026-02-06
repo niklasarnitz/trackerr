@@ -127,13 +127,13 @@ export function UnifiedSearchDialog() {
       <Button
         variant="outline"
         size="sm"
-        className="w-full justify-start text-sm text-muted-foreground md:w-64"
+        className="text-muted-foreground w-full justify-start text-sm md:w-64"
         onClick={() => setOpen(true)}
       >
         <Search className="mr-2 h-4 w-4" />
         <span className="hidden sm:inline-flex">Search...</span>
         <span className="inline-flex sm:hidden">Search</span>
-        <kbd className="pointer-events-none ml-auto hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+        <kbd className="bg-muted pointer-events-none ml-auto hidden h-6 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
@@ -162,11 +162,11 @@ export function UnifiedSearchDialog() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
               ) : query.trim() === "" ? (
-                <div className="py-8 text-center text-sm text-muted-foreground">
+                <div className="text-muted-foreground py-8 text-center text-sm">
                   Start typing to search
                 </div>
               ) : !hasResults ? (
-                <div className="py-8 text-center text-sm text-muted-foreground">
+                <div className="text-muted-foreground py-8 text-center text-sm">
                   No results found for "{query}"
                 </div>
               ) : (
@@ -174,7 +174,7 @@ export function UnifiedSearchDialog() {
                   {/* Movies Results */}
                   {results.movies.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-xs font-semibold uppercase text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center space-x-2 text-xs font-semibold uppercase">
                         <Film className="h-3 w-3" />
                         <span>Movies</span>
                       </div>
@@ -183,11 +183,11 @@ export function UnifiedSearchDialog() {
                           <button
                             key={movie.id}
                             onClick={() => handleResultClick("movie", movie.id)}
-                            className="w-full rounded px-2 py-2 text-left text-sm hover:bg-accent"
+                            className="hover:bg-accent w-full rounded px-2 py-2 text-left text-sm"
                           >
                             <p className="font-medium">{movie.title}</p>
                             {movie.overview && (
-                              <p className="line-clamp-1 text-xs text-muted-foreground">
+                              <p className="text-muted-foreground line-clamp-1 text-xs">
                                 {movie.overview}
                               </p>
                             )}
@@ -200,7 +200,7 @@ export function UnifiedSearchDialog() {
                   {/* TV Shows Results */}
                   {results.tvShows.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-xs font-semibold uppercase text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center space-x-2 text-xs font-semibold uppercase">
                         <Tv className="h-3 w-3" />
                         <span>TV Shows</span>
                       </div>
@@ -209,11 +209,11 @@ export function UnifiedSearchDialog() {
                           <button
                             key={show.id}
                             onClick={() => handleResultClick("tvshow", show.id)}
-                            className="w-full rounded px-2 py-2 text-left text-sm hover:bg-accent"
+                            className="hover:bg-accent w-full rounded px-2 py-2 text-left text-sm"
                           >
                             <p className="font-medium">{show.title}</p>
                             {show.overview && (
-                              <p className="line-clamp-1 text-xs text-muted-foreground">
+                              <p className="text-muted-foreground line-clamp-1 text-xs">
                                 {show.overview}
                               </p>
                             )}
@@ -226,7 +226,7 @@ export function UnifiedSearchDialog() {
                   {/* Books Results */}
                   {results.books.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-xs font-semibold uppercase text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center space-x-2 text-xs font-semibold uppercase">
                         <Book className="h-3 w-3" />
                         <span>Books</span>
                       </div>
@@ -235,11 +235,11 @@ export function UnifiedSearchDialog() {
                           <button
                             key={book.id}
                             onClick={() => handleResultClick("book", book.id)}
-                            className="w-full rounded px-2 py-2 text-left text-sm hover:bg-accent"
+                            className="hover:bg-accent w-full rounded px-2 py-2 text-left text-sm"
                           >
                             <p className="font-medium">{book.title}</p>
                             {book.authors && book.authors.length > 0 && (
-                              <p className="line-clamp-1 text-xs text-muted-foreground">
+                              <p className="text-muted-foreground line-clamp-1 text-xs">
                                 {book.authors.join(", ")}
                               </p>
                             )}
@@ -265,10 +265,10 @@ export function UnifiedSearchDialog() {
             </div>
 
             {/* Keyboard Hint */}
-            <div className="border-t pt-4 text-xs text-muted-foreground">
+            <div className="text-muted-foreground border-t pt-4 text-xs">
               <p>
-                <kbd className="rounded border bg-muted px-2 py-1">⌘K</kbd> or{" "}
-                <kbd className="rounded border bg-muted px-2 py-1">/</kbd> to
+                <kbd className="bg-muted rounded border px-2 py-1">⌘K</kbd> or{" "}
+                <kbd className="bg-muted rounded border px-2 py-1">/</kbd> to
                 open search
               </p>
             </div>

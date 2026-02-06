@@ -94,7 +94,7 @@ Restructure navigation into logical, user-mental-model groups with clear visual 
 **Priority**: 🔴 CRITICAL  
 **Impact**: High (major UX improvement)  
 **Effort**: Large (6-8 hours)  
-**Status**: ⬜ Not Started
+**Status**: ✅ Completed
 **Dependencies**: Task 1.1 (should be in header after nav refactor)
 
 **Current Problem**:
@@ -157,7 +157,7 @@ Create single unified search that spans all media types (movies, TV, books) with
 **Priority**: 🔴 CRITICAL  
 **Impact**: High (consistency & discoverability)  
 **Effort**: Medium (4-5 hours)  
-**Status**: ⬜ Not Started
+**Status**: ✅ Completed
 **Dependencies**: Task 1.1 (should be after nav refactor)
 
 **Current Problem**:
@@ -938,8 +938,8 @@ When working through these tasks:
 (Update this section as tasks are completed)
 
 - [x] Task 1.1: Navigation Refactor
-- [ ] Task 1.2: Unified Search
-- [ ] Task 1.3: Consolidate Watchlists
+- [x] Task 1.2: Unified Search
+- [x] Task 1.3: Consolidate Watchlists
 - [ ] Task 2.1: Standardize Detail Pages
 - [ ] Task 2.2: Enhance Dashboard
 - [ ] Task 2.3: Mobile Bottom Nav
