@@ -29,9 +29,9 @@ export const searchRouter = createTRPCRouter({
           id: true,
           title: true,
           posterPath: true,
-          releaseDate: true,
+          releaseYear: true,
           overview: true,
-          genres: { select: { genre: { select: { name: true } } } },
+          genres: true,
         },
         take: limit,
       });
@@ -51,7 +51,7 @@ export const searchRouter = createTRPCRouter({
           posterPath: true,
           firstAirDate: true,
           overview: true,
-          genres: { select: { genre: { select: { name: true } } } },
+          genres: true,
         },
         take: limit,
       });
@@ -62,9 +62,9 @@ export const searchRouter = createTRPCRouter({
           userId,
           OR: [
             { title: { contains: query, mode: "insensitive" } },
-            { synopsis: { contains: query, mode: "insensitive" } },
+            { description: { contains: query, mode: "insensitive" } },
             {
-              authors: {
+              bookAuthors: {
                 some: {
                   author: { name: { contains: query, mode: "insensitive" } },
                 },
@@ -75,11 +75,10 @@ export const searchRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
-          coverImage: true,
-          publicationDate: true,
-          synopsis: true,
-          authors: { select: { author: { select: { name: true } } } },
-          categories: { select: { category: { select: { name: true } } } },
+          coverUrl: true,
+          publishedYear: true,
+          description: true,
+          bookAuthors: { select: { author: { select: { name: true } } } },
         },
         take: limit,
       });
@@ -88,18 +87,16 @@ export const searchRouter = createTRPCRouter({
         movies: movies.map((m) => ({
           ...m,
           type: "movie" as const,
-          genres: m.genres.map((g) => g.genre.name),
         })),
         tvShows: tvShows.map((t) => ({
           ...t,
           type: "tvshow" as const,
-          genres: t.genres.map((g) => g.genre.name),
         })),
         books: books.map((b) => ({
           ...b,
           type: "book" as const,
-          authors: b.authors.map((a) => a.author.name),
-          categories: b.categories.map((c) => c.category.name),
+          coverImage: b.coverUrl,
+          authors: b.bookAuthors.map((a) => a.author.name),
         })),
       };
     }),
@@ -130,9 +127,9 @@ export const searchRouter = createTRPCRouter({
             id: true,
             title: true,
             posterPath: true,
-            releaseDate: true,
+            releaseYear: true,
             overview: true,
-            genres: { select: { genre: { select: { name: true } } } },
+            genres: true,
           },
           orderBy: { title: "asc" },
           skip,
@@ -153,7 +150,6 @@ export const searchRouter = createTRPCRouter({
         items: movies.map((m) => ({
           ...m,
           type: "movie" as const,
-          genres: m.genres.map((g) => g.genre.name),
         })),
         total,
         hasMore: skip + limit < total,
@@ -188,7 +184,7 @@ export const searchRouter = createTRPCRouter({
             posterPath: true,
             firstAirDate: true,
             overview: true,
-            genres: { select: { genre: { select: { name: true } } } },
+            genres: true,
           },
           orderBy: { title: "asc" },
           skip,
@@ -209,7 +205,6 @@ export const searchRouter = createTRPCRouter({
         items: tvShows.map((t) => ({
           ...t,
           type: "tvshow" as const,
-          genres: t.genres.map((g) => g.genre.name),
         })),
         total,
         hasMore: skip + limit < total,
@@ -235,9 +230,9 @@ export const searchRouter = createTRPCRouter({
             userId,
             OR: [
               { title: { contains: query, mode: "insensitive" } },
-              { synopsis: { contains: query, mode: "insensitive" } },
+              { description: { contains: query, mode: "insensitive" } },
               {
-                authors: {
+                bookAuthors: {
                   some: {
                     author: { name: { contains: query, mode: "insensitive" } },
                   },
@@ -248,11 +243,10 @@ export const searchRouter = createTRPCRouter({
           select: {
             id: true,
             title: true,
-            coverImage: true,
-            publicationDate: true,
-            synopsis: true,
-            authors: { select: { author: { select: { name: true } } } },
-            categories: { select: { category: { select: { name: true } } } },
+            coverUrl: true,
+            publishedYear: true,
+            description: true,
+            bookAuthors: { select: { author: { select: { name: true } } } },
           },
           orderBy: { title: "asc" },
           skip,
@@ -263,9 +257,9 @@ export const searchRouter = createTRPCRouter({
             userId,
             OR: [
               { title: { contains: query, mode: "insensitive" } },
-              { synopsis: { contains: query, mode: "insensitive" } },
+              { description: { contains: query, mode: "insensitive" } },
               {
-                authors: {
+                bookAuthors: {
                   some: {
                     author: { name: { contains: query, mode: "insensitive" } },
                   },
@@ -280,8 +274,8 @@ export const searchRouter = createTRPCRouter({
         items: books.map((b) => ({
           ...b,
           type: "book" as const,
-          authors: b.authors.map((a) => a.author.name),
-          categories: b.categories.map((c) => c.category.name),
+          coverImage: b.coverUrl,
+          authors: b.bookAuthors.map((a) => a.author.name),
         })),
         total,
         hasMore: skip + limit < total,

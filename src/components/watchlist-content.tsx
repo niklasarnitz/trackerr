@@ -11,18 +11,35 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import type { RouterOutputs } from "~/trpc/react";
 
-type Movie = RouterOutputs["movie"]["getWatchlist"][0];
-type TvShow = RouterOutputs["tvShow"]["getWatchlist"][0];
-type Book = RouterOutputs["book"]["getWishlist"][0];
+type Movie = RouterOutputs["movie"]["getWatchlist"]["movies"][0];
+type TvShow = RouterOutputs["tvShow"]["getAll"]["tvShows"][0];
+type Book = RouterOutputs["book"]["getAll"]["books"][0];
 
 export function WatchlistContent() {
   const [activeTab, setActiveTab] = useState("all");
   const utils = api.useUtils();
 
   // Fetch watchlists
-  const moviesQuery = api.movie.getWatchlist.useQuery();
-  const tvShowsQuery = api.tvShow.getWatchlist.useQuery();
-  const booksQuery = api.book.getWishlist.useQuery();
+  const moviesQuery = api.movie.getWatchlist.useQuery({
+    search: "",
+    sort: "title",
+    skip: 0,
+    limit: 100,
+  });
+  const tvShowsQuery = api.tvShow.getAll.useQuery({
+    search: "",
+    sort: "title",
+    skip: 0,
+    limit: 100,
+    watchlist: true,
+  });
+  const booksQuery = api.book.getAll.useQuery({
+    search: "",
+    sort: "title",
+    skip: 0,
+    limit: 100,
+    isOnWishlist: true,
+  });
 
   // Mutations
   const removeMovieFromWatchlist = api.movie.toggleWatchlist.useMutation({
@@ -38,26 +55,26 @@ export function WatchlistContent() {
   const removeTvShowFromWatchlist = api.tvShow.toggleWatchlist.useMutation({
     onSuccess: async () => {
       toast.success("Removed from watchlist");
-      await utils.tvShow.getWatchlist.invalidate();
+      await utils.tvShow.getAll.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to remove from watchlist");
     },
   });
 
-  const removeBookFromWishlist = api.book.toggleWishlist.useMutation({
+  const removeBookFromWishlist = api.book.update.useMutation({
     onSuccess: async () => {
       toast.success("Removed from wishlist");
-      await utils.book.getWishlist.invalidate();
+      await utils.book.getAll.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to remove from wishlist");
     },
   });
 
-  const movies = moviesQuery.data ?? [];
-  const tvShows = tvShowsQuery.data ?? [];
-  const books = booksQuery.data ?? [];
+  const movies = moviesQuery.data?.movies ?? [];
+  const tvShows = tvShowsQuery.data?.tvShows ?? [];
+  const books = booksQuery.data?.books ?? [];
 
   const totalCount = movies.length + tvShows.length + books.length;
 
@@ -65,16 +82,14 @@ export function WatchlistContent() {
     <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold">Watchlist</h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Media you want to watch or read. ({totalCount} items)
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="all">
-            All ({totalCount})
-          </TabsTrigger>
+          <TabsTrigger value="all">All ({totalCount})</TabsTrigger>
           <TabsTrigger value="movies">
             <Film className="mr-2 h-4 w-4" />
             Movies ({movies.length})
@@ -95,15 +110,39 @@ export function WatchlistContent() {
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">
-                  No items in your watchlist yet. Add movies, TV shows, or books to get started!
+                  No items in your watchlist yet. Add movies, TV shows, or books
+                  to get started!
                 </p>
               </CardContent>
             </Card>
           ) : (
             <>
-              {movies.length > 0 && <MovieSection movies={movies} onRemove={(id) => removeMovieFromWatchlist.mutate({ id })} isLoading={removeMovieFromWatchlist.isPending} />}
-              {tvShows.length > 0 && <TVShowSection tvShows={tvShows} onRemove={(id) => removeTvShowFromWatchlist.mutate({ id })} isLoading={removeTvShowFromWatchlist.isPending} />}
-              {books.length > 0 && <BookSection books={books} onRemove={(id) => removeBookFromWishlist.mutate({ id })} isLoading={removeBookFromWishlist.isPending} />}
+              {movies.length > 0 && (
+                <MovieSection
+                  movies={movies}
+                  onRemove={(id) => removeMovieFromWatchlist.mutate({ id })}
+                  isLoading={removeMovieFromWatchlist.isPending}
+                />
+              )}
+              {tvShows.length > 0 && (
+                <TVShowSection
+                  tvShows={tvShows}
+                  onRemove={(id) => removeTvShowFromWatchlist.mutate({ id })}
+                  isLoading={removeTvShowFromWatchlist.isPending}
+                />
+              )}
+              {books.length > 0 && (
+                <BookSection
+                  books={books}
+                  onRemove={(id) =>
+                    removeBookFromWishlist.mutate({
+                      id,
+                      isOnWishlist: false,
+                    })
+                  }
+                  isLoading={removeBookFromWishlist.isPending}
+                />
+              )}
             </>
           )}
         </TabsContent>
@@ -119,7 +158,11 @@ export function WatchlistContent() {
               </CardContent>
             </Card>
           ) : (
-            <MovieSection movies={movies} onRemove={(id) => removeMovieFromWatchlist.mutate({ id })} isLoading={removeMovieFromWatchlist.isPending} />
+            <MovieSection
+              movies={movies}
+              onRemove={(id) => removeMovieFromWatchlist.mutate({ id })}
+              isLoading={removeMovieFromWatchlist.isPending}
+            />
           )}
         </TabsContent>
 
@@ -129,12 +172,17 @@ export function WatchlistContent() {
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">
-                  No TV shows in your watchlist. Add some TV shows to get started!
+                  No TV shows in your watchlist. Add some TV shows to get
+                  started!
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <TVShowSection tvShows={tvShows} onRemove={(id) => removeTvShowFromWatchlist.mutate({ id })} isLoading={removeTvShowFromWatchlist.isPending} />
+            <TVShowSection
+              tvShows={tvShows}
+              onRemove={(id) => removeTvShowFromWatchlist.mutate({ id })}
+              isLoading={removeTvShowFromWatchlist.isPending}
+            />
           )}
         </TabsContent>
 
@@ -149,7 +197,13 @@ export function WatchlistContent() {
               </CardContent>
             </Card>
           ) : (
-            <BookSection books={books} onRemove={(id) => removeBookFromWishlist.mutate({ id })} isLoading={removeBookFromWishlist.isPending} />
+            <BookSection
+              books={books}
+              onRemove={(id) =>
+                removeBookFromWishlist.mutate({ id, isOnWishlist: false })
+              }
+              isLoading={removeBookFromWishlist.isPending}
+            />
           )}
         </TabsContent>
       </Tabs>
@@ -173,7 +227,7 @@ function MovieSection({
         {movies.map((movie) => (
           <Link key={movie.id} href={`/movies/${movie.id}`}>
             <Card className="h-full overflow-hidden transition-shadow hover:shadow-lg">
-              <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+              <div className="bg-muted relative aspect-[2/3] overflow-hidden">
                 {movie.posterPath ? (
                   <img
                     src={`https://image.tmdb.org/t/p/w300${movie.posterPath}`}
@@ -182,12 +236,12 @@ function MovieSection({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <Film className="h-12 w-12 text-muted-foreground" />
+                    <Film className="text-muted-foreground h-12 w-12" />
                   </div>
                 )}
               </div>
               <CardContent className="p-4">
-                <h3 className="font-semibold line-clamp-2">{movie.title}</h3>
+                <h3 className="line-clamp-2 font-semibold">{movie.title}</h3>
                 <div className="mt-3 flex items-center justify-between">
                   {movie.runtime && (
                     <Badge variant="secondary" className="text-xs">
@@ -231,7 +285,7 @@ function TVShowSection({
         {tvShows.map((show) => (
           <Link key={show.id} href={`/tv-shows/${show.id}`}>
             <Card className="h-full overflow-hidden transition-shadow hover:shadow-lg">
-              <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+              <div className="bg-muted relative aspect-[2/3] overflow-hidden">
                 {show.posterPath ? (
                   <img
                     src={`https://image.tmdb.org/t/p/w300${show.posterPath}`}
@@ -240,12 +294,12 @@ function TVShowSection({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <Tv className="h-12 w-12 text-muted-foreground" />
+                    <Tv className="text-muted-foreground h-12 w-12" />
                   </div>
                 )}
               </div>
               <CardContent className="p-4">
-                <h3 className="font-semibold line-clamp-2">{show.title}</h3>
+                <h3 className="line-clamp-2 font-semibold">{show.title}</h3>
                 <div className="mt-3 flex items-center justify-between">
                   {show.status && (
                     <Badge variant="secondary" className="text-xs">
@@ -289,7 +343,7 @@ function BookSection({
         {books.map((book) => (
           <Link key={book.id} href={`/books/${book.id}`}>
             <Card className="h-full overflow-hidden transition-shadow hover:shadow-lg">
-              <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+              <div className="bg-muted relative aspect-[2/3] overflow-hidden">
                 {book.coverUrl ? (
                   <img
                     src={book.coverUrl}
@@ -298,12 +352,12 @@ function BookSection({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <BookOpen className="h-12 w-12 text-muted-foreground" />
+                    <BookOpen className="text-muted-foreground h-12 w-12" />
                   </div>
                 )}
               </div>
               <CardContent className="p-4">
-                <h3 className="font-semibold line-clamp-2">{book.title}</h3>
+                <h3 className="line-clamp-2 font-semibold">{book.title}</h3>
                 <div className="mt-3 flex items-center justify-between">
                   <Badge variant="secondary" className="text-xs">
                     Wishlist

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Film, Tv, Book, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 interface SearchResult {
@@ -20,8 +19,8 @@ interface SearchResult {
   title: string;
   posterPath?: string | null;
   coverImage?: string | null;
-  overview?: string;
-  synopsis?: string;
+  overview?: string | null;
+  synopsis?: string | null;
   genres?: string[];
   authors?: string[];
 }
@@ -29,6 +28,7 @@ interface SearchResult {
 export function UnifiedSearchDialog() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [results, setResults] = useState<{
     movies: SearchResult[];
     tvShows: SearchResult[];
@@ -36,8 +36,11 @@ export function UnifiedSearchDialog() {
   }>({ movies: [], tvShows: [], books: [] });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const debounceTimer = useRef<NodeJS.Timeout>();
-  const { mutate: search } = api.search.searchAll.useMutation();
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const { data, isFetching } = api.search.searchAll.useQuery(
+    { query: debouncedQuery, limit: 5 },
+    { enabled: debouncedQuery.trim().length > 0 },
+  );
 
   // Handle keyboard shortcut
   useEffect(() => {
@@ -59,38 +62,29 @@ export function UnifiedSearchDialog() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
-  const performSearch = useCallback(
-    (searchQuery: string) => {
-      if (!searchQuery.trim()) {
-        setResults({ movies: [], tvShows: [], books: [] });
-        return;
-      }
+  useEffect(() => {
+    setIsLoading(isFetching);
+  }, [isFetching]);
 
-      setIsLoading(true);
-      search(
-        { query: searchQuery, limit: 5 },
-        {
-          onSuccess: (data) => {
-            setResults({
-              movies: data.movies,
-              tvShows: data.tvShows,
-              books: data.books,
-            });
-            setIsLoading(false);
-          },
-          onError: () => {
-            setIsLoading(false);
-          },
-        },
-      );
-    },
-    [search],
-  );
+  useEffect(() => {
+    if (!debouncedQuery.trim()) {
+      setResults({ movies: [], tvShows: [], books: [] });
+      return;
+    }
+
+    if (data) {
+      setResults({
+        movies: data.movies,
+        tvShows: data.tvShows,
+        books: data.books,
+      });
+    }
+  }, [data, debouncedQuery]);
 
   const handleQueryChange = (newQuery: string) => {
     setQuery(newQuery);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => performSearch(newQuery), 300);
+    debounceTimer.current = setTimeout(() => setDebouncedQuery(newQuery), 300);
   };
 
   const handleResultClick = (type: string, id: string) => {
