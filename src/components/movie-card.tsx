@@ -202,17 +202,25 @@ export function MovieCard({ movie, onMovieUpdated }: MovieCardProps) {
         </div>
 
         <div className="flex gap-2">
-          <Link href={`/movies/${movie.id}`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full">
-              View Details
-            </Button>
-          </Link>
-          <Link href={`/movies/${movie.id}?addWatch=true`} className="flex-1">
-            <Button variant="default" size="sm" className="w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full flex-1"
+            asChild
+          >
+            <Link href={`/movies/${movie.id}`}>View Details</Link>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            className="w-full flex-1"
+            asChild
+          >
+            <Link href={`/movies/${movie.id}?addWatch=true`}>
               <Play className="mr-1 h-3 w-3" />
               Watch
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="flex gap-2">

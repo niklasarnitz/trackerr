@@ -22,6 +22,11 @@ import {
 } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { OptimizedCoverImage } from "~/components/optimized-cover-image";
 import { getPosterUrl } from "~/lib/utils";
 import { StarRatingDisplay } from "~/components/star-rating-display";
@@ -110,8 +115,8 @@ export function TvShowCard({ tvShow, onTvShowUpdated }: TvShowCardProps) {
 
   return (
     <Card className="group relative overflow-hidden transition-shadow hover:shadow-lg">
-      <Link href={`/tv-shows/${tvShow.id}`}>
-        <div className="bg-muted relative aspect-2/3 overflow-hidden">
+      <div className="bg-muted relative aspect-2/3 overflow-hidden">
+        <Link href={`/tv-shows/${tvShow.id}`} className="block h-full w-full">
           {posterUrl ? (
             <OptimizedCoverImage
               src={posterUrl}
@@ -126,40 +131,65 @@ export function TvShowCard({ tvShow, onTvShowUpdated }: TvShowCardProps) {
               <Tv className="text-muted-foreground h-16 w-16" />
             </div>
           )}
+        </Link>
 
-          {/* Quick action buttons overlay */}
-          <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-            <Button
-              size="icon"
-              variant={tvShow.isInWatchlist ? "default" : "secondary"}
-              onClick={(e) => {
-                e.preventDefault();
-                toggleWatchlist.mutate({ id: tvShow.id });
-              }}
-              disabled={toggleWatchlist.isPending}
-              className="h-8 w-8"
-            >
-              <Bookmark
-                className={`h-4 w-4 ${tvShow.isInWatchlist ? "fill-current" : ""}`}
-              />
-            </Button>
-            <Button
-              size="icon"
-              variant={tvShow.isFavorite ? "default" : "secondary"}
-              onClick={(e) => {
-                e.preventDefault();
-                toggleFavorite.mutate({ id: tvShow.id });
-              }}
-              disabled={toggleFavorite.isPending}
-              className="h-8 w-8"
-            >
-              <Heart
-                className={`h-4 w-4 ${tvShow.isFavorite ? "fill-current" : ""}`}
-              />
-            </Button>
-          </div>
+        {/* Quick action buttons overlay */}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant={tvShow.isInWatchlist ? "default" : "secondary"}
+                onClick={() => toggleWatchlist.mutate({ id: tvShow.id })}
+                disabled={toggleWatchlist.isPending}
+                className="h-8 w-8"
+                aria-label={
+                  tvShow.isInWatchlist
+                    ? "Remove from watchlist"
+                    : "Add to watchlist"
+                }
+              >
+                <Bookmark
+                  className={`h-4 w-4 ${tvShow.isInWatchlist ? "fill-current" : ""}`}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {tvShow.isInWatchlist
+                  ? "Remove from watchlist"
+                  : "Add to watchlist"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant={tvShow.isFavorite ? "default" : "secondary"}
+                onClick={() => toggleFavorite.mutate({ id: tvShow.id })}
+                disabled={toggleFavorite.isPending}
+                className="h-8 w-8"
+                aria-label={
+                  tvShow.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
+              >
+                <Heart
+                  className={`h-4 w-4 ${tvShow.isFavorite ? "fill-current" : ""}`}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {tvShow.isFavorite ? "Remove from favorites" : "Add to favorites"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </div>
-      </Link>
+      </div>
 
       <CardHeader className="p-4">
         <Link href={`/tv-shows/${tvShow.id}`}>

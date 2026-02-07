@@ -9,3 +9,7 @@
 ## 2026-02-06 - Composing Tooltips with Radix Triggers
 **Learning:** When adding tooltips to buttons that are already triggers for other Radix primitives (DropdownMenu, AlertDialog), wrap the existing Trigger in the TooltipTrigger using `asChild`. The order should be Tooltip > TooltipTrigger > [Other]Trigger > Button. This ensures both hover (tooltip) and click ([Other]) events work correctly.
 **Action:** Apply this nesting pattern whenever enhancing existing interactive elements with tooltips.
+
+## 2026-02-27 - Accessible Card Overlays and Links
+**Learning:** Nesting interactive buttons inside a card's main `Link` creates invalid HTML and accessibility issues. Additionally, hiding action buttons with `opacity-0` often makes them inaccessible to keyboard users.
+**Action:** Structure cards so the main link and action buttons are siblings (using absolute positioning for layout). Use `asChild` on Buttons that act as Links. Ensure hidden overlay actions have `group-focus-within:opacity-100` so they appear when tabbing.
