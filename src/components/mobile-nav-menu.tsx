@@ -5,18 +5,19 @@ import { usePathname } from "next/navigation";
 import {
   Heart,
   Bookmark,
-  Archive,
-  Sparkles,
   LayoutDashboard,
   BarChart2,
   Film,
   Tv,
   Book,
+  BookOpen,
   History,
   Library,
   List,
   HandHelping,
   ThumbsUp,
+  Settings,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -42,7 +43,7 @@ const mediaDiscoveryItems: NavItem[] = [
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
-  { href: "/bible", name: "Bible", icon: Book },
+  { href: "/bible", name: "Bible", icon: BookOpen },
 ];
 
 const myLibraryItems: NavItem[] = [
@@ -66,6 +67,7 @@ const moreItems: NavItem[] = [
   { href: "/loans", name: "Loans", icon: HandHelping },
   { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
   { href: "/statistics", name: "Statistics", icon: BarChart2 },
+  { href: "/settings", name: "Settings", icon: Settings },
 ];
 
 interface MobileNavMenuProps {

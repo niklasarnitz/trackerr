@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   Heart,
   Bookmark,
-  Archive,
   Sparkles,
   ChevronDown,
   LayoutDashboard,
@@ -13,11 +12,13 @@ import {
   Film,
   Tv,
   Book,
+  BookOpen,
   History,
   Library,
   List,
   HandHelping,
   ThumbsUp,
+  Settings,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -43,7 +44,7 @@ const mediaDiscoveryItems: NavItem[] = [
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
-  { href: "/bible", name: "Bible", icon: Book },
+  { href: "/bible", name: "Bible", icon: BookOpen },
 ];
 
 const myLibraryItems: NavItem[] = [
@@ -67,6 +68,7 @@ const moreItems: NavItem[] = [
   { href: "/loans", name: "Loans", icon: HandHelping },
   { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
   { href: "/statistics", name: "Statistics", icon: BarChart2 },
+  { href: "/settings", name: "Settings", icon: Settings },
 ];
 
 interface DesktopNavMenusProps {
@@ -209,16 +211,11 @@ export function DesktopNavMenus({ isActive }: DesktopNavMenusProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant={
-              isAnyActive(customListItems)
-                ? "secondary"
-                : "ghost"
-            }
+            variant={isAnyActive(customListItems) ? "secondary" : "ghost"}
             size="sm"
             className={cn(
               "flex items-center space-x-2",
-              isAnyActive(customListItems) &&
-                "bg-secondary",
+              isAnyActive(customListItems) && "bg-secondary",
             )}
             aria-label="Lists menu"
           >
