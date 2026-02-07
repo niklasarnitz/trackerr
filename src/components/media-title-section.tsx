@@ -8,6 +8,8 @@ interface MetadataBadge {
   variant?: "default" | "secondary" | "outline" | "destructive";
 }
 
+export type { MetadataBadge };
+
 interface MediaTitleSectionProps {
   title: string;
   originalTitle?: string | null;

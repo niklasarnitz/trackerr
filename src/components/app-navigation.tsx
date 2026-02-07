@@ -129,18 +129,11 @@ export function AppNavigation({ user }: AppNavigationProps) {
     return matchingItem?.href === itemHref;
   };
 
-  const libraryItems = navigationItems.filter((item) =>
-    ["/watches", "/collection"].includes(item.href),
-  );
-  const listItems = navigationItems.filter((item) =>
-    ["/lists"].includes(item.href),
-  );
-  const featureItems = navigationItems.filter((item) =>
-    ["/loans", "/recommendations", "/statistics"].includes(item.href),
-  );
-
   const isGroupActive = (items: typeof navigationItems) =>
     items.some((item) => isNavigationItemActive(item.href));
+
+  const handleMobileMenuToggle = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const handleMobileMenuClose = () => setIsMobileMenuOpen(false);
 
   return (
     <>
@@ -170,7 +163,7 @@ export function AppNavigation({ user }: AppNavigationProps) {
                 variant="outline"
                 size="sm"
                 className="bg-secondary/50 md:hidden"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                onClick={handleMobileMenuToggle}
                 aria-label="Navigation Menu"
               >
                 <Menu className="h-5 w-5" />
@@ -183,7 +176,7 @@ export function AppNavigation({ user }: AppNavigationProps) {
             <MobileNavMenu
               isActive={isNavigationItemActive}
               isGroupActive={isGroupActive}
-              onClose={() => setIsMobileMenuOpen(false)}
+              onClose={handleMobileMenuClose}
             />
           )}
         </div>
@@ -191,7 +184,7 @@ export function AppNavigation({ user }: AppNavigationProps) {
 
       <MobileBottomNav
         isActive={isNavigationItemActive}
-        onMoreClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onMoreClick={handleMobileMenuToggle}
         isMoreOpen={isMobileMenuOpen}
       />
     </>
