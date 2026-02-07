@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { Film, Tv, Book } from "lucide-react";
 import { api } from "~/trpc/server";
 
@@ -11,10 +11,8 @@ interface SearchPageProps {
 async function SearchResults({ query }: { query: string }) {
   if (!query || query.trim().length === 0) {
     return (
-      <div className="space-y-8">
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">Enter a search query to begin</p>
-        </div>
+      <div className="rounded-lg border border-dashed p-8 text-center">
+        <p className="text-muted-foreground">Enter a search query to begin</p>
       </div>
     );
   }
@@ -36,12 +34,10 @@ async function SearchResults({ query }: { query: string }) {
 
   if (!results.total && !tvResults.total && !bookResults.total) {
     return (
-      <div className="space-y-8">
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">
-            No results found for "{query}"
-          </p>
-        </div>
+      <div className="rounded-lg border border-dashed p-8 text-center">
+        <p className="text-muted-foreground">
+          No results found for &quot;{query}&quot;
+        </p>
       </div>
     );
   }
@@ -64,10 +60,11 @@ async function SearchResults({ query }: { query: string }) {
               >
                 <div className="bg-muted aspect-video overflow-hidden">
                   {movie.posterPath ? (
-                    <img
+                    <Image
                       src={`https://image.tmdb.org/t/p/w300${movie.posterPath}`}
                       alt={movie.title}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
@@ -105,10 +102,11 @@ async function SearchResults({ query }: { query: string }) {
               >
                 <div className="bg-muted aspect-video overflow-hidden">
                   {show.posterPath ? (
-                    <img
+                    <Image
                       src={`https://image.tmdb.org/t/p/w300${show.posterPath}`}
                       alt={show.title}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
@@ -146,10 +144,11 @@ async function SearchResults({ query }: { query: string }) {
               >
                 <div className="bg-muted aspect-[2/3] overflow-hidden">
                   {book.coverImage ? (
-                    <img
+                    <Image
                       src={book.coverImage}
                       alt={book.title}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
@@ -204,7 +203,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <h1 className="text-4xl font-bold">Search Results</h1>
         {query && (
           <p className="text-muted-foreground mt-2">
-            Showing results for "{query}"
+            Showing results for &quot;{query}&quot;
           </p>
         )}
       </div>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
 import { BookQuotes } from "~/components/book-quotes";
