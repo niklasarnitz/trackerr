@@ -9,3 +9,7 @@
 ## 2026-02-06 - Composing Tooltips with Radix Triggers
 **Learning:** When adding tooltips to buttons that are already triggers for other Radix primitives (DropdownMenu, AlertDialog), wrap the existing Trigger in the TooltipTrigger using `asChild`. The order should be Tooltip > TooltipTrigger > [Other]Trigger > Button. This ensures both hover (tooltip) and click ([Other]) events work correctly.
 **Action:** Apply this nesting pattern whenever enhancing existing interactive elements with tooltips.
+
+## 2026-03-05 - Fixing Invalid Button Nesting in Links
+**Learning:** Placing interactive `<Button>` elements inside a `<Link>` (anchor) creates invalid HTML and causes issues for screen readers (nested interactive controls) and keyboard navigation (hidden focus states).
+**Action:** Restructure the component to place the overlay actions as siblings to the `Link`, using absolute positioning to visually overlay them. Ensure the container has `group-focus-within:opacity-100` so keyboard users can access the hidden controls.
