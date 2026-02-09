@@ -33,7 +33,7 @@ export function MediaDetailHeader({
   const Icon = iconMap[type];
 
   return (
-    <div className="sticky top-8">
+    <div className="lg:sticky lg:top-8">
       <div className="bg-muted relative aspect-[2/3] overflow-hidden rounded-lg">
         {posterPath ? (
           <OptimizedCoverImage
