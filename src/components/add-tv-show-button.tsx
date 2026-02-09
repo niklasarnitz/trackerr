@@ -5,6 +5,19 @@ import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
+interface AddTvShowButtonProps {
+  readonly variant?:
+    | "default"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "destructive"
+    | "secondary";
+  readonly size?: "default" | "sm" | "lg" | "icon";
+  readonly children?: React.ReactNode;
+  readonly className?: string;
+}
+
 const TvShowSearchDialog = dynamic(
   () =>
     import("~/components/tv-show-search-dialog").then(
@@ -13,14 +26,29 @@ const TvShowSearchDialog = dynamic(
   { ssr: false },
 );
 
-export function AddTvShowButton() {
+export function AddTvShowButton({
+  variant = "default",
+  size = "default",
+  children,
+  className,
+}: AddTvShowButtonProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
     <>
-      <Button onClick={() => setIsSearchOpen(true)}>
-        <Plus className="mr-2 h-4 w-4" />
-        Add TV Show
+      <Button
+        variant={variant}
+        size={size}
+        className={className}
+        onClick={() => setIsSearchOpen(true)}
+        aria-label="Add new TV show to collection"
+      >
+        {children ?? (
+          <>
+            <Plus className="mr-2 h-4 w-4" />
+            Add TV Show
+          </>
+        )}
       </Button>
       <TvShowSearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </>
