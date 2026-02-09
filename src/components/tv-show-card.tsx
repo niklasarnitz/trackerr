@@ -111,7 +111,7 @@ export function TvShowCard({ tvShow, onTvShowUpdated }: TvShowCardProps) {
   return (
     <Card className="group relative overflow-hidden transition-shadow hover:shadow-lg">
       <Link href={`/tv-shows/${tvShow.id}`}>
-        <div className="bg-muted relative aspect-2/3 overflow-hidden">
+        <div className="relative aspect-2/3 overflow-hidden">
           {posterUrl ? (
             <OptimizedCoverImage
               src={posterUrl}

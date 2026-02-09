@@ -22,6 +22,7 @@ import { quoteRouter } from "./routers/quote";
 import { bookSeriesRouter } from "./routers/bookSeries";
 import { bibleRouter } from "./routers/bible";
 import { libraryStatsRouter } from "./routers/libraryStats";
+import { searchRouter } from "./routers/search";
 
 /**
  * This is the primary router for your server.
@@ -52,6 +53,7 @@ export const appRouter = createTRPCRouter({
   bookSeries: bookSeriesRouter,
   bible: bibleRouter,
   libraryStats: libraryStatsRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

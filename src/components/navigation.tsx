@@ -9,19 +9,18 @@ import { useNavigation } from "~/hooks/use-navigation";
 import { DesktopNavMenus } from "~/components/desktop-nav-menus";
 import { NavUserMenu } from "~/components/nav-user-menu";
 import { MobileNavMenu } from "~/components/mobile-nav-menu";
+import { UnifiedSearchDialog } from "~/components/unified-search-dialog";
 import type { Session } from "next-auth";
 
+// Navigation items grouped by category (for reference/consistency)
 const navigationItems = [
+  // Primary: Always visible
   {
     href: "/",
     name: "Dashboard",
     icon: null,
   },
-  {
-    href: "/statistics",
-    name: "Statistics",
-    icon: null,
-  },
+  // Media Discovery Group
   {
     href: "/movies",
     name: "Movies",
@@ -42,21 +41,24 @@ const navigationItems = [
     name: "Bible",
     icon: null,
   },
+  // My Library Group
   {
     href: "/watches",
-    name: "History",
+    name: "Watch History",
     icon: null,
   },
   {
     href: "/collection",
-    name: "Collection",
+    name: "Library",
     icon: null,
   },
+  // Lists
   {
     href: "/lists",
     name: "Lists",
     icon: null,
   },
+  // Secondary: In More dropdown
   {
     href: "/loans",
     name: "Loans",
@@ -65,6 +67,11 @@ const navigationItems = [
   {
     href: "/recommendations",
     name: "Recommendations",
+    icon: null,
+  },
+  {
+    href: "/statistics",
+    name: "Statistics",
     icon: null,
   },
 ];
@@ -114,8 +121,11 @@ function NavigationContent({ user }: NavigationProps) {
   const libraryItems = navigationItems.filter((item) =>
     ["/watches", "/collection"].includes(item.href),
   );
+  const listItems = navigationItems.filter((item) =>
+    ["/lists"].includes(item.href),
+  );
   const featureItems = navigationItems.filter((item) =>
-    ["/lists", "/loans", "/recommendations"].includes(item.href),
+    ["/loans", "/recommendations", "/statistics"].includes(item.href),
   );
 
   const isGroupActive = (items: typeof navigationItems) =>
@@ -137,6 +147,11 @@ function NavigationContent({ user }: NavigationProps) {
               isActive={isNavigationItemActive}
               isGroupActive={isGroupActive}
             />
+          </div>
+
+          {/* Search Dialog */}
+          <div className="max-sm:hidden">
+            <UnifiedSearchDialog />
           </div>
 
           {/* User Menu & Mobile Button */}

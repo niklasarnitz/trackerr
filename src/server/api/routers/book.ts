@@ -576,6 +576,30 @@ export const bookRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // Toggle favorite status
+  toggleFavorite: protectedProcedure
+    .input(idSchema)
+    .mutation(async ({ ctx, input }) => {
+      const book = await ctx.db.book.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (!book) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Book not found",
+        });
+      }
+
+      return await ctx.db.book.update({
+        where: { id: input.id },
+        data: { isFavorite: !book.isFavorite },
+      });
+    }),
+
   // Get book statistics
   getStats: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
