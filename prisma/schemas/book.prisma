@@ -17,7 +17,6 @@ model Book {
   seriesId        String?
   series          BookSeries?       @relation(fields: [seriesId], references: [id])
   isEbook         Boolean           @default(false)
-  isFavorite      Boolean           @default(false)
   isOnWishlist    Boolean           @default(false)
   categoryId      String?
   category        BookCategory?     @relation(fields: [categoryId], references: [id])
@@ -32,7 +31,6 @@ model Book {
 
   @@index([userId, title])
   @@index([userId, status])
-  @@index([userId, isFavorite])
   @@index([userId, seriesName])
   @@index([userId, seriesId])
   @@index([userId, categoryId])

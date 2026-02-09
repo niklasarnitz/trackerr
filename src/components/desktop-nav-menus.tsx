@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Heart,
   Bookmark,
+  Archive,
   Sparkles,
   ChevronDown,
   LayoutDashboard,
@@ -12,13 +13,11 @@ import {
   Film,
   Tv,
   Book,
-  BookOpen,
   History,
   Library,
   List,
   HandHelping,
   ThumbsUp,
-  Settings,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -38,37 +37,28 @@ interface NavItem {
 
 const topLevelItems: NavItem[] = [
   { href: "/", name: "Dashboard", icon: LayoutDashboard },
-];
-
-const mediaDiscoveryItems: NavItem[] = [
+  { href: "/statistics", name: "Statistics", icon: BarChart2 },
   { href: "/movies", name: "Movies", icon: Film },
   { href: "/tv-shows", name: "TV Shows", icon: Tv },
   { href: "/books", name: "Books", icon: Book },
-  { href: "/bible", name: "Bible", icon: BookOpen },
+  { href: "/bible", name: "Bible", icon: Book },
 ];
 
-const myLibraryItems: NavItem[] = [
-  { href: "/watches", name: "Watch History", icon: History },
-  { href: "/collection", name: "Library", icon: Library },
+const libraryItems: NavItem[] = [
+  { href: "/collection", name: "Collection", icon: Library },
+  { href: "/watches", name: "History", icon: History },
 ];
 
-const watchlistItems: NavItem[] = [
-  { href: "/watchlist", name: "All Watchlist", icon: Bookmark },
-  { href: "/movies/watchlist", name: "Movies", icon: Film },
-  { href: "/tv-shows", name: "TV Shows", icon: Tv },
-  { href: "/books/wishlist", name: "Books", icon: Book },
+const listItems: NavItem[] = [
+  { href: "/movies/watchlist", name: "Watchlist", icon: Bookmark },
+  { href: "/books/wishlist", name: "Book Wishlist", icon: Bookmark },
   { href: "/movies/favorites", name: "Favorites", icon: Heart },
-];
-
-const customListItems: NavItem[] = [
   { href: "/lists", name: "Custom Lists", icon: List },
 ];
 
 const moreItems: NavItem[] = [
   { href: "/loans", name: "Loans", icon: HandHelping },
   { href: "/recommendations", name: "Recommendations", icon: ThumbsUp },
-  { href: "/statistics", name: "Statistics", icon: BarChart2 },
-  { href: "/settings", name: "Settings", icon: Settings },
 ];
 
 interface DesktopNavMenusProps {
@@ -76,7 +66,9 @@ interface DesktopNavMenusProps {
   readonly isGroupActive: (items: any[]) => boolean;
 }
 
-export function DesktopNavMenus({ isActive }: DesktopNavMenusProps) {
+export function DesktopNavMenus({
+  isActive,
+}: DesktopNavMenusProps) {
   const pathname = usePathname();
 
   // Helper to check if any item in a list is active (for dropdown highlighting)
@@ -100,61 +92,31 @@ export function DesktopNavMenus({ isActive }: DesktopNavMenusProps) {
                 isItemActive && "bg-secondary",
               )}
             >
-              <item.icon className="h-4 w-4" />
               <span className="hidden sm:inline">{item.name}</span>
             </Button>
           </Link>
         );
       })}
 
-      {/* Media Discovery Dropdown */}
+      {/* Library Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant={isAnyActive(mediaDiscoveryItems) ? "secondary" : "ghost"}
+            variant={isAnyActive(libraryItems) ? "secondary" : "ghost"}
             size="sm"
             className={cn(
               "flex items-center space-x-2",
-              isAnyActive(mediaDiscoveryItems) && "bg-secondary",
+              isAnyActive(libraryItems) && "bg-secondary",
             )}
-            aria-label="Media discovery menu"
+            aria-label="Library menu"
           >
-            <Film className="h-4 w-4" />
-            <span className="hidden sm:inline">Media</span>
+            <Archive className="h-4 w-4" />
+            <span className="hidden sm:inline">Library</span>
             <ChevronDown className="h-4 w-4 opacity-70" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          {mediaDiscoveryItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href}>
-                <item.icon className="mr-2 h-4 w-4" />
-                <span>{item.name}</span>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* My Library Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={isAnyActive(myLibraryItems) ? "secondary" : "ghost"}
-            size="sm"
-            className={cn(
-              "flex items-center space-x-2",
-              isAnyActive(myLibraryItems) && "bg-secondary",
-            )}
-            aria-label="My library menu"
-          >
-            <Library className="h-4 w-4" />
-            <span className="hidden sm:inline">My Library</span>
-            <ChevronDown className="h-4 w-4 opacity-70" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {myLibraryItems.map((item) => (
+          {libraryItems.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href}>
                 <item.icon className="mr-2 h-4 w-4" />
@@ -170,52 +132,21 @@ export function DesktopNavMenus({ isActive }: DesktopNavMenusProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant={
-              isAnyActive(watchlistItems) ||
+              isAnyActive(listItems) ||
               pathname.startsWith("/movies/watchlist") ||
               pathname.startsWith("/books/wishlist") ||
-              pathname.startsWith("/movies/favorites") ||
-              pathname.startsWith("/watchlist")
+              pathname.startsWith("/movies/favorites")
                 ? "secondary"
                 : "ghost"
             }
             size="sm"
             className={cn(
               "flex items-center space-x-2",
-              (isAnyActive(watchlistItems) ||
+              (isAnyActive(listItems) ||
                 pathname.startsWith("/movies/watchlist") ||
                 pathname.startsWith("/books/wishlist") ||
-                pathname.startsWith("/movies/favorites") ||
-                pathname.startsWith("/watchlist")) &&
+                pathname.startsWith("/movies/favorites")) &&
                 "bg-secondary",
-            )}
-            aria-label="Watchlist menu"
-          >
-            <Bookmark className="h-4 w-4" />
-            <span className="hidden sm:inline">Watchlist</span>
-            <ChevronDown className="h-4 w-4 opacity-70" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {watchlistItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href}>
-                <item.icon className="mr-2 h-4 w-4" />
-                <span>{item.name}</span>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Custom Lists Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={isAnyActive(customListItems) ? "secondary" : "ghost"}
-            size="sm"
-            className={cn(
-              "flex items-center space-x-2",
-              isAnyActive(customListItems) && "bg-secondary",
             )}
             aria-label="Lists menu"
           >
@@ -225,7 +156,7 @@ export function DesktopNavMenus({ isActive }: DesktopNavMenusProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          {customListItems.map((item) => (
+          {listItems.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href}>
                 <item.icon className="mr-2 h-4 w-4" />

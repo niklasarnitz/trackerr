@@ -2,11 +2,12 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+
 import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "next-auth/react";
+import { NavigationWrapper } from "~/components/navigation-wrapper";
 import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
-import { NavigationWrapper } from "~/components/navigation-wrapper";
 
 export const metadata: Metadata = {
   title: "Trackerr - Movies & Books Tracker",
@@ -40,9 +41,7 @@ export default function RootLayout({
               </a>
               <div className="bg-background min-h-screen">
                 <NavigationWrapper />
-                <main id="main-content" className="pb-20 md:pb-0">
-                  {children}
-                </main>
+                <main id="main-content">{children}</main>
                 <Toaster />
               </div>
             </TRPCReactProvider>

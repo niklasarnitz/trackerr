@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Loader2, Trash2, Heart, Bookmark } from "lucide-react";
+import { BookOpen, Loader2, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -90,13 +90,6 @@ export function BookCard({ book }: BookCardProps) {
     });
   };
 
-  const toggleFavorite = api.book.toggleFavorite.useMutation({
-    onSuccess: async () => {
-      await utils.book.getAll.invalidate();
-      router.refresh();
-    },
-  });
-
   const readingProgress = book.readingProgress?.[0];
   const progressPercentage = readingProgress?.pagesRead
     ? Math.round((readingProgress.pagesRead / (book.pages ?? 1)) * 100)
@@ -104,53 +97,18 @@ export function BookCard({ book }: BookCardProps) {
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-shadow hover:shadow-lg">
-        <Link href={`/books/${book.id}`}>
-          <div className="relative aspect-2/3 overflow-hidden">
-            <OptimizedCoverImage
-              src={book.coverUrl}
-              alt={book.title}
-              blurDataUrl={book.blurDataUrl}
-              fill
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              fallbackSrc="/placeholder-book.jpg"
-              book={book}
-            />
-
-            {/* Quick action buttons overlay */}
-            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                size="icon"
-                variant={book.isOnWishlist ? "default" : "secondary"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleWishlist();
-                }}
-                disabled={updateBook.isPending}
-                className="h-8 w-8"
-              >
-                <Bookmark
-                  className={`h-4 w-4 ${book.isOnWishlist ? "fill-current" : ""}`}
-                />
-              </Button>
-              <Button
-                size="icon"
-                variant={book.isFavorite ? "default" : "secondary"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleFavorite.mutate({ id: book.id });
-                }}
-                disabled={toggleFavorite.isPending}
-                className="h-8 w-8"
-              >
-                <Heart
-                  className={`h-4 w-4 ${book.isFavorite ? "fill-current" : ""}`}
-                />
-              </Button>
-            </div>
-          </div>
-        </Link>
+      <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+        <div className="bg-muted relative aspect-2/3 overflow-hidden">
+          <OptimizedCoverImage
+            src={book.coverUrl}
+            alt={book.title}
+            blurDataUrl={book.blurDataUrl}
+            fill
+            sizes="(max-width: 768px) 100vw, 300px"
+            fallbackSrc="/placeholder-book.jpg"
+            book={book}
+          />
+        </div>
 
         <CardHeader className="pb-3">
           <div className="space-y-2">
