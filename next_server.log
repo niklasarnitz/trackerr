@@ -1,0 +1,52 @@
+$ next dev --turbo
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 1794ms
+ ○ Compiling /test-ui ...
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:5051:234)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+ GET /test-ui 200 in 7.3s (compile: 6.6s, render: 771ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:5051:234)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+ GET /test-ui 200 in 103ms (compile: 6ms, render: 97ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:5051:236)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/ssr/97170_@auth_core_b73a3bc9._.js:5051:234)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at listOnTimeout (node:internal/timers:549:9)
+    at process.processTimers (node:internal/timers:523:7)
+ GET /test-ui 200 in 112ms (compile: 6ms, render: 107ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:5051:236)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+ GET /api/auth/session 500 in 38ms (compile: 27ms, render: 11ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:511:16)
+    at Auth (/app/.next/dev/server/chunks/97170_@auth_core_46bb605f._.js:5051:236)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+ GET /api/auth/session 500 in 17ms (compile: 9ms, render: 9ms)
