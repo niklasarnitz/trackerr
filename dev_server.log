@@ -1,0 +1,52 @@
+$ next dev --turbo
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 1778ms
+ ○ Compiling /test-ui ...
+ GET /test-ui 200 in 8.7s (compile: 7.8s, render: 843ms)
+ GET /api/auth/session 200 in 2.1s (compile: 2.0s, render: 29ms)
+ GET /api/auth/session 200 in 45ms (compile: 37ms, render: 8ms)
+ GET /test-ui 200 in 189ms (compile: 12ms, render: 177ms)
+ GET /api/auth/session 200 in 78ms (compile: 56ms, render: 22ms)
+ GET /api/auth/session 200 in 25ms (compile: 10ms, render: 15ms)
+ ○ Compiling /api/trpc/[trpc] ...
+[TRPC] bookSearch.searchAndAdd took 433ms to execute
+❌ tRPC failed on bookSearch.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/bookSearch.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22title%22%3A%22Test%20Book%22%2C%22author%22%3Anull%2C%22includedInLibrary%22%3Atrue%7D%2C%22meta%22%3A%7B%22values%22%3A%7B%22author%22%3A%5B%22undefined%22%5D%7D%2C%22v%22%3A1%7D%7D%7D 200 in 7.8s (compile: 7.3s, render: 462ms)
+[TRPC] bookSearch.searchAndAdd took 259ms to execute
+❌ tRPC failed on bookSearch.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/bookSearch.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22title%22%3A%22Test%20Book%22%2C%22author%22%3Anull%2C%22includedInLibrary%22%3Atrue%7D%2C%22meta%22%3A%7B%22values%22%3A%7B%22author%22%3A%5B%22undefined%22%5D%7D%2C%22v%22%3A1%7D%7D%7D 200 in 319ms (compile: 49ms, render: 270ms)
+[TRPC] bookSearch.searchAndAdd took 398ms to execute
+❌ tRPC failed on bookSearch.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/bookSearch.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22title%22%3A%22Test%20Book%22%2C%22author%22%3Anull%2C%22includedInLibrary%22%3Atrue%7D%2C%22meta%22%3A%7B%22values%22%3A%7B%22author%22%3A%5B%22undefined%22%5D%7D%2C%22v%22%3A1%7D%7D%7D 200 in 449ms (compile: 39ms, render: 410ms)
+[TRPC] bookSearch.searchAndAdd took 166ms to execute
+❌ tRPC failed on bookSearch.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/bookSearch.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22title%22%3A%22Test%20Book%22%2C%22author%22%3Anull%2C%22includedInLibrary%22%3Atrue%7D%2C%22meta%22%3A%7B%22values%22%3A%7B%22author%22%3A%5B%22undefined%22%5D%7D%2C%22v%22%3A1%7D%7D%7D 200 in 211ms (compile: 36ms, render: 175ms)
+[TRPC] bookSearch.searchAndAdd took 229ms to execute
+❌ tRPC failed on bookSearch.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/bookSearch.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22title%22%3A%22Test%20Book%22%2C%22author%22%3Anull%2C%22includedInLibrary%22%3Atrue%7D%2C%22meta%22%3A%7B%22values%22%3A%7B%22author%22%3A%5B%22undefined%22%5D%7D%2C%22v%22%3A1%7D%7D%7D 200 in 243ms (compile: 4ms, render: 239ms)
+[TRPC] tmdb.searchAndAdd took 300ms to execute
+❌ tRPC failed on tmdb.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/tmdb.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22query%22%3A%22Test%20Movie%22%2C%22page%22%3A1%2C%22includedInCollection%22%3Atrue%7D%7D%7D 200 in 349ms (compile: 39ms, render: 310ms)
+[TRPC] tmdb.searchAndAdd took 158ms to execute
+❌ tRPC failed on tmdb.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/tmdb.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22query%22%3A%22Test%20Movie%22%2C%22page%22%3A1%2C%22includedInCollection%22%3Atrue%7D%7D%7D 200 in 170ms (compile: 3ms, render: 166ms)
+[TRPC] tmdb.searchAndAdd took 491ms to execute
+❌ tRPC failed on tmdb.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/tmdb.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22query%22%3A%22Test%20Movie%22%2C%22page%22%3A1%2C%22includedInCollection%22%3Atrue%7D%7D%7D 200 in 546ms (compile: 40ms, render: 506ms)
+[TRPC] tmdb.searchAndAdd took 176ms to execute
+❌ tRPC failed on tmdb.searchAndAdd: UNAUTHORIZED
+ GET /api/trpc/tmdb.searchAndAdd?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22query%22%3A%22Test%20Movie%22%2C%22page%22%3A1%2C%22includedInCollection%22%3Atrue%7D%7D%7D 200 in 223ms (compile: 38ms, render: 185ms)
+ GET /test-ui 200 in 95ms (compile: 4ms, render: 91ms)
+ GET /api/auth/session 200 in 47ms (compile: 40ms, render: 7ms)
+ GET /api/auth/session 200 in 25ms (compile: 3ms, render: 22ms)
+ GET /test-ui 200 in 82ms (compile: 4ms, render: 78ms)
+ GET /api/auth/session 200 in 51ms (compile: 40ms, render: 11ms)
+ GET /api/auth/session 200 in 13ms (compile: 6ms, render: 7ms)
+[?25h

@@ -23,6 +23,7 @@ import {
   Calendar,
   CheckCircle,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { useMovieMutations } from "~/hooks/use-movie-mutations";
 import { useTmdbMovieSearch } from "~/hooks/use-tmdb-movie-search";
@@ -98,6 +99,9 @@ export function MovieSearchDialog({ children }: MovieSearchDialogProps) {
                 />
               </div>
               <Button type="submit" disabled={searchResults.isLoading}>
+                {searchResults.isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
                 Search
               </Button>
             </div>
@@ -217,7 +221,11 @@ export function MovieSearchDialog({ children }: MovieSearchDialogProps) {
                                   onClick={() => handleAddMovie(movie)}
                                   disabled={createMovie.isPending}
                                 >
-                                  <Plus className="mr-1 h-4 w-4" />
+                                  {createMovie.isPending ? (
+                                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Plus className="mr-1 h-4 w-4" />
+                                  )}
                                   Add Movie
                                 </Button>
                               )}

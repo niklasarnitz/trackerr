@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Tv } from "lucide-react";
+import { Search, Plus, Tv, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -83,6 +83,7 @@ export function TvShowSearchDialog({
             <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
             <Input
               placeholder="Search for TV shows..."
+              aria-label="Search for TV shows"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               className="pl-9"
@@ -142,7 +143,11 @@ export function TvShowSearchDialog({
                         onClick={() => handleAddShow(show.id)}
                         disabled={createTvShow.isPending}
                       >
-                        <Plus className="mr-1 h-4 w-4" />
+                        {createTvShow.isPending ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Plus className="mr-1 h-4 w-4" />
+                        )}
                         Add
                       </Button>
                     </div>

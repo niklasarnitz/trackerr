@@ -163,6 +163,7 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
                     <Input
                       type="text"
                       placeholder="Search by title or ISBN..."
+                      aria-label="Search by title or ISBN"
                       value={titleQuery}
                       onChange={(e) => setTitleQuery(e.target.value)}
                       className="pl-10"
@@ -172,6 +173,7 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
                     <Input
                       type="text"
                       placeholder="Author (optional)"
+                      aria-label="Filter by author"
                       value={authorQuery}
                       onChange={(e) => setAuthorQuery(e.target.value)}
                       className="flex-1"
@@ -182,10 +184,14 @@ export function BookSearchDialog({ children }: BookSearchDialogProps) {
                       size="icon"
                       onClick={() => setShowScanner(true)}
                       title="Scan Barcode"
+                      aria-label="Scan Barcode"
                     >
                       <ScanBarcode className="h-4 w-4" />
                     </Button>
                     <Button type="submit" disabled={searchResults.isLoading}>
+                      {searchResults.isLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
                       Search
                     </Button>
                   </div>
