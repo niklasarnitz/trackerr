@@ -9,3 +9,7 @@
 ## 2026-02-06 - Composing Tooltips with Radix Triggers
 **Learning:** When adding tooltips to buttons that are already triggers for other Radix primitives (DropdownMenu, AlertDialog), wrap the existing Trigger in the TooltipTrigger using `asChild`. The order should be Tooltip > TooltipTrigger > [Other]Trigger > Button. This ensures both hover (tooltip) and click ([Other]) events work correctly.
 **Action:** Apply this nesting pattern whenever enhancing existing interactive elements with tooltips.
+
+## 2026-02-19 - Keyboard Accessibility for Overlay Actions
+**Learning:** Overlay actions that appear only on hover (`opacity-0 group-hover:opacity-100`) are invisible to keyboard users.
+**Action:** Always include `group-focus-within:opacity-100` alongside hover effects to ensure keyboard users can discover and access these controls.
