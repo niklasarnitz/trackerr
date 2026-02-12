@@ -119,35 +119,67 @@ export function BookCard({ book }: BookCardProps) {
             />
 
             {/* Quick action buttons overlay */}
-            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                size="icon"
-                variant={book.isOnWishlist ? "default" : "secondary"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleWishlist();
-                }}
-                disabled={updateBook.isPending}
-                className="h-8 w-8"
-              >
-                <Bookmark
-                  className={`h-4 w-4 ${book.isOnWishlist ? "fill-current" : ""}`}
-                />
-              </Button>
-              <Button
-                size="icon"
-                variant={book.isFavorite ? "default" : "secondary"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleFavorite.mutate({ id: book.id });
-                }}
-                disabled={toggleFavorite.isPending}
-                className="h-8 w-8"
-              >
-                <Heart
-                  className={`h-4 w-4 ${book.isFavorite ? "fill-current" : ""}`}
-                />
-              </Button>
+            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={book.isOnWishlist ? "default" : "secondary"}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleWishlist();
+                    }}
+                    disabled={updateBook.isPending}
+                    className="h-8 w-8"
+                    aria-label={
+                      book.isOnWishlist
+                        ? "Remove from wishlist"
+                        : "Add to wishlist"
+                    }
+                  >
+                    <Bookmark
+                      className={`h-4 w-4 ${book.isOnWishlist ? "fill-current" : ""}`}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {book.isOnWishlist
+                      ? "Remove from wishlist"
+                      : "Add to wishlist"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={book.isFavorite ? "default" : "secondary"}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleFavorite.mutate({ id: book.id });
+                    }}
+                    disabled={toggleFavorite.isPending}
+                    className="h-8 w-8"
+                    aria-label={
+                      book.isFavorite
+                        ? "Remove from favorites"
+                        : "Add to favorites"
+                    }
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${book.isFavorite ? "fill-current" : ""}`}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {book.isFavorite
+                      ? "Remove from favorites"
+                      : "Add to favorites"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </Link>
